@@ -29,7 +29,7 @@ function setTheme(theme) {
         <label for="my-drawer-2" class="btn btn-square btn-ghost">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-6 h-6 stroke-current text-base-content"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
         </label>
-        <h1 class="text-xl font-bold lg:hidden text-base-content">Flow Forge</h1>
+        <h1 class="text-xl font-bold text-base-content">Flow Forge</h1>
         <div class="flex-1"></div>
 
         <div class="dropdown dropdown-end">
@@ -68,9 +68,9 @@ function setTheme(theme) {
       <ul class="menu p-4 w-80 min-h-full bg-base-100 text-base-content">
         <!-- Sidebar content here -->
         <li class="mb-4">
-          <RouterLink to="/" class="text-2xl font-bold">
+          <div class="text-2xl font-bold">
             Flow Forge
-          </RouterLink>
+          </div>
         </li>
         <li><RouterLink to="/">Home</RouterLink></li>
         <li><RouterLink to="/templates">Templates</RouterLink></li>

@@ -26,13 +26,6 @@
   We make the handle element larger and transparent, then use a border
   to create the smaller, visible dot in the center.
   */
-  width: 1rem; /* 16px */
-  height: 1rem; /* 16px */
-  background: transparent;
-  border: 0.25rem solid transparent; /* (16px - 8px) / 2 = 4px. This creates an 8px (0.5rem) dot */
-  background-clip: content-box;
-  border-radius: 100%;
-  background-color: hsl(var(--bc) / 0.6); /* Use daisyUI's base-content color */
+  width: 0.8rem;
+  height: 0.8rem;
 }
-
-/* We don't need the incorrect ::after rule anymore. */
