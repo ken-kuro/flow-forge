@@ -1,21 +1,20 @@
-/* tailwindcss */
+/* Tailwind CSS v4 base imports */
 @import 'tailwindcss';
 
-/* daisyui */
+/* DaisyUI configuration using new plugin syntax */
 @plugin "daisyui" {
-  themes: false
+  themes: false;
+  exclude: rootscrollgutter;
 }
 
+/* Custom Catppuccin themes */
 @plugin "./catppuccin-latte.js";
 @plugin "./catppuccin-mocha.js";
 
-/* these are necessary styles for vue flow */
+/* Vue Flow styles - required for proper functionality */
 @import '@vue-flow/core/dist/style.css';
-/* this contains the default theme, these are optional styles */
 @import '@vue-flow/core/dist/theme-default.css';
-/* import default minimap styles */
 @import '@vue-flow/minimap/dist/style.css';
-/* import default controls styles */
 @import '@vue-flow/controls/dist/style.css';
 
 /* Custom overrides for Vue Flow */

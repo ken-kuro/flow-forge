@@ -38,22 +38,22 @@ function setTheme(theme) {
             <Moon v-else-if="selectedTheme === 'dark'" />
             <Monitor v-else />
           </div>
-          <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52 text-base-content">
-            <li><a @click="setTheme('auto')">
-              <Monitor class="inline-block w-4 h-4 mr-2" />
+          <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 text-base-content border border-base-300 z-50">
+            <li><button type="button" @click="setTheme('auto')" class="flex items-center gap-2">
+              <Monitor class="w-4 h-4" />
               System
-              <span v-if="selectedTheme === 'auto'">✓</span>
-            </a></li>
-            <li><a @click="setTheme('light')">
-              <Sun class="inline-block w-4 h-4 mr-2" />
+              <span v-if="selectedTheme === 'auto'" class="ml-auto">✓</span>
+            </button></li>
+            <li><button type="button" @click="setTheme('light')" class="flex items-center gap-2">
+              <Sun class="w-4 h-4" />
               Light
-              <span v-if="selectedTheme === 'light'">✓</span>
-            </a></li>
-            <li><a @click="setTheme('dark')">
-              <Moon class="inline-block w-4 h-4 mr-2" />
+              <span v-if="selectedTheme === 'light'" class="ml-auto">✓</span>
+            </button></li>
+            <li><button type="button" @click="setTheme('dark')" class="flex items-center gap-2">
+              <Moon class="w-4 h-4" />
               Dark
-              <span v-if="selectedTheme === 'dark'">✓</span>
-            </a></li>
+              <span v-if="selectedTheme === 'dark'" class="ml-auto">✓</span>
+            </button></li>
           </ul>
         </div>
       </div>
