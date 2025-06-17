@@ -13,7 +13,26 @@
 @import '@vue-flow/core/dist/style.css';
 /* this contains the default theme, these are optional styles */
 @import '@vue-flow/core/dist/theme-default.css';
- /* import default minimap styles */
+/* import default minimap styles */
 @import '@vue-flow/minimap/dist/style.css';
 /* import default controls styles */
 @import '@vue-flow/controls/dist/style.css';
+
+/* Custom overrides for Vue Flow */
+/* TODO: Remove this override when custom nodes with dedicated connection buttons are implemented. */
+.vue-flow__handle {
+  /*
+  This is the correct way to increase the touch target size for handles.
+  We make the handle element larger and transparent, then use a border
+  to create the smaller, visible dot in the center.
+  */
+  width: 1rem; /* 16px */
+  height: 1rem; /* 16px */
+  background: transparent;
+  border: 0.25rem solid transparent; /* (16px - 8px) / 2 = 4px. This creates an 8px (0.5rem) dot */
+  background-clip: content-box;
+  border-radius: 100%;
+  background-color: hsl(var(--bc) / 0.6); /* Use daisyUI's base-content color */
+}
+
+/* We don't need the incorrect ::after rule anymore. */

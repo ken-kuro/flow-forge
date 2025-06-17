@@ -17,7 +17,6 @@
     "@vue-flow/node-resizer": "^1.5.0",
     "@vue-flow/node-toolbar": "^1.1.1",
     "@vueuse/core": "^13.3.0",
-    "daisyui": "^5.0.43",
     "lucide-vue-next": "^0.515.0",
     "pinia": "^3.0.3",
     "tailwindcss": "^4.1.10",
@@ -27,6 +26,7 @@
   "devDependencies": {
     "@catppuccin/daisyui": "^2.1.1",
     "@vitejs/plugin-vue": "^5.2.3",
+    "daisyui": "^5.0.43",
     "vite": "^6.2.4",
     "vite-plugin-vue-devtools": "^7.7.2"
   }
