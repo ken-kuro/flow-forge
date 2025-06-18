@@ -12,25 +12,67 @@ import { generateId } from '@/utils/id-generator'
  */
 export const useFlowStore = defineStore('flow', () => {
   // --- STATE ---
-  // Generate UUIDs for initial nodes
+  // Generate UUIDs for initial nodes (now using custom node types)
   const nodeId1 = generateId()
   const nodeId2 = generateId()
   const nodeId3 = generateId()
   const nodeId4 = generateId()
   
   const nodes = ref([
-    { id: nodeId1, type: 'input', label: 'Start', position: { x: 250, y: 5 } },
-    { id: nodeId2, label: 'A Node', position: { x: 100, y: 100 } },
-    { id: nodeId3, label: 'Another Node', position: { x: 400, y: 100 } },
-    { id: nodeId4, type: 'output', label: 'End', position: { x: 250, y: 200 } },
+    { 
+      id: nodeId1, 
+      type: 'custom-start', 
+      position: { x: 250, y: 5 },
+      data: {
+        nodeType: 'start',
+        title: 'Start',
+        config: {
+          message: 'Welcome to the flow!',
+          nextAction: 'continue'
+        }
+      }
+    },
+    { 
+      id: nodeId2, 
+      type: 'default',
+      position: { x: 100, y: 100 },
+      data: { label: 'A Node' }
+    },
+    { 
+      id: nodeId3, 
+      type: 'default',
+      position: { x: 400, y: 100 },
+      data: { label: 'Another Node' }
+    },
+    { 
+      id: nodeId4, 
+      type: 'custom-end', 
+      position: { x: 250, y: 200 },
+      data: {
+        nodeType: 'end',
+        title: 'End',
+        config: {
+          message: 'Flow completed!',
+          nextAction: 'end'
+        }
+      }
+    },
   ]);
   const edges = ref([
-    { id: generateId(), source: nodeId1, target: nodeId2, animated: true },
+    { id: generateId(), source: nodeId1, target: nodeId2 },
     { id: generateId(), source: nodeId1, target: nodeId3 },
   ]);
 
+  // --- ENHANCED STATE FOR CUSTOM NODES ---
+  // Blocks organized by node ID (Phase 2 architecture)
+  const nodeBlocks = ref({})
+  
   const history = ref([])
   const historyIndex = ref(-1)
+  
+  // --- CONCURRENCY CONTROL ---
+  // Monotonically incrementing version for optimistic locking
+  const version = ref(0)
   
   // Vue Flow actions (injected from the component)
   let vueFlowActions = null
@@ -38,13 +80,18 @@ export const useFlowStore = defineStore('flow', () => {
   // --- ACTIONS ---
 
   /**
-   * Pushes the current state of nodes and edges to the history stack.
+   * Pushes the current state of nodes, edges, and nodeBlocks to the history stack.
    * This is used for undo/redo functionality. It truncates any "future" states if a new state is saved after an undo.
    */
   function saveState() {
+    // Increment version on every significant change
+    version.value++
+    
     const currentState = {
       nodes: JSON.parse(JSON.stringify(nodes.value)),
       edges: JSON.parse(JSON.stringify(edges.value)),
+      nodeBlocks: JSON.parse(JSON.stringify(nodeBlocks.value)),
+      version: version.value
     }
     // If we have undone actions, we clear the "future" history
     if (historyIndex.value < history.value.length - 1) {
@@ -74,6 +121,11 @@ export const useFlowStore = defineStore('flow', () => {
         nodes.value = JSON.parse(JSON.stringify(previousState.nodes))
         edges.value = JSON.parse(JSON.stringify(previousState.edges))
       }
+      
+      // Restore nodeBlocks
+      nodeBlocks.value = JSON.parse(JSON.stringify(previousState.nodeBlocks || {}))
+      // Restore version
+      version.value = previousState.version
     }
   }
 
@@ -95,6 +147,11 @@ export const useFlowStore = defineStore('flow', () => {
         nodes.value = JSON.parse(JSON.stringify(nextState.nodes))
         edges.value = JSON.parse(JSON.stringify(nextState.edges))
       }
+      
+      // Restore nodeBlocks
+      nodeBlocks.value = JSON.parse(JSON.stringify(nextState.nodeBlocks || {}))
+      // Restore version
+      version.value = nextState.version
     }
   }
   
@@ -276,6 +333,119 @@ export const useFlowStore = defineStore('flow', () => {
     historyIndex.value = 0
   }
 
+  // --- BLOCK MANAGEMENT METHODS ---
+  /**
+   * Updates a specific block within a node
+   * @param {string} nodeId - The ID of the node containing the block
+   * @param {string} blockId - The ID of the block to update
+   * @param {Object} newData - The new data to merge with the block
+   */
+  function updateBlock(nodeId, blockId, newData) {
+    const blocks = nodeBlocks.value[nodeId]
+    if (blocks) {
+      const blockIndex = blocks.findIndex(b => b.id === blockId)
+      if (blockIndex !== -1) {
+        blocks[blockIndex].data = { ...blocks[blockIndex].data, ...newData }
+        saveState()
+      }
+    }
+  }
+
+  /**
+   * Adds a new block to a node
+   * @param {string} nodeId - The ID of the node to add the block to
+   * @param {Object} blockData - The block data to add
+   */
+  function addBlock(nodeId, blockData) {
+    if (!nodeBlocks.value[nodeId]) {
+      nodeBlocks.value[nodeId] = []
+    }
+    nodeBlocks.value[nodeId].push({
+      id: generateId(),
+      ...blockData
+    })
+    saveState()
+  }
+
+  /**
+   * Removes a block from a node
+   * @param {string} nodeId - The ID of the node containing the block
+   * @param {string} blockId - The ID of the block to remove
+   */
+  function removeBlock(nodeId, blockId) {
+    if (nodeBlocks.value[nodeId]) {
+      nodeBlocks.value[nodeId] = nodeBlocks.value[nodeId].filter(b => b.id !== blockId)
+      saveState()
+    }
+  }
+
+  /**
+   * Reorders blocks within a node
+   * @param {string} nodeId - The ID of the node containing the blocks
+   * @param {number} fromIndex - The current index of the block
+   * @param {number} toIndex - The target index for the block
+   */
+  function reorderBlocks(nodeId, fromIndex, toIndex) {
+    const blocks = nodeBlocks.value[nodeId]
+    if (blocks && fromIndex !== toIndex) {
+      const [removed] = blocks.splice(fromIndex, 1)
+      blocks.splice(toIndex, 0, removed)
+      saveState()
+    }
+  }
+
+  /**
+   * Gets all blocks for a specific node
+   * @param {string} nodeId - The ID of the node
+   * @returns {Array} Array of blocks for the node
+   */
+  function getNodeBlocks(nodeId) {
+    return nodeBlocks.value[nodeId] || []
+  }
+
+  /**
+   * Resolves an asset reference from a setup node
+   * @param {string} setupNodeId - The ID of the setup node
+   * @param {string} assetId - The ID of the asset
+   * @returns {Object|null} The asset block data or null if not found
+   */
+  function getAssetFromSetup(setupNodeId, assetId) {
+    const setupBlocks = nodeBlocks.value[setupNodeId] || []
+    return setupBlocks.find(block => 
+      block.type.startsWith('asset-') && 
+      block.data.assetId === assetId
+    ) || null
+  }
+
+  /**
+   * Gets all available assets from setup nodes
+   * @returns {Array} Array of available assets with metadata
+   */
+  function getAvailableAssets() {
+    const assets = []
+    
+    // Find all setup nodes
+    const setupNodes = nodes.value.filter(n => n.data.nodeType === 'setup')
+    
+    setupNodes.forEach(setupNode => {
+      const setupBlocks = nodeBlocks.value[setupNode.id] || []
+      setupBlocks.forEach(block => {
+        if (block.type.startsWith('asset-')) {
+          assets.push({
+            setupNodeId: setupNode.id,
+            setupNodeTitle: setupNode.data.title,
+            assetId: block.data.assetId,
+            assetTitle: block.data.title,
+            assetType: block.type,
+            assetData: block.data
+          })
+        }
+      })
+    })
+    
+    return assets
+  }
+
   // Save the initial state to the history
   saveState()
 
@@ -283,6 +453,8 @@ export const useFlowStore = defineStore('flow', () => {
     // --- STATE ---
     nodes,
     edges,
+    nodeBlocks,
+    version,
     history,
     historyIndex,
     
@@ -300,6 +472,15 @@ export const useFlowStore = defineStore('flow', () => {
     
     // --- NODE/EDGE OPERATIONS ---
     createNode,
+    
+    // --- BLOCK MANAGEMENT METHODS ---
+    updateBlock,
+    addBlock,
+    removeBlock,
+    reorderBlocks,
+    getNodeBlocks,
+    getAssetFromSetup,
+    getAvailableAssets,
     
     // --- INTERNAL METHODS ---
     setVueFlowActions,

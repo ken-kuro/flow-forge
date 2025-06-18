@@ -119,17 +119,16 @@ onUnmounted(() => {
 
 // Node operations
 const handleCreate = () => {
-  // Create a new node at a random position
+  // Create a new end node at a random position
   const newNode = {
-    type: 'default',
-    label: `Node ${Date.now()}`,
-    position: { 
-      x: Math.random() * 400 + 100, 
-      y: Math.random() * 300 + 100 
+    type: 'custom-end',
+    position: {
+      x: Math.random() * 400 + 100,
+      y: Math.random() * 300 + 100
     },
-    data: { 
-      label: `Node ${Date.now()}`,
-      createdAt: new Date().toISOString()
+    data: {
+      title: `End`,
+      config: {}
     }
   }
   

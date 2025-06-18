@@ -1,10 +1,15 @@
 <script setup>
+import { markRaw } from "vue";
 import { VueFlow } from "@vue-flow/core";
 import { Background } from "@vue-flow/background";
 import { Controls } from "@vue-flow/controls";
 import { MiniMap } from "@vue-flow/minimap";
 import { useFlowEditor } from "@/composables/use-flow-editor";
 import EditorToolbar from "@/components/editor/toolbar.vue";
+
+// Import custom node components
+import StartNode from "@/components/nodes/start-node.vue";
+import EndNode from "@/components/nodes/end-node.vue";
 
 /**
  * FlowEditor - The core flow editor component
@@ -16,6 +21,13 @@ import EditorToolbar from "@/components/editor/toolbar.vue";
  * - Clean separation between presentation and business logic
  * - Will be extended to support custom nodes and sub-node architecture
  */
+
+// --- Custom Node Types ---
+// Register our custom node components with Vue Flow using markRaw to prevent reactivity warnings
+const nodeTypes = {
+  'custom-start': markRaw(StartNode),
+  'custom-end': markRaw(EndNode),
+}
 
 // --- Flow Editor Logic ---
 // All Vue Flow interactions are handled by this composable
@@ -32,12 +44,15 @@ const isValidConnection = () => true;
 <template>
   <div class="flow-editor w-full h-full bg-base-300 relative">
     <!-- Vue Flow Canvas -->
+    <!-- TODO: Allow passing the config to the VueFlow component -->
     <VueFlow
       v-model:nodes="nodes"
       v-model:edges="edges"
+      :node-types="nodeTypes"
       :is-valid-connection="isValidConnection"
       :nodes-draggable="true"
       :pan-on-scroll="true"
+      :delete-key-code="['Backspace', 'Delete']"
       fit-view-on-init
       class="vue-flow-instance"
     >
