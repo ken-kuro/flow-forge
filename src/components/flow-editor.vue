@@ -10,6 +10,7 @@ import EditorToolbar from "@/components/editor/toolbar.vue";
 // Import custom node components
 import StartNode from "@/components/nodes/start-node.vue";
 import EndNode from "@/components/nodes/end-node.vue";
+import SetupNode from "@/components/nodes/setup-node.vue";
 
 /**
  * FlowEditor - The core flow editor component
@@ -27,6 +28,7 @@ import EndNode from "@/components/nodes/end-node.vue";
 const nodeTypes = {
   'custom-start': markRaw(StartNode),
   'custom-end': markRaw(EndNode),
+  'custom-setup': markRaw(SetupNode),
 }
 
 // --- Flow Editor Logic ---
