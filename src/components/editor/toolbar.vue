@@ -2,7 +2,7 @@
 import { useFlowEditor } from "@/composables/use-flow-editor";
 import { Plus, History, Undo, Redo, Download, Upload } from "lucide-vue-next";
 import { useMagicKeys, onClickOutside } from "@vueuse/core";
-import { computed, watchEffect, ref, onMounted, onUnmounted } from "vue";
+import { ref, watchEffect } from "vue";
 
 /**
  * EditorToolbar - Simplified application toolbar for the flow editor
@@ -31,16 +31,21 @@ const {
 // Keyboard shortcuts
 const { ctrl_z, ctrl_y, ctrl_shift_z, cmd_z, cmd_y, cmd_shift_z } = useMagicKeys()
 
-// Handle Ctrl+Alt+N separately with preventDefault (VS Code convention)
+// Ref for the create button to programmatically open the dropdown
+const createButtonRef = ref(null);
+
+// Keyboard shortcut for creating a new node
 const { ctrl_alt_n, cmd_option_n } = useMagicKeys({
   passive: false,
   onEventFired(e) {
     if ((e.ctrlKey || e.metaKey) && e.altKey && e.key.toLowerCase() === 'n') {
-      e.preventDefault()
-      e.stopPropagation()
+      e.preventDefault();
+      e.stopPropagation();
+      // Focus the button to open the dropdown menu
+      createButtonRef.value?.focus();
     }
   },
-})
+});
 
 // History state
 const showHistory = ref(false)
@@ -90,49 +95,32 @@ watchEffect(() => {
   }
 });
 
-watchEffect(() => {
-  if (ctrl_alt_n.value || cmd_option_n.value) {
-    handleCreate();
-  }
-});
-
-// Additional direct event listener for more reliable preventDefault
-let keydownHandler = null
-
-onMounted(() => {
-  keydownHandler = (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.altKey && e.key.toLowerCase() === 'n') {
-      e.preventDefault()
-      e.stopPropagation()
-      handleCreate()
-    }
-  }
-  
-  document.addEventListener('keydown', keydownHandler, { passive: false })
-})
-
-onUnmounted(() => {
-  if (keydownHandler) {
-    document.removeEventListener('keydown', keydownHandler)
-  }
-})
-
 // Node operations
-const handleCreate = () => {
-  // Create a new end node at a random position
-  const newNode = {
-    type: 'custom-end',
-    position: {
-      x: Math.random() * 400 + 100,
-      y: Math.random() * 300 + 100
-    },
-    data: {
-      title: `End`,
-      config: {}
-    }
+const handleCreateNodeByType = (type) => {
+  // TODO: Add a more robust system for positioning new nodes
+  const position = {
+    x: Math.random() * 400 + 100,
+    y: Math.random() * 300 + 100
   }
-  
-  createNode(newNode)
+
+  let nodeData;
+
+  // Set default data based on node type
+  switch (type) {
+    case 'custom-end':
+      nodeData = { type, position, data: { title: 'End' } };
+      break;
+    case 'custom-setup':
+      nodeData = { type, position, data: { title: 'Setup' } };
+      break;
+    // Add cases for future node types like 'lecture' or 'setup'
+    // case 'lecture':
+    default:
+      console.warn(`Unknown node type: ${type}`);
+      return;
+  }
+
+  createNode(nodeData);
 };
 
 // File operations
@@ -149,18 +137,25 @@ const handleExport = () => {
   <div class="app-toolbar absolute top-4 right-4 z-50">
     <div class="flex items-center gap-2 bg-base-100 rounded-lg shadow-lg border border-base-300 p-2">
       <!-- Create Group -->
-      <div class="flex items-center gap-1 border-r border-base-300 pr-2">
+      <div class="dropdown dropdown-bottom dropdown-end">
         <button
-          @click="handleCreate"
+          ref="createButtonRef"
+          tabindex="0"
+          role="button"
           class="btn btn-primary btn-sm"
           title="Create Node (Ctrl+Alt+N)"
         >
           <Plus class="w-4 h-4" />
         </button>
+        <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+          <li><a @click="() => handleCreateNodeByType('custom-setup')">Setup Node</a></li>
+          <li><a @click="() => handleCreateNodeByType('custom-end')">End Node</a></li>
+          <!-- Future node types will be added here -->
+        </ul>
       </div>
 
       <!-- History Group -->
-      <div class="flex items-center gap-1 border-r border-base-300 pr-2">
+      <div class="flex items-center gap-1 border-l border-base-300 ml-2 pl-2">
         <button
           @click="undo"
           :disabled="!canUndo"
@@ -246,18 +241,18 @@ const handleExport = () => {
       </div>
 
       <!-- Import/Export Group -->
-      <div class="flex items-center gap-1">
+      <div class="flex items-center gap-1 border-l border-base-300 ml-2 pl-2">
         <button
           @click="handleImport"
           class="btn btn-ghost btn-sm"
-          title="Import Flow"
+          title="Import from JSON"
         >
           <Upload class="w-4 h-4" />
         </button>
         <button
           @click="handleExport"
           class="btn btn-ghost btn-sm"
-          title="Export Flow"
+          title="Export as JSON"
         >
           <Download class="w-4 h-4" />
         </button>
