@@ -20,7 +20,7 @@ import { computed } from "vue";
 export function useFlowEditor() {
   // --- Store Connection ---
   const flowStore = useFlowStore();
-  const { nodes, edges, history, historyIndex } = storeToRefs(flowStore);
+  const { nodes, edges, nodeBlocks, history, historyIndex } = storeToRefs(flowStore);
 
   // --- Computed Properties ---
   const canUndo = computed(() => historyIndex.value > 0);
@@ -74,6 +74,7 @@ export function useFlowEditor() {
     // --- Reactive State ---
     nodes,
     edges,
+    nodeBlocks,
     history,
     historyIndex,
 
@@ -84,6 +85,15 @@ export function useFlowEditor() {
 
     // --- Edge Operations ---
     deleteEdge: (edgeId) => removeEdges(edgeId),
+
+    // --- Block Operations ---
+    updateBlock: flowStore.updateBlock,
+    addBlock: flowStore.addBlock,
+    removeBlock: flowStore.removeBlock,
+    reorderBlocks: flowStore.reorderBlocks,
+    getNodeBlocks: flowStore.getNodeBlocks,
+    getAssetFromSetup: flowStore.getAssetFromSetup,
+    getAvailableAssets: flowStore.getAvailableAssets,
 
     // --- History Operations ---
     undo: flowStore.undo,
