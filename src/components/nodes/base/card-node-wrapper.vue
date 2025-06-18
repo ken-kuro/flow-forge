@@ -36,4 +36,17 @@ defineProps({
   /* This forces the content to respect the rounded corners of the card */
   overflow: hidden;
 }
+
+/*
+  By default, handles are vertically centered. We use :deep() to target the
+  child Handle components and adjust the 'default' handles for a better
+  top-to-bottom flow, leaving other potential handles unaffected.
+*/
+:deep(.vue-flow__handle[data-handleid="default"].target) {
+  top: 35%;
+}
+
+:deep(.vue-flow__handle[data-handleid="default"].source) {
+  top: 65%;
+}
 </style> 
