@@ -3,10 +3,15 @@ import { Handle, Position } from '@vue-flow/core'
 
 /**
  * EndNode - A simple, circular flow termination point.
+ * Uses DaisyUI/Catppuccin theme colors for consistency.
  */
 
 // Props from Vue Flow with improved type definition for `data`
 const props = defineProps({
+  /**
+   * The data object for the node.
+   * @type {{title: string, config: object}}
+   */
   data: {
     type: Object,
     required: true,
@@ -15,38 +20,27 @@ const props = defineProps({
   },
   selected: Boolean,
 })
-
-// Extract title for display, providing a default
-const { title = 'End' } = props.data || {}
 </script>
 
 <template>
-  <div 
-    :class="[
-      'end-node',
-      'bg-red-500 border-2 border-red-700 rounded-full',
-      'w-16 h-16 flex items-center justify-center text-white text-sm',
-      'transition-all duration-200 ease-in-out',
-      { 'ring-4 ring-red-400 ring-opacity-70': selected },
-    ]"
+  <div
+    class="end-node w-16 h-16 flex items-center justify-center rounded-full border-2 bg-error text-error-content border-error-focus transition-all duration-200 ease-in-out"
+    :class="{ 'ring-4 ring-error ring-opacity-70': selected }"
   >
     {{ data.title }}
-    
-    <!-- Single target handle, centered at the top -->
-    <Handle 
-      type="target" 
+
+    <!-- Single target handle, centered at the left -->
+    <Handle
+      type="target"
       :position="Position.Left"
-      class="!bg-red-700"
+      class="!bg-error-content"
     />
   </div>
 </template>
 
 <style scoped>
-/* Ensure handles are visible and properly styled on the circular node */
-.vue-flow__handle {
-  width: 10px;
-  height: 10px;
-  border-radius: 100%;
-  border-width: 2px;
-}
+/*
+  The global handle style in main.css is now used.
+  This scoped style block is removed to ensure consistency.
+*/
 </style> 
