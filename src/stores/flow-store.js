@@ -22,46 +22,23 @@ export const useFlowStore = defineStore('flow', () => {
     { 
       id: nodeId1, 
       type: 'custom-start', 
-      position: { x: 250, y: 5 },
+      position: { x: 50, y: 150 },
       data: {
-        nodeType: 'start',
         title: 'Start',
-        config: {
-          message: 'Welcome to the flow!',
-          nextAction: 'continue'
-        }
+        config: {}
       }
-    },
-    { 
-      id: nodeId2, 
-      type: 'default',
-      position: { x: 100, y: 100 },
-      data: { label: 'A Node' }
-    },
-    { 
-      id: nodeId3, 
-      type: 'default',
-      position: { x: 400, y: 100 },
-      data: { label: 'Another Node' }
     },
     { 
       id: nodeId4, 
       type: 'custom-end', 
-      position: { x: 250, y: 200 },
+      position: { x: 2000, y: 150 },
       data: {
-        nodeType: 'end',
         title: 'End',
-        config: {
-          message: 'Flow completed!',
-          nextAction: 'end'
-        }
+        config: {}
       }
     },
   ]);
-  const edges = ref([
-    { id: generateId(), source: nodeId1, target: nodeId2 },
-    { id: generateId(), source: nodeId1, target: nodeId3 },
-  ]);
+  const edges = ref([]);
 
   // --- ENHANCED STATE FOR CUSTOM NODES ---
   // Blocks organized by node ID (Phase 2 architecture)
@@ -289,27 +266,21 @@ export const useFlowStore = defineStore('flow', () => {
 
   /**
    * Creates a new node with a UUID and adds it to the nodes state.
-   * @param {Object} nodeData - The node data (type, label, position, etc.)
-   * @returns {string} The generated UUID for the new node
+   * @param {object} nodeData - The node data from the toolbar/UI
    */
   function createNode(nodeData) {
-    const nodeId = generateId()
     const newNode = {
-      id: nodeId,
       ...nodeData,
+      id: generateId(),
+    };
+
+    // For nodes that can contain blocks, initialize their block list
+    if (nodeData.type !== 'custom-start' && nodeData.type !== 'custom-end') {
+      nodeBlocks.value[newNode.id] = [];
     }
-    
-    // Use Vue Flow actions if available, otherwise fall back to direct manipulation
-    if (vueFlowActions) {
-      // Vue Flow actions will trigger onNodesChange which will call saveState()
-      vueFlowActions.addNodes(newNode)
-    } else {
-      // Direct manipulation needs manual state saving
-      nodes.value.push(newNode)
-      saveState()
-    }
-    
-    return nodeId
+
+    // This will trigger onNodesChange, which will save the state
+    vueFlowActions.addNodes([newNode]);
   }
 
   /**
