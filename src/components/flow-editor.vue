@@ -1,31 +1,25 @@
 <script setup>
-import { VueFlow, useVueFlow } from "@vue-flow/core";
+import { VueFlow } from "@vue-flow/core";
 import { Background } from "@vue-flow/background";
-import { Controls, ControlButton } from "@vue-flow/controls";
+import { Controls } from "@vue-flow/controls";
 import { MiniMap } from "@vue-flow/minimap";
-import { storeToRefs } from "pinia";
-import { useFlowStore } from "@/stores/flow-store";
-import { Undo, Redo } from "lucide-vue-next";
+import { useFlowEditor } from "@/composables/use-flow-editor";
+import EditorToolbar from "@/components/editor/toolbar.vue";
 
 /**
  * FlowEditor - The core flow editor component
  * 
  * This component handles:
- * - Rendering the Vue Flow canvas and its parts (MiniMap, Controls, Background)
- * - Connecting to the Pinia store for state management
- * - Handling user interactions and events
+ * - Rendering the Vue Flow canvas with basic controls (zoom, fit, etc.)
+ * - Custom application toolbar for save/load/import features
+ * - Using the useFlowEditor composable for all logic
+ * - Clean separation between presentation and business logic
  * - Will be extended to support custom nodes and sub-node architecture
  */
 
-// --- Pinia Store Connection ---
-const flowStore = useFlowStore();
-const { nodes, edges } = storeToRefs(flowStore);
-
-// --- Vue Flow Event Hooks ---
-const { onConnect } = useVueFlow();
-
-// Wire the event hooks to the store's actions
-onConnect(flowStore.onConnect);
+// --- Flow Editor Logic ---
+// All Vue Flow interactions are handled by this composable
+const { nodes, edges } = useFlowEditor();
 
 /**
  * Connection validation function
@@ -36,7 +30,8 @@ const isValidConnection = () => true;
 </script>
 
 <template>
-  <div class="flow-editor w-full h-full bg-base-300">
+  <div class="flow-editor w-full h-full bg-base-300 relative">
+    <!-- Vue Flow Canvas -->
     <VueFlow
       v-model:nodes="nodes"
       v-model:edges="edges"
@@ -47,23 +42,30 @@ const isValidConnection = () => true;
       class="vue-flow-instance"
     >
       <Background />
-      <MiniMap />
+      
+      <!-- Interactive minimap -->
+      <!-- TODO: Configure it with nodeColor and nodeStrokeColor -->
+      <MiniMap pannable zoomable />
 
-      <Controls>
-        <ControlButton title="Undo" @click="flowStore.undo()">
-          <Undo />
-        </ControlButton>
-        <ControlButton title="Redo" @click="flowStore.redo()">
-          <Redo />
-        </ControlButton>
-      </Controls>
+      <!-- Vue Flow Basic Controls (zoom, fit, lock, etc.) -->
+      <Controls position="bottom-left" />
     </VueFlow>
+
+    <!-- Custom Application Toolbar (save, load, import, export, etc.) -->
+    <EditorToolbar />
   </div>
 </template>
 
 <style scoped>
-/* Component-specific styles can go here if needed */
 .flow-editor {
   /* This will contain the editor and any future toolbars, panels, etc. */
+  position: relative;
+  overflow: hidden;
+}
+
+/* Ensure Vue Flow takes full space */
+.vue-flow-instance {
+  width: 100%;
+  height: 100%;
 }
 </style> 
