@@ -1,7 +1,7 @@
 <script setup>
 import { useFlowEditor } from "@/composables/use-flow-editor";
-import { Plus, History, Undo, Redo, Download, Upload } from "lucide-vue-next";
-import { useMagicKeys, onClickOutside } from "@vueuse/core";
+import { Plus, History, Undo, Redo, Download, Upload, Bug } from "lucide-vue-next";
+import { useMagicKeys } from "@vueuse/core";
 import { ref, watchEffect } from "vue";
 
 /**
@@ -26,6 +26,9 @@ const {
   history,
   historyIndex,
   clearHistory,
+  nodes,
+  edges,
+  nodeBlocks,
 } = useFlowEditor();
 
 // Keyboard shortcuts
@@ -48,17 +51,7 @@ const { ctrl_alt_n, cmd_option_n } = useMagicKeys({
 });
 
 // History state
-const showHistory = ref(false)
 const historyRef = ref(null)
-
-// Close history dropdown when clicking outside
-onClickOutside(historyRef, () => {
-  showHistory.value = false
-})
-
-const handleHistory = () => {
-  showHistory.value = !showHistory.value
-};
 
 // History navigation functions
 const jumpToHistoryState = (targetIndex) => {
@@ -121,6 +114,11 @@ const handleCreateNodeByType = (type) => {
   }
 
   createNode(nodeData);
+
+  // Close the dropdown after creating the node
+  if (document.activeElement) {
+    document.activeElement.blur();
+  }
 };
 
 // File operations
@@ -131,6 +129,17 @@ const handleImport = () => {
 const handleExport = () => {
   // TODO: Export as JSON or image
 };
+
+const handleDebugDump = () => {
+  console.group("🔬 Flow Forge Debug Dump");
+  console.log("Nodes:", JSON.parse(JSON.stringify(nodes.value)));
+  console.log("Edges:", JSON.parse(JSON.stringify(edges.value)));
+  console.log("Node Blocks:", JSON.parse(JSON.stringify(nodeBlocks.value)));
+  console.log("History Stack:", JSON.parse(JSON.stringify(history.value)));
+  console.log("Current History Index:", historyIndex.value);
+  console.groupEnd();
+  alert("Current flow state has been logged to the console.");
+};
 </script>
 
 <template>
@@ -138,7 +147,7 @@ const handleExport = () => {
     <div class="flex items-center gap-2 bg-base-100 rounded-lg shadow-lg border border-base-300 p-2">
       <!-- Create Group -->
       <div class="dropdown dropdown-bottom dropdown-end">
-        <button
+        <div
           ref="createButtonRef"
           tabindex="0"
           role="button"
@@ -146,7 +155,7 @@ const handleExport = () => {
           title="Create Node (Ctrl+Alt+N)"
         >
           <Plus class="w-4 h-4" />
-        </button>
+        </div>
         <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
           <li><a @click="() => handleCreateNodeByType('custom-setup')">Setup Node</a></li>
           <li><a @click="() => handleCreateNodeByType('custom-end')">End Node</a></li>
@@ -172,17 +181,18 @@ const handleExport = () => {
         >
           <Redo class="w-4 h-4" />
         </button>
-        <div class="relative" ref="historyRef">
+        <div class="dropdown dropdown-bottom dropdown-end" ref="historyRef">
           <button
-            @click="handleHistory"
-            :class="['btn', 'btn-ghost', 'btn-sm', { 'btn-active': showHistory }]"
+            tabindex="0"
+            role="button"
+            class="btn btn-ghost btn-sm"
             title="History Timeline"
           >
             <History class="w-4 h-4" />
           </button>
           
           <!-- History Timeline Dropdown -->
-          <div v-if="showHistory" class="absolute top-full right-0 mt-2 w-80 bg-base-100 border border-base-300 rounded-lg shadow-lg z-50 p-4">
+          <div tabindex="0" class="dropdown-content z-[1] menu p-4 shadow bg-base-100 rounded-box w-80 border border-base-300">
             <div class="mb-3">
               <h3 class="font-semibold text-sm text-base-content">History Timeline</h3>
               <p class="text-xs text-base-content/70">Current: {{ historyIndex + 1 }} / {{ history.length }}</p>
@@ -223,17 +233,11 @@ const handleExport = () => {
             
             <div class="mt-3 pt-3 border-t border-base-300 flex gap-2">
               <button 
-                @click="() => { clearHistory(); showHistory = false; }" 
+                @click="() => { clearHistory(); }" 
                 class="btn btn-ghost btn-xs flex-1"
                 :disabled="history.length <= 1"
               >
                 Clear History
-              </button>
-              <button 
-                @click="showHistory = false" 
-                class="btn btn-primary btn-xs flex-1"
-              >
-                Close
               </button>
             </div>
           </div>
@@ -255,6 +259,17 @@ const handleExport = () => {
           title="Export as JSON"
         >
           <Download class="w-4 h-4" />
+        </button>
+      </div>
+
+      <!-- Debug Group -->
+      <div class="flex items-center gap-1 border-l border-base-300 ml-2 pl-2">
+        <button
+          @click="handleDebugDump"
+          class="btn btn-ghost btn-sm text-accent"
+          title="Dump State to Console"
+        >
+          <Bug class="w-4 h-4" />
         </button>
       </div>
     </div>
