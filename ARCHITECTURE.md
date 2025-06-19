@@ -351,28 +351,71 @@ const nodeTypes = {
 }
 ```
 
-### **Component Structure**
+### **Component Structure** ✅ SIMPLIFIED
 ```
 src/components/
 ├── nodes/
-│   ├── start-node.vue           # Simple welcome/start node
-│   ├── end-node.vue             # Simple termination node
-│   ├── setup-node.vue           # Asset management node
-│   ├── lecture-node.vue         # Main content node (most complex)
-│   ├── condition-node.vue       # Decision making node  
-│   └── condition-branch-node.vue # Branch sub-node
-├── blocks/
-│   ├── teacher-video-block.vue  # Video player block
-│   ├── question-block.vue       # Question/input block
-│   ├── assets-applied-block.vue # Asset reference block
-│   ├── collect-answer-block.vue # Answer collection block
-│   ├── system-action-block.vue  # System actions block
-│   ├── asset-image-block.vue    # Image asset (setup)
-│   └── asset-video-block.vue    # Video asset (setup)
-└── shared/
-    ├── block-wrapper.vue        # Common block container
-    └── block-toolbar.vue        # Add/edit/delete blocks
+│   ├── base/                       # Foundation components
+│   │   ├── card-node-wrapper.vue  # Generic card shell for card-style nodes
+│   │   └── block-container.vue    # Core block rendering & management logic
+│   ├── shared/                     # Cross-node reusable components
+│   │   └── blocks/                # (Future: generic blocks for any node)
+│   ├── setup/                      # Setup node & setup-specific blocks
+│   │   ├── blocks/
+│   │   │   ├── variable-block.vue # ✅ Variable definition blocks
+│   │   │   ├── image-asset-block.vue # ✅ Image asset blocks
+│   │   │   └── video-asset-block.vue # ✅ Video asset blocks
+│   │   └── setup-node.vue         # ✅ Asset & variable management node
+│   ├── start-node.vue             # ✅ Simple welcome/start node
+│   ├── end-node.vue               # ✅ Simple termination node
+│   ├── index.js                   # ✅ ONLY exports nodeTypes registry
+│   └── (future directories)
+│       ├── lecture/               # 🚧 Next: lecture-specific components
+│       └── condition/             # 🚧 Future: condition-specific components
+└── editor/
+    └── toolbar.vue                # ✅ Node creation toolbar
 ```
+
+#### **Architectural Benefits**
+- **No Barrel Exports**: Eliminates complexity and improves tree shaking
+- **Clear File Paths**: Every import shows exactly where the component lives
+- **Scalable Organization**: Easy to add new node types without conflicts
+- **Direct Dependencies**: Easy to see what each component needs
+- **Maintainability**: Related code is co-located by feature/domain
+
+#### **Import Patterns** ✅ DIRECT ONLY
+```javascript
+// ✅ Only registry export (for Vue Flow registration)
+import { nodeTypes } from '@/components/nodes';
+
+// ✅ All other imports are direct file paths
+import StartNode from '@/components/nodes/start-node.vue';
+import EndNode from '@/components/nodes/end-node.vue';
+import SetupNode from '@/components/nodes/setup/setup-node.vue';
+import CardNodeWrapper from '@/components/nodes/base/card-node-wrapper.vue';
+import BlockContainer from '@/components/nodes/base/block-container.vue';
+
+// ✅ Internal components (when needed)
+import VariableBlock from '@/components/nodes/setup/blocks/variable-block.vue';
+
+// ✅ Future shared components (direct imports)
+import BlockToolbar from '@/components/nodes/shared/block-toolbar.vue';
+```
+
+#### **Why Direct Imports Only?**
+- **Maximum Tree Shaking**: Bundlers can eliminate unused code perfectly
+- **Zero Abstraction**: What you import is exactly what you get
+- **Fastest IDE Performance**: No barrel file resolution needed
+- **Smallest Bundles**: No accidental imports of unused components
+- **Perfect Encapsulation**: Block components are clearly internal
+
+#### **Block Component Architecture**
+Each block component follows a consistent pattern:
+- **Props**: `nodeId` (string), `block` (object with id, type, data)
+- **Composition**: Uses `useFlowEditor()` for store operations
+- **UI Pattern**: Header with icon/title/delete, form fields, preview area
+- **State Management**: Local reactive refs synced to store on blur/change
+- **Styling**: DaisyUI classes with hover transitions and semantic colors
 
 ## 🔧 Implementation Plan
 
@@ -381,11 +424,25 @@ src/components/
 2. ✅ **Basic Node Registration**: Register custom node types with Vue Flow
 3. ✅ **Simple Nodes First**: Implement Start and End nodes (no blocks)
 
-### **Phase 2: Setup Node (Week 2)** 
+### **Phase 2: Setup Node (Week 2)** ✅ COMPLETED
 1. ✅ **Setup Node Component**: Basic container with block support
-2. ✅ **Asset Blocks**: Image and Video asset blocks
-3. ✅ **Block Management**: Add/remove/reorder blocks within nodes
-4. ✅ **Asset ID System**: Unique IDs for cross-referencing
+2. ✅ **Asset Blocks**: Image and Video asset blocks with preview functionality
+3. ✅ **Variable Blocks**: Typed variable definitions (string, number, boolean)
+4. ✅ **Block Management**: Add/remove/edit blocks with dropdown interface
+5. ✅ **Asset ID System**: Unique IDs for cross-referencing
+
+#### **Implemented Block Types**
+- **Variable Block** (`variable`): Define typed variables with name, value, and type selection
+- **Image Asset Block** (`imageAsset`): Image resources with URL, title, alt text, and preview
+- **Video Asset Block** (`videoAsset`): Video resources with URL, title, duration, thumbnail, and preview
+
+#### **Block Management Features**
+- **Dropdown Interface**: Clean UI for selecting block types to add
+- **Inline Editing**: Direct editing of block properties with auto-save on blur
+- **Type Safety**: Proper type conversion for variable blocks (string/number/boolean)
+- **Delete Functionality**: Individual block deletion with confirmation
+- **Preview System**: Live preview of images and video thumbnails
+- **Consistent Styling**: DaisyUI-based theming with hover states and transitions
 
 ### **Phase 3: Lecture Node (Week 3-4)**
 1. ✅ **Lecture Node Component**: Complex container with multiple block types
