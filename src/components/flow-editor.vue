@@ -1,5 +1,5 @@
 <script setup>
-import { markRaw } from "vue";
+
 import { VueFlow } from "@vue-flow/core";
 import { Background } from "@vue-flow/background";
 import { Controls } from "@vue-flow/controls";
@@ -7,10 +7,8 @@ import { MiniMap } from "@vue-flow/minimap";
 import { useFlowEditor } from "@/composables/use-flow-editor";
 import EditorToolbar from "@/components/editor/toolbar.vue";
 
-// Import custom node components
-import StartNode from "@/components/nodes/start-node.vue";
-import EndNode from "@/components/nodes/end-node.vue";
-import SetupNode from "@/components/nodes/setup-node.vue";
+// Import custom node registry
+import { nodeTypes } from "@/components/nodes";
 
 /**
  * FlowEditor - The core flow editor component
@@ -22,14 +20,6 @@ import SetupNode from "@/components/nodes/setup-node.vue";
  * - Clean separation between presentation and business logic
  * - Will be extended to support custom nodes and sub-node architecture
  */
-
-// --- Custom Node Types ---
-// Register our custom node components with Vue Flow using markRaw to prevent reactivity warnings
-const nodeTypes = {
-  'custom-start': markRaw(StartNode),
-  'custom-end': markRaw(EndNode),
-  'custom-setup': markRaw(SetupNode),
-}
 
 // --- Flow Editor Logic ---
 // All Vue Flow interactions are handled by this composable
