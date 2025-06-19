@@ -409,13 +409,32 @@ import BlockToolbar from '@/components/nodes/shared/block-toolbar.vue';
 - **Smallest Bundles**: No accidental imports of unused components
 - **Perfect Encapsulation**: Block components are clearly internal
 
-#### **Block Component Architecture**
-Each block component follows a consistent pattern:
+#### **Component Architecture Principles**
+
+**Base Components (Pure UI Containers):**
+- **`CardNodeWrapper`**: Generic card shell with consistent styling
+- **`BlockContainer`**: Pure container for linear block stacking
+- **No Business Logic**: Only provide UI structure and styling
+- **Slot-Based**: Accept content through slots for maximum flexibility
+
+**Node Components (Domain-Specific Logic):**
+- **Own Their Blocks**: Each node manages its specific block types
+- **Import Block Components**: Direct imports of their required block types
+- **Handle Block Logic**: Create, update, delete operations for their blocks
+- **Provide Management UI**: Custom dropdowns and actions for their use case
+
+**Block Components (Leaf Components):**
 - **Props**: `nodeId` (string), `block` (object with id, type, data)
 - **Composition**: Uses `useFlowEditor()` for store operations
 - **UI Pattern**: Header with icon/title/delete, form fields, preview area
 - **State Management**: Local reactive refs synced to store on blur/change
 - **Styling**: DaisyUI classes with hover transitions and semantic colors
+
+This architecture ensures:
+- **Perfect Encapsulation**: Setup nodes can't accidentally import Lecture blocks
+- **Clean Separation**: UI containers vs business logic vs data components
+- **Reusability**: Base components work for any node type
+- **Maintainability**: Each concern is in the right place
 
 ## 🔧 Implementation Plan
 
