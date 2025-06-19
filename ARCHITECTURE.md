@@ -54,7 +54,6 @@ This is the primary JSON structure for a flow, designed to be stored in a MongoD
         title: "Welcome",
         config: {
           message: "Welcome to the course!",
-          nextAction: "continue"
         }
       }
     },
@@ -245,7 +244,6 @@ All nodes, regardless of type, will follow this basic structure, compatible with
     prompt: "Please submit your answer",
     collectFrom: "lesson-1-answer", // Variable to collect
     showSummary: true,
-    nextAction: "continue" // "continue", "wait", "redirect"
   }
 }
 
@@ -618,3 +616,46 @@ function getAvailableAssets() {
 ---
 
 **Next Step**: Begin Phase 1 implementation with Start and End nodes, then progressively add Setup → Lecture → Condition nodes. 
+
+### 🏛️ **State Management & Interaction Patterns**
+
+To ensure a clean, maintainable, and scalable codebase, we adhere to a strict three-layer architecture pattern, inspired by Model-View-Controller (MVC).
+
+#### **1. The Three Layers**
+- **The Model (`/src/stores/flow-store.js`):** The "Brain." This is our Pinia store and the single source of truth for all application state (`nodes`, `edges`, `nodeBlocks`, `history`). It must be UI-agnostic and should not contain any Vue Flow-specific logic other than the pure `applyChanges` helper. It exposes functions for managing our application's *custom* data, like block manipulations.
+- **The Controller (`/src/composables/use-flow-editor.js`):** The "Orchestrator." This is the central hub for all application logic. It is the **only file** in the application that should import and use the `useVueFlow()` hook. It connects the View and the Model, listening for user events and calling actions on either the store or the Vue Flow library.
+- **The View (`/src/components/**/*.vue`):** The "Face." This layer is considered "dumb" and is only responsible for displaying state and emitting user intent to the Controller. All actions (e.g., button clicks) must call a function exposed by `useFlowEditor`.
+
+#### **2. Unidirectional Data Flow ("Actions Up, State Down")**
+We enforce a strict one-way data flow to ensure predictability and ease of debugging.
+- **Actions Flow UP:** A user interacts with the `View`, which calls an action on the `Controller`. The `Controller` then executes logic, which may update the `Model`.
+- **State Flows DOWN:** The `Model`'s state is mutated. Vue's reactivity system then automatically updates the `View` to reflect the new state.
+
+#### **3. Vue Flow Interaction Strategy**
+- **State Sync via `v-model`:** For our current needs, we use `v-model:nodes` and `v-model:edges` for simple and declarative state synchronization. We have a `TODO` in the store to revisit this and switch to a fully controlled pattern if future features (like confirmation dialogs) require it.
+- **Communicate Intent with Library Actions:** To initiate a change like adding or removing a node, the `Controller` **must** use the library's provided actions (e.g., `addNodes`, `removeNodes`). This ensures Vue Flow emits clean, semantic events.
+- **Listen to Events for Custom Logic:** We use event handlers like `onNodesChange` for the sole purpose of triggering our own custom logic that the library is unaware of—primarily, to call `saveState()` and manage our undo/redo history stack.
+
+---
+
+### **Enhanced Node Structure**
+
+All nodes, regardless of type, will follow this basic structure, compatible with Vue Flow.
+
+```javascript
+{
+  // --- Vue Flow Required Properties ---
+  id: "node-uuid",
+  type: "custom-start", // e.g., custom-start, custom-end, custom-setup
+  position: { x: 100, y: 200 },
+  
+  // --- Our Enhanced Properties ---
+  data: {
+    title: "Welcome Message", // The primary label displayed in the node's UI.
+    config: { ... }           // An object for type-specific settings. It may be empty
+                              // for simple nodes like Start/End but is kept for
+                              // architectural consistency.
+  }
+}
+```
+}
