@@ -15,8 +15,6 @@ export const useFlowStore = defineStore('flow', () => {
   // Generate UUIDs for initial nodes (now using custom node types)
   const nodeId1 = generateId()
   const nodeId2 = generateId()
-  const nodeId3 = generateId()
-  const nodeId4 = generateId()
   
   const nodes = ref([
     { 
@@ -29,7 +27,7 @@ export const useFlowStore = defineStore('flow', () => {
       }
     },
     { 
-      id: nodeId4, 
+      id: nodeId2, 
       type: 'custom-end', 
       position: { x: 2000, y: 150 },
       data: {
