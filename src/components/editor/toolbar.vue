@@ -106,6 +106,12 @@ const handleCreateNodeByType = (type) => {
     case 'custom-setup':
       nodeData = { type, position, data: { title: 'Setup' } };
       break;
+    case 'custom-lecture':
+      nodeData = { type, position, data: { title: 'Lecture' } };
+      break;
+    case 'custom-condition':
+      nodeData = { type, position, data: { title: 'Condition' } };
+      break;
     // Add cases for future node types like 'lecture' or 'setup'
     // case 'lecture':
     default:
@@ -158,6 +164,8 @@ const handleDebugDump = () => {
         </div>
         <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
           <li><a @click="() => handleCreateNodeByType('custom-setup')">Setup Node</a></li>
+          <li><a @click="() => handleCreateNodeByType('custom-lecture')">Lecture Node</a></li>
+          <li><a @click="() => handleCreateNodeByType('custom-condition')">Condition Node</a></li>
           <li><a @click="() => handleCreateNodeByType('custom-end')">End Node</a></li>
           <!-- Future node types will be added here -->
         </ul>
