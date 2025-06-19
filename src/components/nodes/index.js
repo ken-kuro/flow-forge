@@ -15,6 +15,7 @@ import StartNode from './start-node.vue';
 import EndNode from './end-node.vue';
 import SetupNode from './setup/setup-node.vue';
 
+// TODO: Make sure this will be used consistently across the project, no magic strings.
 export const nodeTypes = {
   'custom-start': markRaw(StartNode),
   'custom-end': markRaw(EndNode),
