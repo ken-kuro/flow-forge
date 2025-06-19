@@ -2,6 +2,7 @@ import { useVueFlow } from "@vue-flow/core";
 import { useFlowStore } from "@/stores/flow-store";
 import { storeToRefs } from "pinia";
 import { computed } from "vue";
+import { generateId } from "@/utils/id-generator";
 
 /**
  * Composable for Vue Flow Editor Logic
@@ -55,19 +56,6 @@ export function useFlowEditor() {
   onEdgesChange(flowStore.onEdgesChange);
   onNodeDragStop(flowStore.onNodeDragStop);
 
-  // --- Inject Vue Flow Actions into Store ---
-  // This provides the store with access to Vue Flow's API
-  flowStore.setVueFlowActions({
-    addNodes,
-    addEdges,
-    removeNodes,
-    removeEdges,
-    updateNode,
-    updateEdge,
-    setNodes,
-    setEdges,
-  });
-
   // --- Exposed API ---
   // This is what components will use - a clean, consistent interface
   return {
@@ -79,9 +67,26 @@ export function useFlowEditor() {
     historyIndex,
 
     // --- Node Operations ---
-    createNode: flowStore.createNode,
+    createNode: (nodeData) => {
+      const newNode = {
+        ...nodeData,
+        id: generateId(),
+      };
+
+      // For nodes that can contain blocks, initialize their block list and set the hasBlocks flag
+      if (nodeData.type === 'custom-setup' || nodeData.type === 'custom-lecture') {
+        nodeBlocks.value[newNode.id] = [];
+        newNode.data.hasBlocks = true;
+      }
+
+      // Use the Vue Flow action to add the node.
+      // This will trigger the `onNodesChange` event with the correct 'add' type,
+      // which our store will then use to save the history state.
+      addNodes([newNode]);
+    },
     deleteNode: (nodeId) => removeNodes(nodeId),
     updateNodeData: (nodeId, data) => updateNode(nodeId, { data }),
+    addChildNode: flowStore.addChildNode,
 
     // --- Edge Operations ---
     deleteEdge: (edgeId) => removeEdges(edgeId),
@@ -100,6 +105,7 @@ export function useFlowEditor() {
     redo: flowStore.redo,
     canUndo,
     canRedo,
+    flushPendingSaves: flowStore.flushPendingSaves,
 
     // --- Viewport Operations ---
     fitToView: fitView,

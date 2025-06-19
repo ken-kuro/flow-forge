@@ -49,14 +49,25 @@ export const useFlowStore = defineStore('flow', () => {
   // Monotonically incrementing version for optimistic locking
   const version = ref(0)
   
-  // Vue Flow actions (injected from the component)
-  let vueFlowActions = null
-
   // --- ACTIONS ---
-
+  // TODO: Revisit this architectural decision.
+  // We are using `v-model` to bind the state to the VueFlow component.
+  // This is convenient, but it also means that we are not able to intercept events before they are applied.
+  // This is a problem if we want to implement features that require intercepting events before they are applied (e.g., "confirm on delete").
+  // This would involve switching from `v-model` to a fully controlled flow by setting
+  // `:apply-default="false"` on the <VueFlow> component and manually applying changes.
+  // This is a big change and will require a lot of work, so we should revisit this decision.
+  // Also, the action APIs will trigger changes events from VueFlow, so we will need to consider how to handle that.
+  // BASICALLY, WE NEED TO COVER EVENTS, ACTIONS FROM USEVUEFLOW HOOK, AND ALSO THE HOOK LIKE USENODEDATA, CURRENTLY, WE ARE RELYING ON THE REACTIVE STATE.
+  
   /**
    * Pushes the current state of nodes, edges, and nodeBlocks to the history stack.
    * This is used for undo/redo functionality. It truncates any "future" states if a new state is saved after an undo.
+   *
+   * PERFORMANCE NOTE: This function can be debounced (e.g., when called from `updateBlock`).
+   * This prevents creating excessive history states during rapid-fire updates like typing in a text field.
+   * As a result, operations that need to act on the *most current* state (like undo/redo)
+   * must call `flushPendingSaves()` first to ensure no pending changes are missed.
    */
   function saveState() {
     // Increment version on every significant change
@@ -79,23 +90,48 @@ export const useFlowStore = defineStore('flow', () => {
 
 
   /**
+   * Forces any pending debounced saves (from `updateBlock`) to execute immediately.
+   * This is crucial for preventing race conditions with the history stack.
+   *
+   * ### Scenario: Why This is Necessary
+   *
+   * 1.  **User Action**: The user types a character in a block's text field.
+   * 2.  **Debounced Save**: `updateBlock()` is called, which schedules `saveState()` to run in 1000ms.
+   * 3.  **Immediate Undo**: Before 1000ms passes, the user clicks "Undo".
+   *
+   * #### Without `flushPendingSaves()`:
+   *   a. `undo()` executes, reverting to the state *before* the character was typed. The history index moves back.
+   *   b. The 1000ms timer from step 2 is still pending.
+   *   c. The timer fires. `saveState()` runs, capturing the state *with* the new character.
+   *   d. This new state is pushed onto the history stack, effectively overwriting the "undone" state and corrupting the history, making a "redo" impossible.
+   *
+   * #### With `flushPendingSaves()`:
+   *   a. `undo()` first calls this function.
+   *   b. The pending `saveState()` timer is cancelled, and `saveState()` is called immediately. The history now correctly includes the typed character.
+   *   c. `undo()` then proceeds, cleanly reverting to the state before the character was typed. The history is consistent.
+   */
+  function flushPendingSaves() {
+    if (saveStateTimeout) {
+      clearTimeout(saveStateTimeout)
+      saveState()
+      saveStateTimeout = null
+    }
+  }
+
+  /**
    * Restores the previous state from the history stack.
    */
   function undo() {
     if (historyIndex.value > 0) {
+      // Flush any pending saves before undoing
+      flushPendingSaves()
+      
       historyIndex.value--
       const previousState = history.value[historyIndex.value]
-      
-      // Use Vue Flow actions if available, otherwise fall back to direct assignment
-      if (vueFlowActions) {
-        // Use setNodes/setEdges to replace the entire state
-        vueFlowActions.setNodes(previousState.nodes)
-        vueFlowActions.setEdges(previousState.edges)
-      } else {
-        // Fallback to direct assignment
-        nodes.value = JSON.parse(JSON.stringify(previousState.nodes))
-        edges.value = JSON.parse(JSON.stringify(previousState.edges))
-      }
+
+      // Directly assign state. Vue Flow's v-model will handle the update.
+      nodes.value = JSON.parse(JSON.stringify(previousState.nodes))
+      edges.value = JSON.parse(JSON.stringify(previousState.edges))
       
       // Restore nodeBlocks
       nodeBlocks.value = JSON.parse(JSON.stringify(previousState.nodeBlocks || {}))
@@ -109,19 +145,15 @@ export const useFlowStore = defineStore('flow', () => {
    */
   function redo() {
     if (historyIndex.value < history.value.length - 1) {
+      // Flush any pending saves before redoing
+      flushPendingSaves()
+      
       historyIndex.value++
       const nextState = history.value[historyIndex.value]
       
-      // Use Vue Flow actions if available, otherwise fall back to direct assignment
-      if (vueFlowActions) {
-        // Use setNodes/setEdges to replace the entire state
-        vueFlowActions.setNodes(nextState.nodes)
-        vueFlowActions.setEdges(nextState.edges)
-      } else {
-        // Fallback to direct assignment
-        nodes.value = JSON.parse(JSON.stringify(nextState.nodes))
-        edges.value = JSON.parse(JSON.stringify(nextState.edges))
-      }
+      // Directly assign state. Vue Flow's v-model will handle the update.
+      nodes.value = JSON.parse(JSON.stringify(nextState.nodes))
+      edges.value = JSON.parse(JSON.stringify(nextState.edges))
       
       // Restore nodeBlocks
       nodeBlocks.value = JSON.parse(JSON.stringify(nextState.nodeBlocks || {}))
@@ -154,6 +186,7 @@ export const useFlowStore = defineStore('flow', () => {
    * @param {import('@vue-flow/core').NodeChange[]} changes
    */
   function onNodesChange(changes) {
+    console.log('onNodesChange', changes)
     // Apply changes immediately for reactivity
     nodes.value = applyChanges(changes, nodes.value)
     
@@ -162,8 +195,6 @@ export const useFlowStore = defineStore('flow', () => {
     const hasSignificantChange = changes.some(change => 
       change.type === 'add' ||      // Node added (from toolbar, drag-drop, etc.)
       change.type === 'remove'      // Node deleted (Delete key, toolbar, etc.)
-      // NOTE: 'reset' type doesn't exist in Vue Flow API
-      // Bulk operations (undo/redo) use setNodes() which doesn't trigger onNodesChange
     )
     
     if (hasSignificantChange) {
@@ -245,54 +276,21 @@ export const useFlowStore = defineStore('flow', () => {
    * @param {import('@vue-flow/core').Connection} connection
    */
   function onConnect(connection) {
-    // Generate a UUID for the new edge
-    const edge = {
+    const newEdge = {
       ...connection,
       id: connection.id || generateId(),
     }
-    
-    // Use Vue Flow actions if available, otherwise fall back to direct manipulation
-    if (vueFlowActions) {
-      // Vue Flow actions will trigger onEdgesChange which will call saveState()
-      vueFlowActions.addEdges(edge)
-    } else {
-      // Direct manipulation needs manual state saving
-      edges.value.push(edge)
-      saveState()
-    }
-  }
-
-  /**
-   * Creates a new node with a UUID and adds it to the nodes state.
-   * @param {object} nodeData - The node data from the toolbar/UI
-   */
-  function createNode(nodeData) {
-    const newNode = {
-      ...nodeData,
-      id: generateId(),
-    };
-
-    // For nodes that can contain blocks, initialize their block list
-    if (nodeData.type !== 'custom-start' && nodeData.type !== 'custom-end') {
-      nodeBlocks.value[newNode.id] = [];
-    }
-
-    // This will trigger onNodesChange, which will save the state
-    vueFlowActions.addNodes([newNode]);
-  }
-
-  /**
-   * Set Vue Flow actions from the component
-   * @param {Object} actions - Vue Flow actions object
-   */
-  function setVueFlowActions(actions) {
-    vueFlowActions = actions
+    edges.value.push(newEdge)
+    // onEdgesChange will be triggered by the view and will handle saving state
   }
 
   /**
    * Clear history and reset to current state only
    */
   function clearHistory() {
+    // Flush any pending saves before clearing
+    flushPendingSaves()
+    
     // Save current state as the only history entry
     const currentState = {
       nodes: JSON.parse(JSON.stringify(nodes.value)),
@@ -303,19 +301,43 @@ export const useFlowStore = defineStore('flow', () => {
   }
 
   // --- BLOCK MANAGEMENT METHODS ---
+  
+  // Manual debounce for field updates to avoid excessive history entries
+  let saveStateTimeout = null
+  
   /**
-   * Updates a specific block within a node
+   * Updates a specific block within a node (debounced save)
    * @param {string} nodeId - The ID of the node containing the block
    * @param {string} blockId - The ID of the block to update
    * @param {Object} newData - The new data to merge with the block
+   * @param {boolean} immediate - Whether to save state immediately (default: false)
    */
-  function updateBlock(nodeId, blockId, newData) {
+  function updateBlock(nodeId, blockId, newData, immediate = false) {
     const blocks = nodeBlocks.value[nodeId]
     if (blocks) {
       const blockIndex = blocks.findIndex(b => b.id === blockId)
       if (blockIndex !== -1) {
+        // Perform the update
         blocks[blockIndex].data = { ...blocks[blockIndex].data, ...newData }
-        saveState()
+        
+        // Save state, either immediately or debounced
+        if (immediate) {
+          // Clear any pending debounced save and save immediately
+          if (saveStateTimeout) {
+            clearTimeout(saveStateTimeout)
+            saveStateTimeout = null
+          }
+          saveState()
+        } else {
+          // Debounced save - wait 1 second after last change
+          if (saveStateTimeout) {
+            clearTimeout(saveStateTimeout)
+          }
+          saveStateTimeout = setTimeout(() => {
+            saveState()
+            saveStateTimeout = null
+          }, 750) // Using 750ms delay
+        }
       }
     }
   }
@@ -381,7 +403,7 @@ export const useFlowStore = defineStore('flow', () => {
   function getAssetFromSetup(setupNodeId, assetId) {
     const setupBlocks = nodeBlocks.value[setupNodeId] || []
     return setupBlocks.find(block => 
-      block.type.startsWith('asset-') && 
+      (block.type === 'asset-image' || block.type === 'asset-video') && 
       block.data.assetId === assetId
     ) || null
   }
@@ -394,12 +416,12 @@ export const useFlowStore = defineStore('flow', () => {
     const assets = []
     
     // Find all setup nodes
-    const setupNodes = nodes.value.filter(n => n.data.nodeType === 'setup')
+    const setupNodes = nodes.value.filter(n => n.type === 'custom-setup')
     
     setupNodes.forEach(setupNode => {
       const setupBlocks = nodeBlocks.value[setupNode.id] || []
       setupBlocks.forEach(block => {
-        if (block.type.startsWith('asset-')) {
+        if (block.type === 'asset-image' || block.type === 'asset-video') {
           assets.push({
             setupNodeId: setupNode.id,
             setupNodeTitle: setupNode.data.title,
@@ -413,6 +435,39 @@ export const useFlowStore = defineStore('flow', () => {
     })
     
     return assets
+  }
+
+  /**
+   * Creates a new child node and attaches it to a parent node.
+   * This is used for creating condition branches, etc.
+   * @param {string} parentNodeId The ID of the parent node.
+   * @param {object} childNodeData The configuration for the new child node (type, data, etc.).
+   */
+  function addChildNode(parentNodeId, childNodeData) {
+    if (!nodes.value) return;
+
+    const parentNode = nodes.value.find(n => n.id === parentNodeId);
+    if (!parentNode) {
+      console.error(`Parent node with ID ${parentNodeId} not found.`);
+      return;
+    }
+
+    // Find existing children for this parent to calculate the new position
+    const existingChildren = nodes.value.filter(n => n.parentNode === parentNodeId);
+
+    // Simple vertical stacking for now
+    const newYPosition = (existingChildren.length * 60) + 50; // 60px height per child + padding
+
+    const newChildNode = {
+      id: generateId(childNodeData.type || 'node'),
+      ...childNodeData,
+      position: { x: 10, y: newYPosition }, // Position relative to parent
+      parentNode: parentNodeId,
+      // extent: 'parent', // Constrain node to parent bounds
+    };
+
+    nodes.value.push(newChildNode);
+    saveState();
   }
 
   // Save the initial state to the history
@@ -432,6 +487,7 @@ export const useFlowStore = defineStore('flow', () => {
     redo,
     saveState,
     clearHistory,
+    flushPendingSaves,
     
     // --- VUE FLOW EVENT HANDLERS ---
     onNodesChange,
@@ -440,7 +496,6 @@ export const useFlowStore = defineStore('flow', () => {
     onConnect,
     
     // --- NODE/EDGE OPERATIONS ---
-    createNode,
     
     // --- BLOCK MANAGEMENT METHODS ---
     updateBlock,
@@ -452,6 +507,6 @@ export const useFlowStore = defineStore('flow', () => {
     getAvailableAssets,
     
     // --- INTERNAL METHODS ---
-    setVueFlowActions,
+    addChildNode,
   }
 }) 
