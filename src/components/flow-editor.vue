@@ -4,7 +4,7 @@ import { VueFlow } from "@vue-flow/core";
 import { Background } from "@vue-flow/background";
 import { Controls } from "@vue-flow/controls";
 import { MiniMap } from "@vue-flow/minimap";
-import { useFlowEditor } from "@/composables/use-flow-editor";
+import { useFlowEditor } from "@/composables/use-flow-editor.js";
 import EditorToolbar from "@/components/editor/toolbar.vue";
 
 // Import custom node registry
