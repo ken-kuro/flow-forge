@@ -257,37 +257,47 @@ export const useFlowStore = defineStore('flow', () => {
   let saveStateTimeout = null
   
   /**
-   * Updates a specific block within a node (debounced save)
-   * @param {string} nodeId - The ID of the node containing the block
-   * @param {string} blockId - The ID of the block to update
-   * @param {Object} newData - The new data to merge with the block
-   * @param {boolean} immediate - Whether to save state immediately (default: false)
+   * Updates a specific block within a node's data.
+   * This is called from the block components themselves.
+   * @param {string} nodeId - The ID of the node containing the block.
+   * @param {string} blockId - The ID of the block to update.
+   * @param {object} newData - The new data to merge into the block.
+   * @param {boolean} [immediate=false] - If true, saves history immediately. Otherwise, debounces the save.
    */
   function updateBlock(nodeId, blockId, newData, immediate = false) {
-    const blocks = nodeBlocks.value[nodeId]
-    if (blocks) {
-      const blockIndex = blocks.findIndex(b => b.id === blockId)
-      if (blockIndex !== -1) {
-        // Perform the update
-        blocks[blockIndex].data = { ...blocks[blockIndex].data, ...newData }
-        
-        // Save state, either immediately or debounced
-        if (immediate) {
-          // Clear any pending debounced save and save immediately
-          if (saveStateTimeout) {
-            clearTimeout(saveStateTimeout)
-            saveStateTimeout = null
-          }
-          saveState()
-        } else {
-          // Debounced save - wait 1 second after last change
-          if (saveStateTimeout) {
-            clearTimeout(saveStateTimeout)
-          }
-          saveStateTimeout = setTimeout(() => {
+    // Prevent any updates or history saves during an active undo/redo
+    if (isRestoringHistory.value) {
+      console.log('⏳ Skipping block update during restoration');
+      return;
+    }
+
+    const node = nodes.value.find(n => n.id === nodeId)
+    if (node) {
+      const blocks = nodeBlocks.value[nodeId]
+      if (blocks) {
+        const blockIndex = blocks.findIndex(b => b.id === blockId)
+        if (blockIndex !== -1) {
+          // Perform the update
+          blocks[blockIndex].data = { ...blocks[blockIndex].data, ...newData }
+          
+          // Save state, either immediately or debounced
+          if (immediate) {
+            // Clear any pending debounced save and save immediately
+            if (saveStateTimeout) {
+              clearTimeout(saveStateTimeout)
+              saveStateTimeout = null
+            }
             saveState()
-            saveStateTimeout = null
-          }, 750) // Using 750ms delay
+          } else {
+            // Debounced save - wait 1 second after last change
+            if (saveStateTimeout) {
+              clearTimeout(saveStateTimeout)
+            }
+            saveStateTimeout = setTimeout(() => {
+              saveState()
+              saveStateTimeout = null
+            }, 750) // Using 750ms delay
+          }
         }
       }
     }
