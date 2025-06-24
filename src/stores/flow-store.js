@@ -49,6 +49,9 @@ export const useFlowStore = defineStore('flow', () => {
   // Monotonically incrementing version for optimistic locking
   const version = ref(0)
   
+  // Flag to prevent history saves during undo/redo operations
+  const isRestoringHistory = ref(false)
+  
   // --- ACTIONS ---
   // TODO: Revisit this architectural decision.
   // We are using `v-model` to bind the state to the VueFlow component.
@@ -119,171 +122,119 @@ export const useFlowStore = defineStore('flow', () => {
   }
 
   /**
-   * Restores the previous state from the history stack.
+   * Moves the history index back and returns the state to restore.
+   * This function DOES NOT apply the state itself. The controller is responsible
+   * for calling this and then using the Vue Flow API to apply the returned state.
+   * @returns {object|null} The state object to restore, or null if no history.
    */
   function undo() {
-    if (historyIndex.value > 0) {
-      // Flush any pending saves before undoing
-      flushPendingSaves()
-      
-      historyIndex.value--
-      const previousState = history.value[historyIndex.value]
+    if (historyIndex.value <= 0) return null;
 
-      // Directly assign state. Vue Flow's v-model will handle the update.
-      nodes.value = JSON.parse(JSON.stringify(previousState.nodes))
-      edges.value = JSON.parse(JSON.stringify(previousState.edges))
-      
-      // Restore nodeBlocks
-      nodeBlocks.value = JSON.parse(JSON.stringify(previousState.nodeBlocks || {}))
-      // Restore version
-      version.value = previousState.version
-    }
+    flushPendingSaves();
+    historyIndex.value--;
+    const previousState = history.value[historyIndex.value];
+    return JSON.parse(JSON.stringify(previousState));
   }
 
   /**
-   * Restores the next state from the history stack.
+   * Moves the history index forward and returns the state to restore.
+   * This function DOES NOT apply the state itself. The controller is responsible
+   * for calling this and then using the Vue Flow API to apply the returned state.
+   * @returns {object|null} The state object to restore, or null if no history.
    */
   function redo() {
-    if (historyIndex.value < history.value.length - 1) {
-      // Flush any pending saves before redoing
-      flushPendingSaves()
-      
-      historyIndex.value++
-      const nextState = history.value[historyIndex.value]
-      
-      // Directly assign state. Vue Flow's v-model will handle the update.
-      nodes.value = JSON.parse(JSON.stringify(nextState.nodes))
-      edges.value = JSON.parse(JSON.stringify(nextState.edges))
-      
-      // Restore nodeBlocks
-      nodeBlocks.value = JSON.parse(JSON.stringify(nextState.nodeBlocks || {}))
-      // Restore version
-      version.value = nextState.version
-    }
+    if (historyIndex.value >= history.value.length - 1) return null;
+
+    flushPendingSaves();
+    historyIndex.value++;
+    const nextState = history.value[historyIndex.value];
+    return JSON.parse(JSON.stringify(nextState));
   }
   
   /**
-   * Applies an array of node changes to the current nodes state.
-   * This is called by the view component when it receives a `nodeschange` event.
-   * 
-   * WHY WE USE THIS GENERIC EVENT:
-   * - Vue Flow batches multiple change types into a single event for performance
-   * - Handles: add, remove, reset, select, dimensions, position changes
-   * - We filter to only save state for significant changes (add/remove/reset)
-   * - Position changes are deliberately ignored here (handled by onNodeDragStop)
-   * 
-   * ALTERNATIVE: We could use more specific events like:
-   * - onNodeAdd, onNodeRemove (don't exist in Vue Flow)
-   * - Template events (@nodes-change in template, but less performant)
-   * 
-        * EXAMPLE CHANGES RECEIVED:
-     * - Add node: [{ type: 'add', item: {...node} }]
-     * - Delete node: [{ type: 'remove', id: 'node-1' }]
-     * - Move node: [{ type: 'position', id: 'node-1', position: {x: 100, y: 200}, dragging: true }]
-     * - Select node: [{ type: 'select', id: 'node-1', selected: true }]
-     * - Resize node: [{ type: 'dimensions', id: 'node-1', dimensions: {width: 200, height: 100} }]
-   * 
+   * This handler is now only responsible for history management.
+   * The actual application of changes is handled by the `useFlowEditor` controller,
+   * which will apply changes to the state *before* calling this handler.
    * @param {import('@vue-flow/core').NodeChange[]} changes
    */
   function onNodesChange(changes) {
-    console.log('onNodesChange', changes)
-    // Apply changes immediately for reactivity
-    nodes.value = applyChanges(changes, nodes.value)
+    console.log('🏪 Store: onNodesChange called', { changes, isRestoring: isRestoringHistory.value });
     
-    // Only save state for add/remove changes - NOT position, dimensions, or selection
-    // Position changes are handled by onNodeDragStop
-    const hasSignificantChange = changes.some(change => 
-      change.type === 'add' ||      // Node added (from toolbar, drag-drop, etc.)
-      change.type === 'remove'      // Node deleted (Delete key, toolbar, etc.)
-    )
+    // Don't save history during undo/redo operations
+    if (isRestoringHistory.value) {
+      console.log('⏳ Skipping history save during restoration');
+      return;
+    }
     
+    // We only save history for significant, atomic actions.
+    const hasSignificantChange = changes.some(change => {
+      if (change.type === 'add' || change.type === 'remove') {
+        return true;
+      }
+      // Position changes with dragging: false indicate end of drag operation
+      if (change.type === 'position' && change.dragging === false) {
+        return true;
+      }
+      return false;
+    });
+
+    console.log('📊 Has significant change:', hasSignificantChange);
+
     if (hasSignificantChange) {
-      saveState()
+      // For position changes, we only want one history entry per drag operation
+      const hasPositionChange = changes.some(change => 
+        change.type === 'position' && change.dragging === false
+      );
+      
+      if (hasPositionChange) {
+        console.log('💾 Saving state for position change');
+        // Save once for the entire drag operation
+        saveState();
+      } else {
+        // For add/remove, save for each significant change
+        changes.forEach(change => {
+          if (change.type === 'add' || change.type === 'remove') {
+            console.log(`💾 Saving state for ${change.type} change`);
+            saveState();
+          }
+        });
+      }
     }
   }
   
   /**
-   * Called when a node drag operation stops.
-   * 
-   * WHY WE USE THIS SPECIFIC EVENT:
-   * - Provides the exact moment when dragging ends
-   * - Prevents creating history entries during drag (performance)
-   * - More reliable than detecting dragging: false in onNodesChange
-   * - Vue Flow guarantees this fires once per drag operation
-   * 
-   * ALTERNATIVE: We could detect position changes in onNodesChange, but:
-   * - Would create many history entries during drag
-   * - Less reliable drag detection
-   * - Worse performance
-   * 
-   * COMPARISON:
-   * ❌ Using position in onNodesChange:
-   *    - Drag node 100px → 100+ history entries (one per pixel)
-   *    - Press Undo → goes back 1 pixel at a time
-   *    - Memory usage: 100+ deep clones of entire state
-   * 
-   * ✅ Using onNodeDragStop:
-   *    - Drag node 100px → 1 history entry
-   *    - Press Undo → goes back to start position
-   *    - Memory usage: 1 deep clone of state
-   */
-  function onNodeDragStop() {
-    saveState()
-  }
-  
-  /**
-   * Applies an array of edge changes to the current edges state.
-   * This is called by the view component when it receives an `edgeschange` event.
-   * 
-   * WHY WE USE THIS GENERIC EVENT:
-   * - Similar to onNodesChange, batches multiple change types
-   * - Handles: add, remove, select, update changes
-   * - We filter to only save state for add/remove (not selection)
-   * 
-   * ALTERNATIVE: We could use:
-   * - onEdgeAdd, onEdgeRemove (don't exist in Vue Flow)
-   * - Handle in onConnect only (but misses deletions)
-   * 
+   * This handler is now only responsible for history management.
+   * The actual application of changes is handled by the `useFlowEditor` controller,
+   * which will apply changes to the state *before* calling this handler.
    * @param {import('@vue-flow/core').EdgeChange[]} changes
    */
   function onEdgesChange(changes) {
-    // Apply changes immediately for reactivity
-    edges.value = applyChanges(changes, edges.value)
+    console.log('🏪 Store: onEdgesChange called', { changes, isRestoring: isRestoringHistory.value });
     
-    // Save state only for significant changes (add/remove, not selection)
-    const hasSignificantChange = changes.some(change => 
-      change.type === 'add' ||      // Edge added (usually from onConnect)
-      change.type === 'remove'      // Edge deleted (Delete key, disconnect)
-    )
+    // Don't save history during undo/redo operations
+    if (isRestoringHistory.value) {
+      console.log('⏳ Skipping edge history save during restoration');
+      return;
+    }
     
+    // We only save history for significant, atomic actions.
+    const hasSignificantChange = changes.some(change =>
+      change.type === 'add' || change.type === 'remove'
+    );
+
+    console.log('🔗 Has significant edge change:', hasSignificantChange);
+
     if (hasSignificantChange) {
-      saveState()
+      // Since batched changes can have multiple 'add' events, we save for each one.
+      changes.forEach(change => {
+        if (change.type === 'add' || change.type === 'remove') {
+          console.log(`💾 Saving state for edge ${change.type} change`);
+          saveState();
+        }
+      });
     }
   }
   
-  /**
-   * Adds a new connection (edge) to the edges state.
-   * This is called by the view component when it receives a `connect` event.
-   * 
-   * WHY WE USE THIS SPECIFIC EVENT:
-   * - Fires exactly when user creates a connection by dragging
-   * - Provides the connection object with source/target info
-   * - Allows us to add custom logic (ID generation, validation)
-   * - More semantic than detecting 'add' changes in onEdgesChange
-   * 
-   * NOTE: This triggers onEdgesChange automatically when we call addEdges()
-   * 
-   * @param {import('@vue-flow/core').Connection} connection
-   */
-  function onConnect(connection) {
-    const newEdge = {
-      ...connection,
-      id: connection.id || generateId(),
-    }
-    edges.value.push(newEdge)
-    // onEdgesChange will be triggered by the view and will handle saving state
-  }
-
   /**
    * Clear history and reset to current state only
    */
@@ -438,36 +389,11 @@ export const useFlowStore = defineStore('flow', () => {
   }
 
   /**
-   * Creates a new child node and attaches it to a parent node.
-   * This is used for creating condition branches, etc.
-   * @param {string} parentNodeId The ID of the parent node.
-   * @param {object} childNodeData The configuration for the new child node (type, data, etc.).
+   * Sets the flag to prevent history saves during undo/redo operations
+   * @param {boolean} value - Whether we are currently restoring history
    */
-  function addChildNode(parentNodeId, childNodeData) {
-    if (!nodes.value) return;
-
-    const parentNode = nodes.value.find(n => n.id === parentNodeId);
-    if (!parentNode) {
-      console.error(`Parent node with ID ${parentNodeId} not found.`);
-      return;
-    }
-
-    // Find existing children for this parent to calculate the new position
-    const existingChildren = nodes.value.filter(n => n.parentNode === parentNodeId);
-
-    // Simple vertical stacking for now
-    const newYPosition = (existingChildren.length * 60) + 50; // 60px height per child + padding
-
-    const newChildNode = {
-      id: generateId(childNodeData.type || 'node'),
-      ...childNodeData,
-      position: { x: 10, y: newYPosition }, // Position relative to parent
-      parentNode: parentNodeId,
-      // extent: 'parent', // Constrain node to parent bounds
-    };
-
-    nodes.value.push(newChildNode);
-    saveState();
+  function setRestoringHistory(value) {
+    isRestoringHistory.value = value;
   }
 
   // Save the initial state to the history
@@ -488,14 +414,11 @@ export const useFlowStore = defineStore('flow', () => {
     saveState,
     clearHistory,
     flushPendingSaves,
+    setRestoringHistory,
     
-    // --- VUE FLOW EVENT HANDLERS ---
+    // --- VUE FLOW EVENT HANDLERS (for history) ---
     onNodesChange,
-    onNodeDragStop,
     onEdgesChange,
-    onConnect,
-    
-    // --- NODE/EDGE OPERATIONS ---
     
     // --- BLOCK MANAGEMENT METHODS ---
     updateBlock,
@@ -505,8 +428,5 @@ export const useFlowStore = defineStore('flow', () => {
     getNodeBlocks,
     getAssetFromSetup,
     getAvailableAssets,
-    
-    // --- INTERNAL METHODS ---
-    addChildNode,
   }
 }) 
