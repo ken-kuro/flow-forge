@@ -101,16 +101,16 @@ const handleCreateNodeByType = (type) => {
   // Set default data based on node type
   switch (type) {
     case 'custom-end':
-      nodeData = { type, position, data: { title: 'End' } };
+      nodeData = { type, position, data: { } };
       break;
     case 'custom-setup':
-      nodeData = { type, position, data: { title: 'Setup' } };
+      nodeData = { type, position, data: { } };
       break;
     case 'custom-lecture':
-      nodeData = { type, position, data: { title: 'Lecture' } };
+      nodeData = { type, position, data: { } };
       break;
     case 'custom-condition':
-      nodeData = { type, position, data: { title: 'Condition' } };
+      nodeData = { type, position, data: { } };
       break;
     // Add cases for future node types like 'lecture' or 'setup'
     // case 'lecture':
@@ -226,7 +226,7 @@ const handleDebugDump = () => {
                   <div class="w-2 h-2 rounded-full bg-current opacity-50"></div>
                   <div class="flex-1">
                     <div class="font-medium">
-                      State {{ index + 1 }}
+                      {{ state.description || `State ${index + 1}` }}
                     </div>
                     <div class="opacity-70">
                       {{ state.nodes.length }} nodes, {{ state.edges.length }} edges

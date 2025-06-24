@@ -230,12 +230,20 @@ export function useFlowEditor() {
 
     // --- Node Operations ---
     createNode: (nodeData) => {
+      // Count existing nodes of the same type to generate a numbered title
+      const count = nodes.value.filter(n => n.type === nodeData.type).length + 1;
+      const typeName = nodeData.type.replace('custom-', '').replace('-', ' ');
+      const defaultTitle = `${typeName.charAt(0).toUpperCase() + typeName.slice(1)} #${count}`;
+
       const newNode = {
         ...nodeData,
         id: generateId(),
+        data: {
+          ...nodeData.data,
+          title: nodeData.data.title || defaultTitle,
+        }
       };
 
-      // For nodes that can contain blocks, initialize their block list and set the hasBlocks flag
       if (nodeData.type === NODE_TYPES.SETUP || nodeData.type === NODE_TYPES.LECTURE) {
         nodeBlocks.value[newNode.id] = [];
         newNode.data.hasBlocks = true;
@@ -268,6 +276,10 @@ export function useFlowEditor() {
       };
 
       addNodes([newChildNode]);
+    },
+    
+    updateNodeData: (nodeId, data) => {
+      flowStore.updateNodeData(nodeId, data);
     },
 
     // --- Edge Operations ---
