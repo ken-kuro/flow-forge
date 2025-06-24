@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { Handle, Position, useVueFlow } from '@vue-flow/core'
 import CardNodeWrapper from '@/components/nodes/base/card-node-wrapper.vue'
 import { useFlowEditor } from '@/composables/use-flow-editor.js'
@@ -17,8 +17,10 @@ const props = defineProps({
   selected: Boolean,
 })
 
-const { addChildNode, getNode } = useFlowEditor()
+const { addChildNode, getNode, updateNodeData } = useFlowEditor()
 const { getNodes } = useVueFlow()
+
+const title = ref(props.data.title);
 
 // Find all branch nodes that belong to this condition node
 const childBranches = computed(() =>
@@ -34,13 +36,18 @@ function handleAddBranch() {
   }
   addChildNode(props.id, newBranchData)
 }
+
+function handleTitleChange() {
+  updateNodeData(props.id, { title: title.value });
+}
 </script>
 
 <template>
   <!-- The `vue-flow__node-inside` class is used by Vue Flow to correctly position child nodes -->
   <CardNodeWrapper
-    :title="data.title"
+    v-model="title"
     :selected="selected"
+    @blur="handleTitleChange"
     node-color="hsl(var(--a))"
     class="vue-flow__node-inside"
   >

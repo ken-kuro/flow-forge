@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { Handle, Position } from '@vue-flow/core'
 import CardNodeWrapper from '@/components/nodes/base/card-node-wrapper.vue'
 import BlockContainer from '@/components/nodes/base/block-container.vue'
@@ -39,7 +39,9 @@ const props = defineProps({
   selected: Boolean,
 })
 
-const { addBlock, getNodeBlocks } = useFlowEditor()
+const { addBlock, getNodeBlocks, updateNodeData } = useFlowEditor()
+
+const title = ref(props.data.title);
 
 const blocks = computed(() => getNodeBlocks(props.id))
 
@@ -60,10 +62,14 @@ function handleAddBlock(blockType) {
     document.activeElement.blur()
   }
 }
+
+function handleTitleChange() {
+  updateNodeData(props.id, { title: title.value });
+}
 </script>
 
 <template>
-  <CardNodeWrapper :title="data.title" :selected="selected">
+  <CardNodeWrapper v-model="title" :selected="selected" @blur="handleTitleChange">
     <!-- Input handle on the left, named 'default' for specific styling -->
     <Handle type="target" :position="Position.Left" id="default" class="!bg-base-content"/>
 
