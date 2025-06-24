@@ -5,8 +5,9 @@ import { Background } from "@vue-flow/background";
 import { Controls } from "@vue-flow/controls";
 import { MiniMap } from "@vue-flow/minimap";
 import { useFlowEditor } from "@/composables/use-flow-editor.js";
-import EditorToolbar from "@/components/editor/toolbar.vue";
 import { onMounted } from 'vue';
+import EditorToolbar from "@/components/editor/toolbar.vue";
+import ModalManager from "@/components/modal-manager.vue";
 
 // Import custom node registry
 import { nodeTypes } from "@/components/nodes";
@@ -41,7 +42,7 @@ const isValidConnection = () => true;
 </script>
 
 <template>
-  <div class="flow-editor w-full h-full bg-base-300 relative">
+  <div class="flow-editor h-full w-full bg-base-300 relative overflow-hidden">
     <!-- Vue Flow Canvas -->
     <!-- TODO: Allow passing the config to the VueFlow component -->
     <!--
@@ -76,7 +77,7 @@ const isValidConnection = () => true;
       :pan-on-scroll="true"
       :delete-key-code="['Backspace', 'Delete']"
       fit-view-on-init
-      class="vue-flow-instance"
+      class="vue-flow-instance w-full h-full"
     >
       <Background />
       
@@ -88,21 +89,14 @@ const isValidConnection = () => true;
       <Controls position="bottom-left" />
     </VueFlow>
 
-    <!-- Custom Application Toolbar (save, load, import, export, etc.) -->
+    <!-- Custom Application Toolbar -->
     <EditorToolbar />
+    
+    <!-- Modal Manager -->
+    <ModalManager />
   </div>
 </template>
 
 <style scoped>
-.flow-editor {
-  /* This will contain the editor and any future toolbars, panels, etc. */
-  position: relative;
-  overflow: hidden;
-}
-
-/* Ensure Vue Flow takes full space */
-.vue-flow-instance {
-  width: 100%;
-  height: 100%;
-}
+/* All styles have been moved to Tailwind utility classes in the template. */
 </style> 
