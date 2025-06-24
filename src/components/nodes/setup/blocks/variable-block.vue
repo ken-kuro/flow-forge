@@ -3,6 +3,7 @@
 import { ref, computed, onUnmounted } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
 import { X, Variable } from 'lucide-vue-next';
+import InlineEditText from '@/components/shared/inline-edit-text.vue';
 
 /**
  * VariableBlock - A block for defining variables in Setup nodes.
@@ -34,7 +35,7 @@ onUnmounted(() => {
 });
 
 // Local reactive copies for editing
-const name = ref(props.block.data.name || '');
+const title = ref(props.block.data.title || '');
 const value = ref(props.block.data.value || '');
 const variableType = ref(props.block.data.type || 'string');
 
@@ -57,7 +58,7 @@ const updateBlockData = () => {
   }
 
   const newData = {
-    name: name.value,
+    title: title.value,
     value: processedValue,
     type: variableType.value,
   };
@@ -76,7 +77,7 @@ const updateBlockDataImmediate = () => {
   }
 
   const newData = {
-    name: name.value,
+    title: title.value,
     value: processedValue,
     type: variableType.value,
   };
@@ -114,7 +115,12 @@ const processedValue = computed(() => {
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
         <Variable class="w-4 h-4 text-accent" />
-        <span class="text-sm font-medium">Variable</span>
+        <InlineEditText
+          v-model="title"
+          @update:modelValue="updateBlockDataImmediate"
+          placeholder="Enter variable name"
+          class="text-sm font-medium"
+        />
       </div>
       <button 
         @click="handleDelete" 
@@ -125,19 +131,7 @@ const processedValue = computed(() => {
       </button>
     </div>
 
-    <!-- Variable Name Field -->
-    <div class="form-control">
-      <label class="label">
-        <span class="label-text text-xs">Variable Name</span>
-      </label>
-      <input 
-        v-model="name"
-        @blur="updateBlockData"
-        type="text" 
-        placeholder="e.g., userName"
-        class="input input-bordered input-xs"
-      />
-    </div>
+    <!-- Variable Name Field has been replaced by inline edit in header -->
 
     <!-- Type and Value Fields -->
     <div class="grid grid-cols-1 gap-2">
@@ -197,12 +191,12 @@ const processedValue = computed(() => {
     </div>
 
     <!-- Value Preview -->
-    <div v-if="name" class="preview-container">
+    <div v-if="title" class="preview-container">
       <div class="label">
         <span class="label-text text-xs">Preview</span>
       </div>
       <div class="bg-base-200 rounded p-2 text-xs font-mono">
-        <span class="text-accent">{{ name }}</span> = 
+        <span class="text-accent">{{ title }}</span> = 
         <span class="text-primary">{{ processedValue }}</span>
         <span class="text-base-content/50 ml-2">({{ variableType }})</span>
       </div>

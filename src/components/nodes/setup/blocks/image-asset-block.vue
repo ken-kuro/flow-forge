@@ -4,6 +4,7 @@ import { useFlowEditor } from '@/composables/use-flow-editor';
 import { X, Image as ImageIcon, Upload } from 'lucide-vue-next';
 import { useModal } from '@/composables/use-modal.js';
 import ObjectDetectionModal from '@/components/editor/object-detection-modal.vue';
+import InlineEditText from '@/components/shared/inline-edit-text.vue';
 
 /**
  * ImageAssetBlock - A block for defining image assets in Setup nodes.
@@ -96,7 +97,12 @@ const openObjectModal = () => {
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
         <ImageIcon class="w-4 h-4 text-primary" />
-        <span class="text-sm font-medium">Image Asset</span>
+        <InlineEditText
+          v-model="title"
+          @update:modelValue="updateBlockData(true)"
+          placeholder="Enter asset name"
+          class="text-sm font-medium"
+        />
       </div>
       <button
         @click="handleDelete"
@@ -108,18 +114,7 @@ const openObjectModal = () => {
     </div>
 
     <!-- Description Field -->
-    <div class="form-control">
-      <label class="label">
-        <span class="label-text text-xs">Description</span>
-      </label>
-      <input
-        v-model="title"
-        @blur="updateBlockData()"
-        type="text"
-        placeholder="Enter a description for the image"
-        class="input input-bordered input-xs"
-      />
-    </div>
+    <!-- This has been replaced by the inline editable title in the header -->
 
     <!-- Source Type Selection -->
     <div class="form-control">

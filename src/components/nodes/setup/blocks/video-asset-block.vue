@@ -2,6 +2,7 @@
 import { ref, computed, onUnmounted } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
 import { X, Video as VideoIcon, Upload } from 'lucide-vue-next';
+import InlineEditText from '@/components/shared/inline-edit-text.vue';
 
 /**
  * VideoAssetBlock - A block for defining video assets in Setup nodes.
@@ -76,7 +77,12 @@ const showPreview = computed(() => videoUrl.value && videoUrl.value.trim() !== '
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
         <VideoIcon class="w-4 h-4 text-secondary" />
-        <span class="text-sm font-medium">Video Asset</span>
+        <InlineEditText
+          v-model="title"
+          @update:modelValue="updateBlockData(true)"
+          placeholder="Enter asset name"
+          class="text-sm font-medium"
+        />
       </div>
       <button
         @click="handleDelete"
@@ -85,20 +91,6 @@ const showPreview = computed(() => videoUrl.value && videoUrl.value.trim() !== '
       >
         <X class="w-3 h-3" />
       </button>
-    </div>
-
-    <!-- Description Field -->
-    <div class="form-control">
-      <label class="label">
-        <span class="label-text text-xs">Description</span>
-      </label>
-      <input
-        v-model="title"
-        @blur="updateBlockData()"
-        type="text"
-        placeholder="Enter a description for the video"
-        class="input input-bordered input-xs"
-      />
     </div>
 
     <!-- Source Type Selection -->
