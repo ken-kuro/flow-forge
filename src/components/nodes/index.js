@@ -17,13 +17,15 @@ import SetupNode from './setup/setup-node.vue';
 import LectureNode from './lecture/lecture-node.vue'
 import ConditionNode from './condition/condition-node.vue'
 import ConditionBranchNode from './condition/condition-branch-node.vue'
+import { NODE_TYPES } from '@/utils/constants';
 
-// TODO: Make sure this will be used consistently across the project, no magic strings.
+// The nodeTypes object maps a string key to a Vue component.
+// This is used by Vue Flow to know which component to render for a given node type.
 export const nodeTypes = {
-  'custom-start': markRaw(StartNode),
-  'custom-end': markRaw(EndNode),
-  'custom-setup': markRaw(SetupNode),
-  'custom-lecture': markRaw(LectureNode),
-  'custom-condition': markRaw(ConditionNode),
-  'condition-branch': markRaw(ConditionBranchNode),
+  [NODE_TYPES.START]: markRaw(StartNode),
+  [NODE_TYPES.END]: markRaw(EndNode),
+  [NODE_TYPES.SETUP]: markRaw(SetupNode),
+  [NODE_TYPES.LECTURE]: markRaw(LectureNode),
+  [NODE_TYPES.CONDITION]: markRaw(ConditionNode),
+  [NODE_TYPES.CONDITION_BRANCH]: markRaw(ConditionBranchNode),
 }; 

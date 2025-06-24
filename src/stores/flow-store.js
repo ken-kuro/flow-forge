@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { applyChanges } from '@vue-flow/core'
 import { generateId } from '@/utils/id-generator'
+import { NODE_TYPES } from '@/utils/constants'
 
 
 
@@ -19,7 +19,7 @@ export const useFlowStore = defineStore('flow', () => {
   const nodes = ref([
     { 
       id: nodeId1, 
-      type: 'custom-start', 
+      type: NODE_TYPES.START, 
       position: { x: 50, y: 150 },
       data: {
         title: 'Start',
@@ -28,7 +28,7 @@ export const useFlowStore = defineStore('flow', () => {
     },
     { 
       id: nodeId2, 
-      type: 'custom-end', 
+      type: NODE_TYPES.END, 
       position: { x: 2000, y: 150 },
       data: {
         title: 'End',
@@ -367,7 +367,7 @@ export const useFlowStore = defineStore('flow', () => {
     const assets = []
     
     // Find all setup nodes
-    const setupNodes = nodes.value.filter(n => n.type === 'custom-setup')
+    const setupNodes = nodes.value.filter(n => n.type === NODE_TYPES.SETUP)
     
     setupNodes.forEach(setupNode => {
       const setupBlocks = nodeBlocks.value[setupNode.id] || []

@@ -3,9 +3,19 @@ import { useFlowStore } from "@/stores/flow-store";
 import { storeToRefs } from "pinia";
 import { computed, nextTick } from "vue";
 import { generateId } from "@/utils/id-generator";
+import { NODE_TYPES } from '@/utils/constants';
 
 /**
  * Composable for Vue Flow Editor Logic
+ * 
+ * TODO: REPO_QUALITY - Set up project-wide tooling for code quality and consistency.
+ * - ESLint: For identifying and reporting on patterns in JavaScript.
+ * - Prettier: For enforcing a consistent code style.
+ * - Husky: For running scripts (like linting) on pre-commit hooks.
+ * - Vitest: For setting up a unit and component testing framework.
+ * 
+ * TODO: PRODUCTION - Configure build process to strip all console.log statements
+ * for production builds to avoid leaking debug information.
  * 
  * This composable encapsulates all Vue Flow interactions and provides
  * a clean interface between components and the store. It follows Vue 3
@@ -68,7 +78,7 @@ export function useFlowEditor() {
         console.log(`Processing change type: ${change.type}`, change);
         
         // For controlled flows, we validate changes and decide whether to apply them
-        // This is where you'd add validation logic (confirm delete, etc.)
+        // This is where you'd add validation logic (e.g. confirm on delete)
         validatedChanges.push(change);
       }
       
@@ -164,6 +174,8 @@ export function useFlowEditor() {
       edges.value = stateToRestore.edges;
       nodeBlocks.value = stateToRestore.nodeBlocks || {};
       
+      // TODO: FEATURE - Add user feedback (e.g., toast notification)
+      // to confirm that the action was successful.
       flowStore.setRestoringHistory(false);
     } else {
       console.log('❌ No state to restore (at beginning of history)');
@@ -198,6 +210,8 @@ export function useFlowEditor() {
       edges.value = stateToRestore.edges;
       nodeBlocks.value = stateToRestore.nodeBlocks || {};
       
+      // TODO: FEATURE - Add user feedback (e.g., toast notification)
+      // to confirm that the action was successful.
       flowStore.setRestoringHistory(false);
     } else {
       console.log('❌ No state to restore (at end of history)');
@@ -222,7 +236,7 @@ export function useFlowEditor() {
       };
 
       // For nodes that can contain blocks, initialize their block list and set the hasBlocks flag
-      if (nodeData.type === 'custom-setup' || nodeData.type === 'custom-lecture') {
+      if (nodeData.type === NODE_TYPES.SETUP || nodeData.type === NODE_TYPES.LECTURE) {
         nodeBlocks.value[newNode.id] = [];
         newNode.data.hasBlocks = true;
       }
