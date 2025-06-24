@@ -1,8 +1,16 @@
 <script setup>
+import InlineEditText from '@/components/shared/inline-edit-text.vue';
+
 defineProps({
-  title: String,
+  modelValue: String, // for v-model
   selected: Boolean,
 });
+
+const emit = defineEmits(['update:modelValue']);
+
+function handleUpdate(newValue) {
+  emit('update:modelValue', newValue);
+}
 </script>
 
 <template>
@@ -16,9 +24,14 @@ defineProps({
     ]"
   >
     <!-- Header Section -->
-    <div class="node-header p-3 border-b-2 border-base-300 font-bold text-lg">
+    <div class="node-header p-3 border-b-2 border-base-300 font-bold text-lg flex items-center">
       <slot name="header">
-        {{ title }}
+        <InlineEditText
+          :model-value="modelValue"
+          @update:modelValue="handleUpdate"
+          placeholder="Enter node name"
+          class="w-full"
+        />
       </slot>
     </div>
 

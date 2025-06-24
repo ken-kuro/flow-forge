@@ -64,6 +64,21 @@ export const useFlowStore = defineStore('flow', () => {
   // BASICALLY, WE NEED TO COVER EVENTS, ACTIONS FROM USEVUEFLOW HOOK, AND ALSO THE HOOK LIKE USENODEDATA, CURRENTLY, WE ARE RELYING ON THE REACTIVE STATE.
   
   /**
+   * Formats an internal node type string into a human-readable name.
+   * e.g., 'custom-setup' -> 'Setup Node'
+   * @param {string} type - The internal node type.
+   * @returns {string} The formatted name.
+   */
+  const formatNodeTypeName = (type) => {
+    if (!type) return 'Node';
+    return type
+      .replace('custom-', '')
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+  
+  /**
    * Pushes the current state of nodes, edges, and nodeBlocks to the history stack.
    * This is used for undo/redo functionality. It truncates any "future" states if a new state is saved after an undo.
    *
@@ -72,7 +87,7 @@ export const useFlowStore = defineStore('flow', () => {
    * As a result, operations that need to act on the *most current* state (like undo/redo)
    * must call `flushPendingSaves()` first to ensure no pending changes are missed.
    */
-  function saveState() {
+  function saveState(description = 'Unknown action') {
     // Increment version on every significant change
     version.value++
     
@@ -80,7 +95,8 @@ export const useFlowStore = defineStore('flow', () => {
       nodes: JSON.parse(JSON.stringify(nodes.value)),
       edges: JSON.parse(JSON.stringify(edges.value)),
       nodeBlocks: JSON.parse(JSON.stringify(nodeBlocks.value)),
-      version: version.value
+      version: version.value,
+      description: description,
     }
     // If we have undone actions, we clear the "future" history
     if (historyIndex.value < history.value.length - 1) {
@@ -187,15 +203,24 @@ export const useFlowStore = defineStore('flow', () => {
       );
       
       if (hasPositionChange) {
-        console.log('💾 Saving state for position change');
-        // Save once for the entire drag operation
-        saveState();
+        const node = nodes.value.find(n => n.id === changes.find(c => c.type === 'position').id);
+        const description = `Move ${formatNodeTypeName(node?.type)} "${node?.data?.title || node?.id}"`;
+        console.log(`💾 Saving state for position change: ${description}`);
+        saveState(description);
       } else {
         // For add/remove, save for each significant change
         changes.forEach(change => {
-          if (change.type === 'add' || change.type === 'remove') {
-            console.log(`💾 Saving state for ${change.type} change`);
-            saveState();
+          if (change.type === 'add') {
+            const node = change.item;
+            const description = `Add ${formatNodeTypeName(node.type)} "${node?.data?.title || ''}"`;
+            console.log(`💾 Saving state for ${change.type} change: ${description}`);
+            saveState(description);
+          } else if (change.type === 'remove') {
+            // NOTE: Getting the name/type of a removed node is difficult as it's already gone.
+            // This would require finding it in the previous history state, which adds complexity.
+            const description = `Remove node`;
+            console.log(`💾 Saving state for ${change.type} change: ${description}`);
+            saveState(description);
           }
         });
       }
@@ -227,9 +252,17 @@ export const useFlowStore = defineStore('flow', () => {
     if (hasSignificantChange) {
       // Since batched changes can have multiple 'add' events, we save for each one.
       changes.forEach(change => {
-        if (change.type === 'add' || change.type === 'remove') {
-          console.log(`💾 Saving state for edge ${change.type} change`);
-          saveState();
+        if (change.type === 'add') {
+          const edge = change.item;
+          const sourceNode = nodes.value.find(n => n.id === edge.source);
+          const targetNode = nodes.value.find(n => n.id === edge.target);
+          const description = `Connect ${formatNodeTypeName(sourceNode?.type)} "${sourceNode?.data?.title || edge.source}" to ${formatNodeTypeName(targetNode?.type)} "${targetNode?.data?.title || edge.target}"`;
+          console.log(`💾 Saving state for edge ${change.type} change: ${description}`);
+          saveState(description);
+        } else if (change.type === 'remove') {
+          const description = `Disconnect edge`;
+          console.log(`💾 Saving state for edge ${change.type} change: ${description}`);
+          saveState(description);
         }
       });
     }
@@ -277,6 +310,25 @@ export const useFlowStore = defineStore('flow', () => {
       if (blocks) {
         const blockIndex = blocks.findIndex(b => b.id === blockId)
         if (blockIndex !== -1) {
+          const block = blocks[blockIndex];
+          const oldTitle = block.data.title;
+          
+          let description;
+          const keyUpdated = Object.keys(newData)[0];
+          const value = Object.values(newData)[0];
+          const blockName = block.data.title || `Block #${block.id.slice(0,4)}`;
+          const nodeIdentifier = `${formatNodeTypeName(node?.type)} "${node?.data.title}"`;
+
+          if (keyUpdated === 'title' && value !== oldTitle) {
+            description = `Rename block from "${oldTitle}" to "${value}" in ${nodeIdentifier}`;
+          } else if (keyUpdated === 'objects') {
+            description = `Finish setting up object(s) in "${blockName}" in ${nodeIdentifier}`;
+          } else if (keyUpdated) {
+            description = `Update ${keyUpdated} for "${blockName}" in ${nodeIdentifier}`;
+          } else {
+            description = `Update block in ${nodeIdentifier}`;
+          }
+
           // Perform the update
           blocks[blockIndex].data = { ...blocks[blockIndex].data, ...newData }
           
@@ -287,14 +339,14 @@ export const useFlowStore = defineStore('flow', () => {
               clearTimeout(saveStateTimeout)
               saveStateTimeout = null
             }
-            saveState()
+            saveState(description);
           } else {
             // Debounced save - wait 1 second after last change
             if (saveStateTimeout) {
               clearTimeout(saveStateTimeout)
             }
             saveStateTimeout = setTimeout(() => {
-              saveState()
+              saveState(description);
               saveStateTimeout = null
             }, 750) // Using 750ms delay
           }
@@ -304,19 +356,65 @@ export const useFlowStore = defineStore('flow', () => {
   }
 
   /**
+   * Updates the data payload of a specific node.
+   * 
+   * ARCHITECTURAL NOTE:
+   * We use an explicit store action here instead of a hypothetical library function
+   * like `vueFlow.updateNodeData()` for a critical reason: **explicit state control and history.**
+   * 
+   * A library's UI command would trigger a generic `onNodesChange` event (e.g., a 'dimensions'
+   * change), from which we could not reliably determine the user's specific intent.
+   * 
+   * By using our own action, we know exactly *what* changed (e.g., the title) and *why*.
+   * This allows us to create precise, descriptive history entries (e.g., "Rename node from 'X' to 'Y'")
+   * and maintain a clean, predictable state management pattern.
+   * 
+   * @param {string} nodeId - The ID of the node to update.
+   * @param {object} newData - The new data to merge into the node's data object.
+   */
+  function updateNodeData(nodeId, newData) {
+    const node = nodes.value.find(n => n.id === nodeId);
+    if (node) {
+      const oldTitle = node.data.title;
+      node.data = { ...node.data, ...newData };
+      const newTitle = node.data.title;
+
+      let description = `Update ${formatNodeTypeName(node.type)} "${oldTitle || node.id}"`;
+      if (newData.title && newData.title !== oldTitle) {
+        description = `Rename ${formatNodeTypeName(node.type)} from "${oldTitle}" to "${newTitle}"`;
+      }
+      saveState(description); 
+    }
+  }
+
+  /**
    * Adds a new block to a node
-   * @param {string} nodeId - The ID of the node to add the block to
-   * @param {Object} blockData - The block data to add
+   * @param {string} nodeId - The ID of the node to add the block to.
+   * @param {object} blockData - The data for the new block (type, etc.).
    */
   function addBlock(nodeId, blockData) {
     if (!nodeBlocks.value[nodeId]) {
-      nodeBlocks.value[nodeId] = []
+      nodeBlocks.value[nodeId] = [];
     }
-    nodeBlocks.value[nodeId].push({
-      id: generateId(),
-      ...blockData
-    })
-    saveState()
+
+    // Generate a default title for the block
+    const existingBlocks = nodeBlocks.value[nodeId];
+    const count = existingBlocks.filter(b => b.type === blockData.type).length + 1;
+    const typeName = blockData.type.replace('asset-', '').replace('-', ' ');
+    const defaultTitle = `${typeName.charAt(0).toUpperCase() + typeName.slice(1)} #${count}`;
+
+    const newBlock = {
+      id: generateId('block'),
+      ...blockData,
+      data: {
+        ...blockData.data,
+        title: defaultTitle,
+      },
+    };
+
+    nodeBlocks.value[nodeId].push(newBlock);
+    const description = `Add block "${defaultTitle}" to ${formatNodeTypeName(node?.type)} "${node?.data?.title}"`;
+    saveState(description);
   }
 
   /**
@@ -436,6 +534,9 @@ export const useFlowStore = defineStore('flow', () => {
     removeBlock,
     reorderBlocks,
     getNodeBlocks,
+    updateNodeData,
+    
+    // --- Asset Management ---
     getAssetFromSetup,
     getAvailableAssets,
   }
