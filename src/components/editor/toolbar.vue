@@ -1,8 +1,8 @@
 <script setup>
 import { useFlowEditor } from "@/composables/use-flow-editor";
 import { Plus, History, Undo, Redo, Download, Upload, Bug } from "lucide-vue-next";
-import { useMagicKeys } from "@vueuse/core";
-import { ref, watchEffect } from "vue";
+import { useMagicKeys, whenever } from "@vueuse/core";
+import { ref, computed } from "vue";
 
 /**
  * EditorToolbar - Simplified application toolbar for the flow editor
@@ -36,6 +36,19 @@ const { ctrl_z, ctrl_y, ctrl_shift_z, cmd_z, cmd_y, cmd_shift_z } = useMagicKeys
 
 // Ref for the create button to programmatically open the dropdown
 const createButtonRef = ref(null);
+
+// --- Keyboard Shortcuts ---
+// The `whenever` utility from @vueuse/core is used here instead of `watch` or `watchEffect`
+// to treat key presses as one-time events. This prevents infinite loops that can occur
+// when a watcher's callback modifies its own reactive dependencies.
+
+// Undo shortcuts: Ctrl+Z or Cmd+Z
+const undoKeys = computed(() => (ctrl_z.value && !ctrl_shift_z.value) || (cmd_z.value && !cmd_shift_z.value));
+whenever(undoKeys, undo);
+
+// Redo shortcuts: Ctrl+Y, Ctrl+Shift+Z, Cmd+Y, or Cmd+Shift+Z
+const redoKeys = computed(() => ctrl_y.value || ctrl_shift_z.value || cmd_y.value || cmd_shift_z.value);
+whenever(redoKeys, redo);
 
 // Keyboard shortcut for creating a new node
 const { ctrl_alt_n, cmd_option_n } = useMagicKeys({
@@ -74,19 +87,6 @@ const jumpToHistoryState = (targetIndex) => {
     }
   }
 }
-
-// Keyboard shortcut handlers
-watchEffect(() => {
-  if (ctrl_z.value || cmd_z.value) {
-    undo();
-  }
-});
-
-watchEffect(() => {
-  if (ctrl_y.value || ctrl_shift_z.value || cmd_y.value || cmd_shift_z.value) {
-    redo();
-  }
-});
 
 // Node operations
 const handleCreateNodeByType = (type) => {
