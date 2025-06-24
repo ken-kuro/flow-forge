@@ -436,7 +436,7 @@ This architecture ensures:
 
 ## 🔧 Implementation Plan
 
-### **Phase 1: Foundation (Week 1)**
+### **Phase 1: Foundation (Week 1)** ✅ COMPLETED
 1. ✅ **Update Data Structure**: Enhance flow store for nodeBlocks
 2. ✅ **Basic Node Registration**: Register custom node types with Vue Flow
 3. ✅ **Simple Nodes First**: Implement Start and End nodes (no blocks)
@@ -461,23 +461,25 @@ This architecture ensures:
 - **Preview System**: Live preview of images and video thumbnails
 - **Consistent Styling**: DaisyUI-based theming with hover states and transitions
 
-### **Phase 3: Lecture Node (Week 3-4)**
-1. ✅ **Lecture Node Component**: Complex container with multiple block types
-2. ✅ **Content Blocks**: Teacher Video, Question blocks  
-3. ✅ **Reference Blocks**: Assets Applied block (references setup nodes)
-4. ✅ **Action Blocks**: Collect Answer, System Action blocks
-5. ✅ **Inline Editing**: Block-level editing within nodes
+### **Phase 3: Condition Node (Week 3)** `▶️ In Progress`
+1. **Condition Logic**: Implement a `custom-condition` node type.
+2. **Branching UI**: Allow adding, editing, and removing condition branches within the node.
+3. **Nested Nodes**: Use Vue Flow's parent/child feature to render `condition-branch` nodes inside the condition node. Each branch must have its own source handle.
+4. **Edge Management**: Ensure edges correctly connect from branches to subsequent nodes.
+5. **Data Structure**: Define how conditions are stored (e.g., simple expression or structured object).
 
-### **Phase 4: Condition Node (Week 5)**
-1. ✅ **Condition Logic**: Single condition block with multiple branches
-2. ✅ **Branch Nodes**: Nested nodes for each condition outcome
-3. ✅ **Edge Management**: Automatic edge creation from branches
+### **Phase 4: Lecture Node (Week 4-5)**
+1. **Lecture Node Component**: Create a `custom-lecture` node that uses the `BlockContainer` for its content.
+2. **Content Blocks**: Implement various content delivery blocks (e.g., "Teacher Video", "Question").
+3. **Reference Blocks**: Implement the "Assets Applied" block to reference items from `Setup Nodes`.
+4. **Action Blocks**: Implement blocks for system actions like "Collect Answer".
+5. **Inline Editing**: Ensure all block properties are editable directly within the node UI.
 
 ### **Phase 5: Polish & Testing (Week 6)**
-1. ✅ **UI Polish**: Consistent styling across all node/block types
-2. ✅ **Performance**: Optimize rendering for flows with many blocks
-3. ✅ **Error Handling**: Validation and error boundaries
-4. ✅ **Documentation**: Component and API documentation
+1. **UI Polish**: Consistent styling across all node/block types.
+2. **Performance**: Optimize rendering for flows with many blocks
+3. **Error Handling**: Validation and error boundaries
+4. **Documentation**: Component and API documentation
 
 ## 🛠️ Flow Store Updates
 
