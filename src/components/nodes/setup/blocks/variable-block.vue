@@ -1,4 +1,5 @@
 <script setup>
+// TODO: Revisit this component. The current implementation is a placeholder for handling variables.
 import { ref, computed, onUnmounted } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
 import { X, Variable } from 'lucide-vue-next';
