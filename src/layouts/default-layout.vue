@@ -35,10 +35,10 @@ function setTheme(theme) {
         <div class="flex items-center gap-3">
           <label for="my-drawer-2" class="btn btn-ghost btn-sm">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-4 h-4 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-          </label>
-          <h1 class="text-xl font-bold text-base-content">Flow Forge</h1>
+        </label>
+        <h1 class="text-xl font-bold text-base-content">Flow Forge</h1>
         </div>
-        
+
         <div class="dropdown dropdown-bottom dropdown-end">
           <button
             tabindex="0"
@@ -112,9 +112,9 @@ function setTheme(theme) {
                 </ul>
               </div>
             </div>
-          </div>
         </div>
-        
+      </div>
+
         <RouterView />
       </main>
     </div>
@@ -126,7 +126,7 @@ function setTheme(theme) {
         <!-- Sidebar Header -->
         <div class="p-4 border-b border-base-300">
           <h2 class="text-xl font-bold text-base-content">Flow Forge</h2>
-        </div>
+          </div>
         
         <!-- Navigation Menu -->
         <nav class="flex-1 p-4">
@@ -149,7 +149,7 @@ function setTheme(theme) {
               </svg>
               Editor
             </RouterLink></li>
-          </ul>
+      </ul>
         </nav>
       </aside>
     </div>

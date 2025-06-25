@@ -1,8 +1,8 @@
 <script setup>
 import { ref, onUnmounted } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
-import { X, Play, Upload } from 'lucide-vue-next';
-import InlineEditText from '@/components/shared/inline-edit-text.vue';
+import { Play, Upload } from 'lucide-vue-next';
+import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue';
 
 /**
  * TeacherVideoBlock - A block for displaying video content in Lecture nodes.
@@ -26,7 +26,7 @@ const props = defineProps({
   },
 });
 
-const { updateBlock, removeBlock, flushPendingSaves } = useFlowEditor();
+const { updateBlock, flushPendingSaves } = useFlowEditor();
 
 // Flush any pending saves when component is unmounted
 onUnmounted(() => {
@@ -50,8 +50,10 @@ const updateBlockData = (immediate = false) => {
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
 
-const handleDelete = () => {
-  removeBlock(props.nodeId, props.block.id);
+// Handle title updates from the wrapper
+const handleTitleUpdate = (newTitle) => {
+  title.value = newTitle;
+  updateBlockData(true);
 };
 
 const handleAddVideo = () => {
@@ -69,27 +71,14 @@ const handleSourceTypeChange = () => {
 </script>
 
 <template>
-  <div class="bg-base-100 border border-base-300 rounded-lg p-3 space-y-3 transition-all duration-200 ease-in-out hover:border-base-content/30">
-    <!-- Block Header -->
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <Play class="w-4 h-4 text-accent" />
-        <InlineEditText
-          v-model="title"
-          @update:modelValue="updateBlockData(true)"
-          placeholder="Enter teacher video block name"
-          class="text-sm font-medium"
-        />
-      </div>
-      <button
-        @click="handleDelete"
-        class="btn btn-ghost btn-xs text-error hover:bg-error hover:text-error-content"
-        title="Delete Teacher Video"
-      >
-        <X class="w-3 h-3" />
-      </button>
-    </div>
-
+  <CardBlockWrapper
+    :model-value="title"
+    @update:modelValue="handleTitleUpdate"
+    :icon="Play"
+    :node-id="nodeId"
+    :block-id="block.id"
+    placeholder="Enter teacher video block name"
+  >
     <!-- Source Type Selection -->
     <div class="form-control">
       <label class="label">
@@ -157,9 +146,9 @@ const handleSourceTypeChange = () => {
         class="textarea textarea-bordered textarea-xs min-h-18 resize-none"
       ></textarea>
     </div>
-  </div>
+  </CardBlockWrapper>
 </template>
 
 <style scoped>
-/* All styles have been moved to Tailwind utility classes in the template. */
+/* All styles now handled by CardBlockWrapper */
 </style> 

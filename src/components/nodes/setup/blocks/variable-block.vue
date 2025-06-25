@@ -2,8 +2,8 @@
 // TODO: Revisit this component. The current implementation is a placeholder for handling variables.
 import { ref, computed, onUnmounted } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
-import { X, Variable } from 'lucide-vue-next';
-import InlineEditText from '@/components/shared/inline-edit-text.vue';
+import { Variable } from 'lucide-vue-next';
+import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue';
 
 /**
  * VariableBlock - A block for defining variables in Setup nodes.
@@ -27,7 +27,7 @@ const props = defineProps({
   },
 });
 
-const { updateBlock, removeBlock, flushPendingSaves } = useFlowEditor();
+const { updateBlock, flushPendingSaves } = useFlowEditor();
 
 // Flush any pending saves when component is unmounted
 onUnmounted(() => {
@@ -84,8 +84,10 @@ const updateBlockDataImmediate = () => {
   updateBlock(props.nodeId, props.block.id, newData, true); // Immediate save
 };
 
-const handleDelete = () => {
-  removeBlock(props.nodeId, props.block.id);
+// Handle title updates from the wrapper
+const handleTitleUpdate = (newTitle) => {
+  title.value = newTitle;
+  updateBlockDataImmediate();
 };
 
 // Handle type change - convert value appropriately
@@ -110,29 +112,14 @@ const processedValue = computed(() => {
 </script>
 
 <template>
-  <div class="variable-block bg-base-100 border border-base-300 rounded-lg p-3 space-y-3">
-    <!-- Block Header -->
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <Variable class="w-4 h-4 text-accent" />
-        <InlineEditText
-          v-model="title"
-          @update:modelValue="updateBlockDataImmediate"
-          placeholder="Enter variable name"
-          class="text-sm font-medium"
-        />
-      </div>
-      <button 
-        @click="handleDelete" 
-        class="btn btn-ghost btn-xs text-error hover:bg-error hover:text-error-content"
-        title="Delete Variable"
-      >
-        <X class="w-3 h-3" />
-      </button>
-    </div>
-
-    <!-- Variable Name Field has been replaced by inline edit in header -->
-
+  <CardBlockWrapper
+    :model-value="title"
+    @update:modelValue="handleTitleUpdate"
+    :icon="Variable"
+    :node-id="nodeId"
+    :block-id="block.id"
+    placeholder="Enter variable name"
+  >
     <!-- Type and Value Fields -->
     <div class="grid grid-cols-1 gap-2">
       <!-- Type Selection -->
@@ -198,18 +185,12 @@ const processedValue = computed(() => {
       <div class="bg-base-200 rounded p-2 text-xs font-mono">
         <span class="text-accent">{{ title }}</span> = 
         <span class="text-primary">{{ processedValue }}</span>
-        <span class="text-base-content/50 ml-2">({{ variableType }})</span>
+        <span class="text-base-content/50"> ({{ variableType }})</span>
       </div>
     </div>
-  </div>
+  </CardBlockWrapper>
 </template>
 
 <style scoped>
-.variable-block {
-  transition: all 0.2s ease;
-}
-
-.variable-block:hover {
-  border-color: hsl(var(--bc) / 0.3);
-}
+/* All styles now handled by CardBlockWrapper */
 </style> 

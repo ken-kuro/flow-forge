@@ -138,14 +138,14 @@ function handleTitleChange() {
               </a>
             </li>
           </ul>
-        </div>
+    </div>
       </template>
     </BlockContainer>
 
     <!-- Output handle on the right -->
     <Handle type="source" :position="Position.Right" id="default" />
   </CardNodeWrapper>
-</template>
+</template> 
 
 <style scoped>
 /* Scoped styles specific to the LectureNode can be added here if needed */
