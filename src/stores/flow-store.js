@@ -175,6 +175,7 @@ export const useFlowStore = defineStore('flow', () => {
    * @param {import('@vue-flow/core').NodeChange[]} changes
    */
   function onNodesChange(changes) {
+    // TODO: HIGH_PRIORITY - Remove debug console.log statements for production
     console.log('🏪 Store: onNodesChange called', { changes, isRestoring: isRestoringHistory.value });
     
     // Don't save history during undo/redo operations
@@ -259,6 +260,7 @@ export const useFlowStore = defineStore('flow', () => {
    * @param {import('@vue-flow/core').EdgeChange[]} changes
    */
   function onEdgesChange(changes) {
+    // TODO: HIGH_PRIORITY - Remove debug console.log statements for production
     console.log('🏪 Store: onEdgesChange called', { changes, isRestoring: isRestoringHistory.value });
     
     // Don't save history during undo/redo operations
@@ -386,7 +388,7 @@ export const useFlowStore = defineStore('flow', () => {
             saveStateTimeout = setTimeout(() => {
               saveState(description);
               saveStateTimeout = null
-            }, 750) // Using 750ms delay
+            }, DEBOUNCE_DELAY)
           }
         }
       }
@@ -407,6 +409,7 @@ export const useFlowStore = defineStore('flow', () => {
    * This allows us to create precise, descriptive history entries (e.g., "Rename node from 'X' to 'Y'")
    * and maintain a clean, predictable state management pattern.
    * 
+   * TODO: MED_PRIORITY - Add validation for node data updates to prevent state corruption
    * @param {string} nodeId - The ID of the node to update.
    * @param {object} newData - The new data to merge into the node's data object.
    */
@@ -473,7 +476,8 @@ export const useFlowStore = defineStore('flow', () => {
         removeEdgesForBranch(nodeId, blockId);
       }
       
-      saveState();
+      const description = `Remove block "${block?.data?.title || 'Unknown'}" from ${formatNodeTypeName(node?.type)} "${node?.data?.title || 'Untitled'}"`;
+      saveState(description);
     }
   }
 
@@ -483,6 +487,7 @@ export const useFlowStore = defineStore('flow', () => {
    * @param {string} branchId - The ID of the branch block
    */
   function removeEdgesForBranch(nodeId, branchId) {
+    // TODO: HIGH_PRIORITY - Remove debug console.log statements for production
     console.log('🔍 Looking for edges to remove for branch:', branchId, 'on node:', nodeId);
     console.log('🔍 Current edges:', edges.value);
     
@@ -520,7 +525,7 @@ export const useFlowStore = defineStore('flow', () => {
     if (blocks && fromIndex !== toIndex) {
       const [removed] = blocks.splice(fromIndex, 1)
       blocks.splice(toIndex, 0, removed)
-      saveState()
+      saveState('Reorder blocks within node')
     }
   }
 
@@ -549,6 +554,7 @@ export const useFlowStore = defineStore('flow', () => {
 
   /**
    * Gets all available assets from setup nodes
+   * TODO: MED_PRIORITY - Optimize asset lookup with memoization for large flows
    * @returns {Array} Array of available assets with metadata
    */
   function getAvailableAssets() {

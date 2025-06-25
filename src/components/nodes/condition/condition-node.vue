@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { Handle, Position } from '@vue-flow/core'
+import { Plus } from 'lucide-vue-next'
 import CardNodeWrapper from '@/components/nodes/base/card-node-wrapper.vue'
 import BlockContainer from '@/components/nodes/base/block-container.vue'
 import { useFlowEditor } from '@/composables/use-flow-editor.js'
@@ -22,6 +23,9 @@ const props = defineProps({
 const { addBlock, getNodeBlocks, updateNodeData } = useFlowEditor()
 
 const title = ref(props.data.title);
+
+// TODO: HIGH_PRIORITY - Add error boundary wrapper to handle malformed branch data
+// TODO: HIGH_PRIORITY - Add error handling for Vue Flow edge creation failures
 
 // Get condition branches (stored as blocks)
 const blocks = computed(() => getNodeBlocks(props.id))
@@ -65,7 +69,7 @@ function handleTitleChange() {
           @click="handleAddBranch"
           class="btn btn-sm btn-outline btn-primary w-full"
         >
-          <span class="icon-[mdi--plus]"></span>
+          <Plus class="w-4 h-4" />
           Add Branch
         </button>
       </template>

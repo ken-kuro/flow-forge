@@ -19,6 +19,7 @@ const props = defineProps({
 const { updateBlock, removeBlock, flushPendingSaves } = useFlowEditor()
 
 // Flush any pending saves when component is unmounted
+// TODO: MED_PRIORITY - Improve memory management by clearing timers more aggressively
 onUnmounted(() => {
   flushPendingSaves()
 })
@@ -64,6 +65,8 @@ const handleDelete = () => {
     </div>
 
     <!-- Condition input -->
+    <!-- TODO: MED_PRIORITY - Add input validation for condition expressions -->
+    <!-- TODO: MED_PRIORITY - Add syntax highlighting for condition text input -->
     <div class="mb-3">
       <label class="text-xs text-base-content/70 mb-1 block">Condition</label>
       <input

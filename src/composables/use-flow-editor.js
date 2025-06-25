@@ -132,8 +132,12 @@ export function useFlowEditor() {
     
     // We handle onConnect here in the controller to ensure the correct event is emitted.
     onConnect((connection) => {
+      // TODO: HIGH_PRIORITY - Remove debug console.log statements for production
       console.log('🔌 New connection:', connection);
       console.log('🔍 Source handle:', connection.sourceHandle);
+      
+      // TODO: HIGH_PRIORITY - Add edge validation to prevent duplicate connections from same branch
+      // Current implementation allows multiple edges from the same condition branch handle
       
       const newEdge = {
         ...connection,
@@ -150,6 +154,8 @@ export function useFlowEditor() {
         let foundBranch = null;
         let sourceNodeId = null;
         
+        // TODO: MED_PRIORITY - Cache node type lookups for performance with large flows
+        // Current O(n*m) search could be optimized with indexed lookups
         for (const node of nodes.value) {
           if (node.type === NODE_TYPES.CONDITION) {
             const sourceBlocks = nodeBlocks.value[node.id] || [];
