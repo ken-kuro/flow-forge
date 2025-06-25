@@ -573,9 +573,9 @@ function getAvailableAssets() {
   // Find all setup nodes
   const setupNodes = nodes.value.filter(n => n.data.nodeType === 'setup')
   
-  setupNodes.forEach(setupNode => {
+  for (const setupNode of setupNodes) {
     const setupBlocks = nodeBlocks[setupNode.id] || []
-    setupBlocks.forEach(block => {
+    for (const block of setupBlocks) {
       if (block.type.startsWith('asset-')) {
         assets.push({
           setupNodeId: setupNode.id,
@@ -586,8 +586,8 @@ function getAvailableAssets() {
           assetData: block.data
         })
       }
-    })
-  })
+    }
+  }
   
   return assets
 }

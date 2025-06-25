@@ -71,11 +71,12 @@ export const useFlowStore = defineStore('flow', () => {
    */
   const formatNodeTypeName = (type) => {
     if (!type) return 'Node';
-    return type
+    const formatted = type
       .replace('custom-', '')
       .split('-')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
+    return formatted + ' Node';
   };
   
   /**
@@ -197,6 +198,9 @@ export const useFlowStore = defineStore('flow', () => {
     console.log('📊 Has significant change:', hasSignificantChange);
 
     if (hasSignificantChange) {
+      // BATCHING STRATEGY: Changes that happen together should be grouped as one history entry
+      // This occurs in: library auto-handling, multi-select operations, programmatic changes
+      
       // For position changes, we only want one history entry per drag operation
       const hasPositionChange = changes.some(change => 
         change.type === 'position' && change.dragging === false
@@ -208,21 +212,42 @@ export const useFlowStore = defineStore('flow', () => {
         console.log(`💾 Saving state for position change: ${description}`);
         saveState(description);
       } else {
-        // For add/remove, save for each significant change
-        changes.forEach(change => {
-          if (change.type === 'add') {
-            const node = change.item;
+        // Group changes by type for batching
+        const addChanges = changes.filter(c => c.type === 'add');
+        const removeChanges = changes.filter(c => c.type === 'remove');
+        
+        // Handle node additions
+        if (addChanges.length > 0) {
+          if (addChanges.length === 1) {
+            const node = addChanges[0].item;
             const description = `Add ${formatNodeTypeName(node.type)} "${node?.data?.title || ''}"`;
-            console.log(`💾 Saving state for ${change.type} change: ${description}`);
+            console.log(`💾 Saving state for single node addition: ${description}`);
             saveState(description);
-          } else if (change.type === 'remove') {
-            // NOTE: Getting the name/type of a removed node is difficult as it's already gone.
-            // This would require finding it in the previous history state, which adds complexity.
-            const description = `Remove node`;
-            console.log(`💾 Saving state for ${change.type} change: ${description}`);
+          } else {
+            // Multiple nodes added at once (e.g., import, paste)
+            const nodeTypes = addChanges.map(c => formatNodeTypeName(c.item.type));
+            const uniqueTypes = [...new Set(nodeTypes)];
+            const description = addChanges.length === uniqueTypes.length && uniqueTypes.length === 1 
+              ? `Add ${addChanges.length} ${uniqueTypes[0]} nodes`
+              : `Add ${addChanges.length} nodes`;
+            console.log(`💾 Saving state for batch node addition: ${description}`);
             saveState(description);
           }
-        });
+        }
+        
+        // Handle node removals
+        if (removeChanges.length > 0) {
+          if (removeChanges.length === 1) {
+            const description = `Remove node`;
+            console.log(`💾 Saving state for single node removal: ${description}`);
+            saveState(description);
+          } else {
+            // Multiple nodes removed at once (e.g., multi-select delete)
+            const description = `Remove ${removeChanges.length} nodes`;
+            console.log(`💾 Saving state for batch node removal: ${description}`);
+            saveState(description);
+          }
+        }
       }
     }
   }
@@ -250,21 +275,37 @@ export const useFlowStore = defineStore('flow', () => {
     console.log('🔗 Has significant edge change:', hasSignificantChange);
 
     if (hasSignificantChange) {
-      // Since batched changes can have multiple 'add' events, we save for each one.
-      changes.forEach(change => {
-        if (change.type === 'add') {
-          const edge = change.item;
-          const sourceNode = nodes.value.find(n => n.id === edge.source);
-          const targetNode = nodes.value.find(n => n.id === edge.target);
-          const description = `Connect ${formatNodeTypeName(sourceNode?.type)} "${sourceNode?.data?.title || edge.source}" to ${formatNodeTypeName(targetNode?.type)} "${targetNode?.data?.title || edge.target}"`;
-          console.log(`💾 Saving state for edge ${change.type} change: ${description}`);
-          saveState(description);
-        } else if (change.type === 'remove') {
+      // BATCHING STRATEGY: Changes that happen together should be grouped as one history entry
+      // This occurs in: library auto-handling, multi-select operations, programmatic changes
+      
+      // Group changes by type for batching
+      const addChanges = changes.filter(c => c.type === 'add');
+      const removeChanges = changes.filter(c => c.type === 'remove');
+      
+      // Handle edge additions individually (each connection is a separate user action)
+      for (const change of addChanges) {
+        const edge = change.item;
+        const sourceNode = nodes.value.find(n => n.id === edge.source);
+        const targetNode = nodes.value.find(n => n.id === edge.target);
+        const description = `Connect ${formatNodeTypeName(sourceNode?.type)} "${sourceNode?.data?.title || edge.source}" to ${formatNodeTypeName(targetNode?.type)} "${targetNode?.data?.title || edge.target}"`;
+        console.log(`💾 Saving state for edge ${change.type} change: ${description}`);
+        saveState(description);
+      }
+      
+      // Handle edge removals as a batch (likely from node deletion)
+      if (removeChanges.length > 0) {
+        if (removeChanges.length === 1) {
+          // Single edge removal - likely user manually disconnected
           const description = `Disconnect edge`;
-          console.log(`💾 Saving state for edge ${change.type} change: ${description}`);
+          console.log(`💾 Saving state for single edge removal: ${description}`);
+          saveState(description);
+        } else {
+          // Multiple edge removals - likely from node deletion, batch them
+          const description = `Disconnect ${removeChanges.length} edges`;
+          console.log(`💾 Saving state for batch edge removal: ${description}`);
           saveState(description);
         }
-      });
+      }
     }
   }
   
@@ -288,6 +329,7 @@ export const useFlowStore = defineStore('flow', () => {
   
   // Manual debounce for field updates to avoid excessive history entries
   let saveStateTimeout = null
+  const DEBOUNCE_DELAY = 750 // Universal debounce delay in milliseconds
   
   /**
    * Updates a specific block within a node's data.
@@ -314,19 +356,26 @@ export const useFlowStore = defineStore('flow', () => {
           const oldTitle = block.data.title;
           
           let description;
-          const keyUpdated = Object.keys(newData)[0];
-          const value = Object.values(newData)[0];
           const blockName = block.data.title || `Block #${block.id.slice(0,4)}`;
           const nodeIdentifier = `${formatNodeTypeName(node?.type)} "${node?.data.title}"`;
 
-          if (keyUpdated === 'title' && value !== oldTitle) {
-            description = `Rename block from "${oldTitle}" to "${value}" in ${nodeIdentifier}`;
-          } else if (keyUpdated === 'objects') {
+          // Handle specific field updates with proper logic
+          if (newData.title && newData.title !== oldTitle) {
+            description = `Rename block from "${oldTitle}" to "${newData.title}" in ${nodeIdentifier}`;
+          } else if (newData.objects) {
             description = `Finish setting up object(s) in "${blockName}" in ${nodeIdentifier}`;
-          } else if (keyUpdated) {
-            description = `Update ${keyUpdated} for "${blockName}" in ${nodeIdentifier}`;
+          } else if (newData.condition !== undefined) {
+            description = `Update condition for "${blockName}" in ${nodeIdentifier}`;
+          } else if (newData.label !== undefined) {
+            description = `Update label for "${blockName}" in ${nodeIdentifier}`;
           } else {
-            description = `Update block in ${nodeIdentifier}`;
+            // Fallback for any other field updates
+            const updatedFields = Object.keys(newData);
+            if (updatedFields.length === 1) {
+              description = `Update ${updatedFields[0]} for "${blockName}" in ${nodeIdentifier}`;
+            } else {
+              description = `Update block "${blockName}" in ${nodeIdentifier}`;
+            }
           }
 
           // Perform the update
@@ -397,6 +446,9 @@ export const useFlowStore = defineStore('flow', () => {
       nodeBlocks.value[nodeId] = [];
     }
 
+    // Find the node for the description
+    const node = nodes.value.find(n => n.id === nodeId);
+
     // Generate a default title for the block
     const existingBlocks = nodeBlocks.value[nodeId];
     const count = existingBlocks.filter(b => b.type === blockData.type).length + 1;
@@ -424,8 +476,47 @@ export const useFlowStore = defineStore('flow', () => {
    */
   function removeBlock(nodeId, blockId) {
     if (nodeBlocks.value[nodeId]) {
-      nodeBlocks.value[nodeId] = nodeBlocks.value[nodeId].filter(b => b.id !== blockId)
-      saveState()
+      const block = nodeBlocks.value[nodeId].find(b => b.id === blockId);
+      nodeBlocks.value[nodeId] = nodeBlocks.value[nodeId].filter(b => b.id !== blockId);
+      
+      // If this was a condition branch block, remove associated edges
+      if (block && block.type === 'condition-branch') {
+        removeEdgesForBranch(nodeId, blockId);
+      }
+      
+      saveState();
+    }
+  }
+
+  /**
+   * Removes all edges connected to a specific condition branch
+   * @param {string} nodeId - The ID of the condition node
+   * @param {string} branchId - The ID of the branch block
+   */
+  function removeEdgesForBranch(nodeId, branchId) {
+    console.log('🔍 Looking for edges to remove for branch:', branchId, 'on node:', nodeId);
+    console.log('🔍 Current edges:', edges.value);
+    
+    const edgesToRemove = edges.value.filter(edge => {
+      console.log('🔍 Checking edge:', edge);
+      console.log('🔍 Edge data:', edge.data);
+      const matches = edge.data?.branchId === branchId && 
+        edge.source === nodeId &&
+        edge.data?.isConditionBranch === true;
+      console.log('🔍 Edge matches criteria:', matches);
+      return matches;
+    });
+    
+    console.log('🔍 Edges to remove:', edgesToRemove);
+    
+    if (edgesToRemove.length > 0) {
+      console.log(`🗑️ Removing ${edgesToRemove.length} edges for deleted branch ${branchId}`);
+      edges.value = edges.value.filter(edge => 
+        !(edge.data?.branchId === branchId && edge.source === nodeId)
+      );
+      console.log('🔍 Remaining edges after removal:', edges.value);
+    } else {
+      console.log('❌ No edges found to remove for branch:', branchId);
     }
   }
 
@@ -477,9 +568,9 @@ export const useFlowStore = defineStore('flow', () => {
     // Find all setup nodes
     const setupNodes = nodes.value.filter(n => n.type === NODE_TYPES.SETUP)
     
-    setupNodes.forEach(setupNode => {
+    for (const setupNode of setupNodes) {
       const setupBlocks = nodeBlocks.value[setupNode.id] || []
-      setupBlocks.forEach(block => {
+      for (const block of setupBlocks) {
         if (block.type === 'asset-image' || block.type === 'asset-video') {
           assets.push({
             setupNodeId: setupNode.id,
@@ -490,8 +581,8 @@ export const useFlowStore = defineStore('flow', () => {
             assetData: block.data
           })
         }
-      })
-    })
+      }
+    }
     
     return assets
   }
@@ -505,7 +596,21 @@ export const useFlowStore = defineStore('flow', () => {
   }
 
   // Save the initial state to the history
-  saveState()
+  saveState('Initialize Flow with Start and End nodes')
+
+  /**
+   * Gets all edges connected to a specific condition branch
+   * @param {string} nodeId - The ID of the condition node
+   * @param {string} branchId - The ID of the branch block
+   * @returns {Array} Array of edges connected to this branch
+   */
+  function getEdgesForBranch(nodeId, branchId) {
+    return edges.value.filter(edge => 
+      edge.data?.branchId === branchId && 
+      edge.source === nodeId &&
+      edge.data?.isConditionBranch === true
+    );
+  }
 
   return {
     // --- STATE ---
@@ -539,5 +644,9 @@ export const useFlowStore = defineStore('flow', () => {
     // --- Asset Management ---
     getAssetFromSetup,
     getAvailableAssets,
+    
+    // --- Condition Branch Edge Management ---
+    removeEdgesForBranch,
+    getEdgesForBranch,
   }
 }) 
