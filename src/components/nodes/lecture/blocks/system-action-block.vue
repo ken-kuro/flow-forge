@@ -113,7 +113,7 @@ const isMethodSelected = (method) => {
     </div>
 
     <!-- Asset Interaction Fields (show only when action is asset-interaction) -->
-    <div v-if="action === 'asset-interaction'" class="space-y-3">
+    <div v-if="action === 'asset-interaction'">
       <!-- Delay Field -->
       <div class="form-control">
         <label class="label">
@@ -138,7 +138,7 @@ const isMethodSelected = (method) => {
             <span v-if="methods.length === 0" class="text-base-content/50">Select view methods...</span>
             <span v-else class="text-left">{{ methods.map(m => availableMethods.find(am => am.value === m)?.label || m).join(', ') }}</span>
           </div>
-          <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-full p-2 shadow-lg border border-base-300 mt-1">
+          <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-full p-2 shadow-lg border border-base-300">
             <li v-for="method in availableMethods" :key="method.value">
               <label class="label cursor-pointer justify-start gap-2 p-2 hover:bg-base-200 rounded">
                 <input

@@ -120,10 +120,8 @@ const processedValue = computed(() => {
     :block-id="block.id"
     placeholder="Enter variable name"
   >
-    <!-- Type and Value Fields -->
-    <div class="grid grid-cols-1 gap-2">
-      <!-- Type Selection -->
-      <div class="form-control">
+    <!-- Type Selection -->
+    <div class="form-control">
         <label class="label">
           <span class="label-text text-xs">Type</span>
         </label>
@@ -175,13 +173,12 @@ const processedValue = computed(() => {
           <option value="true">true</option>
         </select>
       </div>
-    </div>
 
     <!-- Value Preview -->
     <div v-if="title" class="preview-container">
-      <div class="label">
+      <label class="label">
         <span class="label-text text-xs">Preview</span>
-      </div>
+      </label>
       <div class="bg-base-200 rounded p-2 text-xs font-mono">
         <span class="text-accent">{{ title }}</span> = 
         <span class="text-primary">{{ processedValue }}</span>

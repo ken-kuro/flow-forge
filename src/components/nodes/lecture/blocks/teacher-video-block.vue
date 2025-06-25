@@ -125,7 +125,7 @@ const removeVideo = () => {
     </div>
 
     <!-- Video Preview -->
-    <div v-if="videoUrl" class="preview-container space-y-2">
+    <div v-if="videoUrl" class="preview-container">
       <label class="label">
         <span class="label-text text-xs">Preview</span>
       </label>

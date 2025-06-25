@@ -101,13 +101,13 @@ const handleTitleUpdate = (newTitle) => {
           {{ option.label }}
         </option>
       </select>
-      <div v-if="assetOptions.length === 0" class="text-xs text-base-content/50 mt-1">
+      <div v-if="assetOptions.length === 0" class="text-xs text-base-content/50">
         No assets available. Create assets in Setup nodes first.
       </div>
     </div>
 
         <!-- Asset Preview -->
-    <div v-if="selectedAsset" class="preview-container space-y-2">
+    <div v-if="selectedAsset" class="preview-container">
       <label class="label">
         <span class="label-text text-xs">Preview</span>
       </label>
