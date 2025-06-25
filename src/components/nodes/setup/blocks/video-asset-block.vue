@@ -2,7 +2,7 @@
 import { ref, computed, onUnmounted } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
 import { X, Video as VideoIcon, Upload } from 'lucide-vue-next';
-import InlineEditText from '@/components/shared/inline-edit-text.vue';
+import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue';
 
 /**
  * VideoAssetBlock - A block for defining video assets in Setup nodes.
@@ -26,7 +26,7 @@ const props = defineProps({
   },
 });
 
-const { updateBlock, removeBlock, flushPendingSaves } = useFlowEditor();
+const { updateBlock, flushPendingSaves } = useFlowEditor();
 
 // Flush any pending saves when component is unmounted
 onUnmounted(() => {
@@ -50,8 +50,10 @@ const updateBlockData = (immediate = false) => {
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
 
-const handleDelete = () => {
-  removeBlock(props.nodeId, props.block.id);
+// Handle title updates from the wrapper
+const handleTitleUpdate = (newTitle) => {
+  title.value = newTitle;
+  updateBlockData(true);
 };
 
 const handleAddVideo = () => {
@@ -77,27 +79,15 @@ const showPreview = computed(() => videoUrl.value && videoUrl.value.trim() !== '
 </script>
 
 <template>
-  <div class="bg-base-100 border border-base-300 rounded-lg p-3 space-y-3 transition-all duration-200 ease-in-out hover:border-base-content/30">
-    <!-- Block Header -->
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <VideoIcon class="w-4 h-4 text-secondary" />
-        <InlineEditText
-          v-model="title"
-          @update:modelValue="updateBlockData(true)"
-          placeholder="Enter asset name"
-          class="text-sm font-medium"
-        />
-      </div>
-      <button
-        @click="handleDelete"
-        class="btn btn-ghost btn-xs text-error hover:bg-error hover:text-error-content"
-        title="Delete Video Asset"
-      >
-        <X class="w-3 h-3" />
-      </button>
-    </div>
-
+  <CardBlockWrapper
+    :model-value="title"
+    @update:modelValue="handleTitleUpdate"
+    :icon="VideoIcon"
+    icon-color="text-secondary"
+    :node-id="nodeId"
+    :block-id="block.id"
+    placeholder="Enter asset name"
+  >
     <!-- Source Type Selection -->
     <div class="form-control">
       <label class="label">
@@ -170,9 +160,9 @@ const showPreview = computed(() => videoUrl.value && videoUrl.value.trim() !== '
         <span class="label-text text-xs">Apply to all nodes of this type</span>
       </label>
     </div>
-  </div>
+  </CardBlockWrapper>
 </template>
 
 <style scoped>
-/* All styles have been moved to Tailwind utility classes in the template. */
+/* All styles now handled by CardBlockWrapper */
 </style> 

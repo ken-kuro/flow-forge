@@ -2,8 +2,8 @@
 import { ref, onUnmounted } from 'vue'
 import { Handle, Position } from '@vue-flow/core'
 import { useFlowEditor } from '@/composables/use-flow-editor.js'
-import { X, GitBranch } from 'lucide-vue-next'
-import InlineEditText from '@/components/shared/inline-edit-text.vue'
+import { GitBranch } from 'lucide-vue-next'
+import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue'
 
 const props = defineProps({
   nodeId: {
@@ -16,7 +16,7 @@ const props = defineProps({
   },
 })
 
-const { updateBlock, removeBlock, flushPendingSaves } = useFlowEditor()
+const { updateBlock, flushPendingSaves } = useFlowEditor()
 
 // Flush any pending saves when component is unmounted
 // TODO: MED_PRIORITY - Improve memory management by clearing timers more aggressively
@@ -37,45 +37,39 @@ const updateBlockData = () => {
   updateBlock(props.nodeId, props.block.id, newData)
 }
 
-const handleDelete = () => {
-  removeBlock(props.nodeId, props.block.id)
-}
+// Handle title updates from the wrapper
+const handleTitleUpdate = (newTitle) => {
+  label.value = newTitle;
+  updateBlockData();
+};
 </script>
 
 <template>
-  <div class="condition-branch-block bg-base-100 border border-base-300 rounded-lg p-3 hover:border-base-400 transition-colors duration-200 relative">
-    <!-- Block header -->
-    <div class="flex items-center justify-between mb-3">
-      <div class="flex items-center space-x-2">
-        <GitBranch class="w-4 h-4 text-primary" />
-        <InlineEditText
-          v-model="label"
+  <div class="condition-branch-block relative">
+    <CardBlockWrapper
+      :model-value="label"
+      @update:modelValue="handleTitleUpdate"
+      :icon="GitBranch"
+      icon-color="text-primary"
+      :node-id="nodeId"
+      :block-id="block.id"
+      placeholder="Branch label"
+    >
+      <!-- Condition input -->
+      <!-- TODO: MED_PRIORITY - Add input validation for condition expressions -->
+      <!-- TODO: MED_PRIORITY - Add syntax highlighting for condition text input -->
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text text-xs">Condition</span>
+        </label>
+        <input
+          v-model="condition"
           @blur="updateBlockData"
-          placeholder="Branch label"
-          class="font-medium text-sm"
+          class="input input-bordered input-xs w-full"
+          placeholder="e.g., score > 80"
         />
       </div>
-      <button
-        @click="handleDelete"
-        class="btn btn-ghost btn-xs text-error hover:bg-error/10"
-        title="Delete branch"
-      >
-        <X class="w-3 h-3" />
-      </button>
-    </div>
-
-    <!-- Condition input -->
-    <!-- TODO: MED_PRIORITY - Add input validation for condition expressions -->
-    <!-- TODO: MED_PRIORITY - Add syntax highlighting for condition text input -->
-    <div class="mb-3">
-      <label class="text-xs text-base-content/70 mb-1 block">Condition</label>
-      <input
-        v-model="condition"
-        @blur="updateBlockData"
-        class="input input-bordered input-sm w-full text-xs"
-        placeholder="e.g., score > 80"
-      />
-    </div>
+    </CardBlockWrapper>
 
     <!-- Source handle for connecting to next nodes -->
     <Handle

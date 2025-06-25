@@ -1,8 +1,8 @@
 <script setup>
 import { ref, onUnmounted } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
-import { X, Settings } from 'lucide-vue-next';
-import InlineEditText from '@/components/shared/inline-edit-text.vue';
+import { Settings } from 'lucide-vue-next';
+import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue';
 
 /**
  * SystemActionBlock - A simplified block for system actions in Lecture nodes.
@@ -26,7 +26,7 @@ const props = defineProps({
   },
 });
 
-const { updateBlock, removeBlock, flushPendingSaves } = useFlowEditor();
+const { updateBlock, flushPendingSaves } = useFlowEditor();
 
 // Flush any pending saves when component is unmounted
 onUnmounted(() => {
@@ -64,6 +64,12 @@ const updateBlockData = (immediate = false) => {
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
 
+// Handle title updates from the wrapper
+const handleTitleUpdate = (newTitle) => {
+  title.value = newTitle;
+  updateBlockData(true);
+};
+
 // Handle method selection (multiple choice)
 const toggleMethod = (method) => {
   const index = methods.value.indexOf(method);
@@ -78,34 +84,18 @@ const toggleMethod = (method) => {
 const isMethodSelected = (method) => {
   return methods.value.includes(method);
 };
-
-const handleDelete = () => {
-  removeBlock(props.nodeId, props.block.id);
-};
 </script>
 
 <template>
-  <div class="bg-base-100 border border-base-300 rounded-lg p-3 space-y-3 transition-all duration-200 ease-in-out hover:border-base-content/30">
-    <!-- Block Header -->
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <Settings class="w-4 h-4 text-success" />
-        <InlineEditText
-          v-model="title"
-          @update:modelValue="updateBlockData(true)"
-          placeholder="Enter system action block name"
-          class="text-sm font-medium"
-        />
-      </div>
-      <button
-        @click="handleDelete"
-        class="btn btn-ghost btn-xs text-error hover:bg-error hover:text-error-content"
-        title="Delete System Action Block"
-      >
-        <X class="w-3 h-3" />
-      </button>
-    </div>
-
+  <CardBlockWrapper
+    :model-value="title"
+    @update:modelValue="handleTitleUpdate"
+    :icon="Settings"
+    icon-color="text-success"
+    :node-id="nodeId"
+    :block-id="block.id"
+    placeholder="Enter system action block name"
+  >
     <!-- Action Type -->
     <div class="form-control">
       <label class="label">
@@ -179,9 +169,9 @@ const handleDelete = () => {
         <!-- TODO: Implement object reference similar to variable reference system -->
       </div>
     </div>
-  </div>
+  </CardBlockWrapper>
 </template>
 
 <style scoped>
-/* All styles have been moved to Tailwind utility classes in the template. */
+/* All styles now handled by CardBlockWrapper */
 </style> 
