@@ -18,7 +18,11 @@ import { ref, computed } from "vue";
 
 // --- Flow Editor API ---
 const {
-  createNode,
+  nodes,
+  edges,
+  nodeBlocks,
+  importFlow,
+  exportFlow,
   undo,
   redo,
   canUndo,
@@ -26,9 +30,7 @@ const {
   history,
   historyIndex,
   clearHistory,
-  nodes,
-  edges,
-  nodeBlocks,
+  createNode,
 } = useFlowEditor();
 
 // Ref for the create button to programmatically open the dropdown
@@ -153,11 +155,105 @@ const handleCreateNodeByType = (type) => {
 
 // File operations
 const handleImport = () => {
-  // TODO: Import from JSON file
+  // Create a file input element
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.style.display = 'none';
+  
+  input.onchange = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const flowData = JSON.parse(e.target.result);
+        
+        // Show confirmation dialog if current flow has content
+        const hasContent = nodes.value.length > 2 || Object.keys(nodeBlocks.value).length > 0;
+        
+        if (hasContent) {
+          const confirmed = confirm(
+            `Import "${flowData.name || 'Untitled Flow'}"?\n\n` +
+            'This will replace your current flow. Make sure to export your current work first if you want to keep it.'
+          );
+          
+          if (!confirmed) return;
+        }
+        
+        // Attempt to import the flow
+        const success = importFlow(flowData);
+        
+        if (success) {
+          alert(`✅ Flow "${flowData.name || 'Untitled'}" imported successfully!`);
+        } else {
+          alert('❌ Failed to import flow. Please check the file format and try again.');
+        }
+      } catch (error) {
+        console.error('Import error:', error);
+        alert('❌ Invalid JSON file. Please select a valid Flow Forge export file.');
+      }
+    };
+    
+    reader.onerror = () => {
+      alert('❌ Error reading file. Please try again.');
+    };
+    
+    reader.readAsText(file);
+  };
+  
+  // Trigger file dialog
+  document.body.appendChild(input);
+  input.click();
+  document.body.removeChild(input);
 };
 
 const handleExport = () => {
-  // TODO: Export as JSON or image
+  // Show a simple prompt for flow name and description
+  const flowName = prompt('Enter a name for your flow:', 'My Learning Flow') || 'Untitled Flow';
+  if (flowName === null) return; // User cancelled
+  
+  const flowDescription = prompt('Enter a description (optional):', 'Created with Flow Forge') || 'Created with Flow Forge';
+  
+  try {
+    // Export the flow data
+    const flowData = exportFlow({
+      name: flowName,
+      description: flowDescription
+    });
+    
+    // Create and download the JSON file
+    const jsonString = JSON.stringify(flowData, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    // Create download link with smart filename generation
+    const sanitizedName = flowName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const filename = sanitizedName.includes('flow') 
+      ? `${sanitizedName}.json` 
+      : `${sanitizedName}_flow.json`;
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.style.display = 'none';
+    
+    // Trigger download
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    // Clean up the URL object
+    URL.revokeObjectURL(url);
+    
+    // Show success message
+    alert(`✅ Flow "${flowName}" exported successfully!`);
+    
+  } catch (error) {
+    console.error('Export error:', error);
+    alert('❌ Error exporting flow. Please try again.');
+  }
 };
 
 const handleDebugDump = () => {
