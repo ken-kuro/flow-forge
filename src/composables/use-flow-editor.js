@@ -50,6 +50,7 @@ export function useFlowEditor() {
     zoomOut,
     applyNodeChanges,
     applyEdgeChanges,
+    setViewport,
   } = vueFlowApi;
 
   /**
@@ -262,6 +263,78 @@ export function useFlowEditor() {
     }
   }
 
+  /**
+   * Imports flow data with proper Vue Flow state synchronization.
+   * This method handles the Vue Flow reactivity issue by using the same
+   * "empty-then-set" pattern as undo/redo to force a complete re-render.
+   */
+  async function importFlow(flowData, clearHistoryOnImport = true) {
+    console.log('📥 Importing flow data:', flowData.name);
+    
+    // Set flag to prevent history saves during import
+    flowStore.setRestoringHistory(true);
+    
+    // Use the same "empty-then-set" pattern as undo/redo to force Vue Flow re-render
+    nodes.value = [];
+    edges.value = [];
+    nodeBlocks.value = {};
+    await nextTick();
+    
+    // Call the store import method to validate and set the data
+    const success = flowStore.importFlow(flowData, clearHistoryOnImport);
+    
+    if (success) {
+      // State is already set by flowStore.importFlow, but we need to ensure
+      // Vue Flow picks up the changes by accessing the reactive refs
+      console.log('📍 Applying imported nodes and edges to Vue Flow');
+      
+      // The store has already updated the reactive refs, but we ensure
+      // Vue Flow sees the changes by triggering reactivity
+      await nextTick();
+      
+      // Restore viewport state if provided in the imported data
+      if (flowData.viewport) {
+        console.log('🔍 Restoring viewport state:', flowData.viewport);
+        setViewport({
+          x: flowData.viewport.x || 0,
+          y: flowData.viewport.y || 0,
+          zoom: flowData.viewport.zoom || 1
+        });
+      }
+      
+      console.log('✅ Import completed with proper Vue Flow synchronization');
+    }
+    
+    // Reset restoration flag (store method already does this, but being explicit)
+    flowStore.setRestoringHistory(false);
+    
+    return success;
+  }
+
+  /**
+   * Exports flow data with current viewport state captured from Vue Flow.
+   * This ensures that positions and zoom level are properly preserved.
+   */
+  function exportFlow(options = {}) {
+    console.log('📤 Exporting flow data');
+    
+    // Capture current viewport state from Vue Flow
+    const { viewport } = vueFlowApi;
+    const currentViewport = {
+      x: viewport.x || 0,
+      y: viewport.y || 0,
+      zoom: viewport.zoom || 1
+    };
+    
+    console.log('📍 Current viewport state:', currentViewport);
+    
+    // Export with the current viewport state
+    return flowStore.exportFlow({
+      ...options,
+      viewport: currentViewport
+    });
+  }
+
   // --- Exposed API ---
   // This is what components will use - a clean, consistent interface
   return {
@@ -333,6 +406,10 @@ export function useFlowEditor() {
     // --- Utility ---
     saveState: flowStore.saveState,
     clearHistory: flowStore.clearHistory,
+
+    // --- Import/Export Operations ---
+    exportFlow,
+    importFlow,
 
     // --- Raw Vue Flow API (for advanced use cases) ---
     vueFlowApi,
