@@ -102,7 +102,7 @@ function handleDelete() {
     </div>
 
     <!-- Block Content with standardized spacing -->
-    <div class="block-content space-y-3">
+    <div class="block-content space-y-2">
       <slot>
         <!-- Block-specific content goes here -->
       </slot>
@@ -120,15 +120,7 @@ function handleDelete() {
   min-width: 0; /* Allow flex items to shrink below content size */
 }
 
-/* Standardize form control spacing within blocks */
-.block-content :deep(.form-control) {
-  /* Ensure consistent spacing for all form controls */
-}
-
-.block-content :deep(.form-control:not(:last-child)) {
-  /* Add margin bottom to all form controls except the last one */
-  margin-bottom: 0; /* Let space-y-3 handle this consistently */
-}
+/* Standardize form control spacing within blocks - let space-y-3 handle vertical spacing */
 
 /* Standardize label styling */
 .block-content :deep(.label) {
