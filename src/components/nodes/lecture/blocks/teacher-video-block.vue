@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onUnmounted } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
-import { Play, Upload } from 'lucide-vue-next';
+import { Play, Upload, X } from 'lucide-vue-next';
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue';
 
 /**
@@ -68,6 +68,11 @@ const handleSourceTypeChange = () => {
   videoUrl.value = '';
   updateBlockData(true);
 };
+
+const removeVideo = () => {
+  videoUrl.value = '';
+  updateBlockData(true); // Immediate update on video removal
+};
 </script>
 
 <template>
@@ -131,6 +136,12 @@ const handleSourceTypeChange = () => {
           class="max-w-full max-h-full"
           preload="metadata"
         ></video>
+        <!-- Remove button on preview -->
+        <div class="absolute top-1 right-1">
+          <button @click="removeVideo" class="btn btn-xs btn-circle btn-error">
+            <X class="w-3 h-3" />
+          </button>
+        </div>
       </div>
     </div>
 

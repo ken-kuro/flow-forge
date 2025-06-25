@@ -67,6 +67,11 @@ const handleSourceTypeChange = () => {
   updateBlockData(true);
 }
 
+const removeVideo = () => {
+  videoUrl.value = '';
+  updateBlockData(true); // Immediate update on video removal
+};
+
 // Preview state
 const showPreview = computed(() => videoUrl.value && videoUrl.value.trim() !== '');
 </script>
@@ -144,6 +149,12 @@ const showPreview = computed(() => videoUrl.value && videoUrl.value.trim() !== '
           controls
           class="max-w-full max-h-full"
         ></video>
+        <!-- Remove button on preview -->
+        <div class="absolute top-1 right-1">
+          <button @click="removeVideo" class="btn btn-xs btn-circle btn-error">
+            <X class="w-3 h-3" />
+          </button>
+        </div>
       </div>
     </div>
 
