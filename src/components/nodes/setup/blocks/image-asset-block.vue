@@ -144,20 +144,25 @@ const openObjectModal = () => {
     </div>
     
     <!-- Image Preview -->
-    <div v-if="imageUrl" class="preview-container relative w-full h-32 bg-base-200 rounded flex items-center justify-center overflow-hidden">
-      <img
-        :src="imageUrl"
-        :alt="title || 'Image preview'"
-        class="max-w-full max-h-full object-contain"
-      />
-      <!-- Action buttons on preview -->
-      <div class="absolute top-1 right-1 flex flex-col gap-1">
-        <button @click="openObjectModal" class="btn btn-xs btn-primary btn-outline">
-          Set up object ({{ objects.length }})
-        </button>
-        <button @click="removeImage" class="btn btn-xs btn-circle btn-error self-end">
-          <X class="w-3 h-3" />
-        </button>
+    <div v-if="imageUrl" class="preview-container">
+      <label class="label">
+        <span class="label-text text-xs">Preview</span>
+      </label>
+      <div class="relative w-full h-32 bg-base-200 rounded flex items-center justify-center overflow-hidden">
+        <img
+          :src="imageUrl"
+          :alt="title || 'Image preview'"
+          class="max-w-full max-h-full object-contain"
+        />
+        <!-- Action buttons on preview -->
+        <div class="absolute top-1 right-1 flex flex-col gap-1">
+          <button @click="openObjectModal" class="btn btn-xs btn-primary btn-outline">
+            Set up object ({{ objects.length }})
+          </button>
+          <button @click="removeImage" class="btn btn-xs btn-circle btn-error self-end">
+            <X class="w-3 h-3" />
+          </button>
+        </div>
       </div>
     </div>
     

@@ -130,7 +130,7 @@ const showPreview = computed(() => videoUrl.value && videoUrl.value.trim() !== '
     
     <!-- Video Preview -->
     <div v-if="showPreview" class="preview-container">
-       <label class="label">
+      <label class="label">
         <span class="label-text text-xs">Preview</span>
       </label>
       <div class="w-full h-32 bg-base-200 rounded flex items-center justify-center overflow-hidden relative">
