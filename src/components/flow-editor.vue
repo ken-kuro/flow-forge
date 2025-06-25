@@ -36,7 +36,23 @@ onMounted(() => {
 /**
  * Connection validation function
  * This prevents Vue Flow's default behavior of replacing existing connections on a handle.
- * @returns {boolean}
+ * 
+ * TODO: EDGE_VALIDATION - Implement proper edge validation and duplicate prevention
+ * Current issues to address:
+ * 1. Prevent duplicate edges between the same source/target nodes
+ * 2. Vue Flow doesn't natively support visual separation of parallel edges
+ * 3. Consider implementing custom edge routing or path offsetting
+ * 4. Add user confirmation dialog for potential duplicate connections
+ * 5. Implement edge labeling/numbering for better identification
+ * 
+ * Possible solutions:
+ * - Custom edge component with bezier curve offsets
+ * - Validation to prevent duplicates entirely
+ * - Edge bundling/grouping UI for multiple connections
+ * - Custom pathfinding algorithm for parallel edge routing
+ * 
+ * @param {Object} connection - The connection being validated
+ * @returns {boolean} - Whether the connection is valid
  */
 const isValidConnection = () => true;
 </script>
@@ -67,6 +83,19 @@ const isValidConnection = () => true;
 
       Official Documentation: https://vueflow.dev/guide/controlled-flow.html
     -->
+    <!-- TODO: CUSTOM_MARKERS - Implement custom edge markers for better visual design
+         Current requirements:
+         1. Circle markers at start of edges, arrow markers at end
+         2. Custom marker definitions with proper SVG paths
+         3. State management for hover/selected marker colors
+         4. Bottom-right corner positioning for card node output handles
+         5. Increased padding (top/bottom) for card nodes to match design
+         6. Handle marker state changes dynamically
+         
+         Reference: https://vueflow.dev/examples/edges/markers.html
+         
+         This is a UI polish feature for future phases, not Phase 3 priority.
+    -->
     <VueFlow
       :nodes="nodes"
       :edges="edges"
@@ -76,6 +105,7 @@ const isValidConnection = () => true;
       :nodes-draggable="true"
       :pan-on-scroll="true"
       :delete-key-code="['Backspace', 'Delete']"
+      :multi-selection-key-code="['Control']"
       fit-view-on-init
       class="vue-flow-instance w-full h-full"
     >
