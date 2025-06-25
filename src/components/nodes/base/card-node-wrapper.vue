@@ -66,6 +66,6 @@ function handleUpdate(newValue) {
 }
 
 :deep(.vue-flow__handle[data-handleid="default"].source) {
-  top: 95% !important;
+  top: 65% !important;
 }
 </style> 
