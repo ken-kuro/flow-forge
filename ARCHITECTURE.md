@@ -461,12 +461,13 @@ This architecture ensures:
 - **Preview System**: Live preview of images and video thumbnails
 - **Consistent Styling**: DaisyUI-based theming with hover states and transitions
 
-### **Phase 3: Condition Node (Week 3)** `▶️ In Progress`
-1. **Condition Logic**: Implement a `custom-condition` node type.
-2. **Branching UI**: Allow adding, editing, and removing condition branches within the node.
-3. **Nested Nodes**: Use Vue Flow's parent/child feature to render `condition-branch` nodes inside the condition node. Each branch must have its own source handle.
-4. **Edge Management**: Ensure edges correctly connect from branches to subsequent nodes.
-5. **Data Structure**: Define how conditions are stored (e.g., simple expression or structured object).
+### **Phase 3: Condition Node (Week 3)** `✅ Completed`
+1. **Condition Logic**: ✅ Implemented `custom-condition` node type with boolean expression evaluation.
+2. **Branching UI**: ✅ Added condition branches as blocks within the node using `BlockContainer` pattern.
+3. **Block-Based Architecture**: ✅ Used block system (not child nodes) for condition branches, each with its own source handle.
+https://github.com/bcakmakoglu/vue-flow/discussions/1821
+4. **Edge Management**: ✅ Edges connect from individual condition branch blocks to subsequent nodes.
+5. **Data Structure**: ✅ Condition branches stored in `nodeBlocks` with simple expression format and evaluation logic.
 
 ### **Phase 4: Lecture Node (Week 4-5)**
 1. **Lecture Node Component**: Create a `custom-lecture` node that uses the `BlockContainer` for its content.
