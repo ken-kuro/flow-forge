@@ -80,6 +80,7 @@ const removeVideo = () => {
     :model-value="title"
     @update:modelValue="handleTitleUpdate"
     :icon="Play"
+    icon-color="text-secondary"
     :node-id="nodeId"
     :block-id="block.id"
     placeholder="Enter teacher video block name"
@@ -117,7 +118,7 @@ const removeVideo = () => {
         <label class="label">
            <span class="label-text text-xs">File</span>
         </label>
-        <button @click="handleAddVideo" class="btn btn-sm btn-outline btn-accent w-full">
+        <button @click="handleAddVideo" class="btn btn-sm btn-outline btn-secondary w-full">
           <Upload class="w-3 h-3 mr-2" />
           <span>Add Video (max 15mb)</span>
         </button>

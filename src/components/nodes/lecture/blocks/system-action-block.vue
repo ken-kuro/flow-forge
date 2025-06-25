@@ -122,8 +122,10 @@ const isMethodSelected = (method) => {
         <input
           v-model="delay"
           @blur="updateBlockData()"
-          type="text"
-          placeholder="e.g., 2.5"
+          type="number"
+          step="0.1"
+          min="0"
+          placeholder="2.5"
           class="input input-bordered input-xs"
         />
       </div>
