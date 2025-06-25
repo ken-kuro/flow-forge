@@ -25,14 +25,14 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-/* Target handles (inputs) - Using secondary color for inputs */
+/* Target handles (inputs) - Using  primary color for inputs */
 .vue-flow__handle.target {
-  @apply bg-secondary border-secondary-content opacity-100;
+  @apply bg-primary border-primary-content opacity-100;
 }
 
-/* Source handles (outputs) - Using primary color for outputs */
+/* Source handles (outputs) - Using secondary color for outputs */
 .vue-flow__handle.source {
-  @apply bg-primary border-primary-content opacity-100;
+  @apply bg-secondary border-secondary-content opacity-100;
 }
 
 /* Hover effects - NO position changes, only visual feedback */
