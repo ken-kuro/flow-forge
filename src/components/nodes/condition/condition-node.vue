@@ -1,8 +1,10 @@
 <script setup>
 import { computed, ref } from 'vue'
-import { Handle, Position, useVueFlow } from '@vue-flow/core'
+import { Handle, Position } from '@vue-flow/core'
 import CardNodeWrapper from '@/components/nodes/base/card-node-wrapper.vue'
+import BlockContainer from '@/components/nodes/base/block-container.vue'
 import { useFlowEditor } from '@/composables/use-flow-editor.js'
+import ConditionBranchBlock from './condition-branch-block.vue'
 
 const props = defineProps({
   id: {
@@ -17,24 +19,23 @@ const props = defineProps({
   selected: Boolean,
 })
 
-const { addChildNode, getNode, updateNodeData } = useFlowEditor()
-const { getNodes } = useVueFlow()
+const { addBlock, getNodeBlocks, updateNodeData } = useFlowEditor()
 
 const title = ref(props.data.title);
 
-// Find all branch nodes that belong to this condition node
-const childBranches = computed(() =>
-  getNodes.value.filter(n => n.parentNode === props.id && n.type === 'condition-branch')
-)
+// Get condition branches (stored as blocks)
+const blocks = computed(() => getNodeBlocks(props.id))
 
 function handleAddBranch() {
-  const newBranchData = {
+  const branchCount = blocks.value.length + 1
+  const blockData = {
     type: 'condition-branch',
     data: {
-      label: `Branch #${childBranches.value.length + 1}`
-    }
+      label: `Branch #${branchCount}`,
+      condition: '',
+    },
   }
-  addChildNode(props.id, newBranchData)
+  addBlock(props.id, blockData)
 }
 
 function handleTitleChange() {
@@ -43,43 +44,35 @@ function handleTitleChange() {
 </script>
 
 <template>
-  <!-- The `vue-flow__node-inside` class is used by Vue Flow to correctly position child nodes -->
-  <CardNodeWrapper
-    v-model="title"
-    :selected="selected"
-    @blur="handleTitleChange"
-    node-color="hsl(var(--a))"
-    class="vue-flow__node-inside"
-  >
-    <Handle type="target" :position="Position.Left" />
+  <CardNodeWrapper v-model="title" :selected="selected" @blur="handleTitleChange">
+    <!-- Input handle -->
+    <Handle type="target" :position="Position.Left" id="default" />
 
-    <!--
-      This is the container for the nested branch nodes.
-      Vue Flow will automatically render child nodes here.
-      We add our own list for adding a footer and empty states.
-    -->
-    <div class="space-y-2 p-2 min-w-[220px]">
-      <div v-if="childBranches.length === 0" class="text-center text-xs text-base-content/60 py-4">
-        No branches yet. Add one below.
-      </div>
+    <BlockContainer empty-message="No condition branches yet. Add one below.">
+      <!-- Render condition branch blocks -->
+      <template v-if="blocks.length > 0">
+        <ConditionBranchBlock
+          v-for="block in blocks"
+          :key="block.id"
+          :node-id="id"
+          :block="block"
+        />
+      </template>
 
-      <!-- Child nodes will be rendered by Vue Flow above this point -->
-    </div>
+      <!-- Add branch button -->
+      <template #footer>
+        <button
+          @click="handleAddBranch"
+          class="btn btn-sm btn-outline btn-primary w-full"
+        >
+          <span class="icon-[mdi--plus]"></span>
+          Add Branch
+        </button>
+      </template>
+    </BlockContainer>
 
-    <!-- Footer for actions -->
-    <div class="border-t border-base-300 p-2">
-      <button
-        @click="handleAddBranch"
-        class="btn btn-sm btn-outline btn-primary w-full"
-      >
-        <span class="icon-[mdi--plus]"></span>
-        Add Branch
-      </button>
-    </div>
-
-    <!--
-      A Condition Node itself does not have a direct output.
-      The outputs come from the individual branches within it.
-    -->
+    <!-- Note: No source handle on the main node - branches provide their own source handles -->
   </CardNodeWrapper>
-</template> 
+</template>
+
+ 
