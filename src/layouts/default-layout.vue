@@ -82,7 +82,7 @@ function setTheme(theme) {
             
             <!-- Theme -->
             <div class="flex items-center gap-1 border-l border-base-300 ml-2 pl-2">
-              <div class="dropdown dropdown-right">
+              <div class="dropdown dropdown-bottom">
                 <button
                   tabindex="0"
                   role="button"
