@@ -4,6 +4,11 @@ import InlineEditText from '@/components/shared/inline-edit-text.vue';
 defineProps({
   modelValue: String, // for v-model
   selected: Boolean,
+  icon: Object, // Lucide icon component
+  iconColor: {
+    type: String,
+    default: 'text-primary'
+  }
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -24,8 +29,13 @@ function handleUpdate(newValue) {
     ]"
   >
     <!-- Header Section -->
-    <div class="node-header p-3 border-b-2 border-base-300 font-bold text-lg flex items-center">
+    <div class="node-header p-3 border-b-2 border-base-300 font-bold text-lg flex items-center gap-2">
       <slot name="header">
+        <component 
+          v-if="icon" 
+          :is="icon" 
+          :class="['w-5 h-5 flex-shrink-0', iconColor]" 
+        />
         <InlineEditText
           :model-value="modelValue"
           @update:modelValue="handleUpdate"
@@ -56,6 +66,6 @@ function handleUpdate(newValue) {
 }
 
 :deep(.vue-flow__handle[data-handleid="default"].source) {
-  top: 65% !important;
+  top: 95% !important;
 }
 </style> 

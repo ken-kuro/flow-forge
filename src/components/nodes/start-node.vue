@@ -1,5 +1,6 @@
 <script setup>
 import { Handle, Position } from '@vue-flow/core'
+import { Play } from 'lucide-vue-next'
 
 /**
  * StartNode - A simple, circular flow entry point.
@@ -27,7 +28,7 @@ const props = defineProps({
     class="start-node w-16 h-16 flex items-center justify-center rounded-full border-2 bg-success text-success-content border-success-focus transition-all duration-200 ease-in-out"
     :class="{ 'ring-4 ring-success ring-opacity-70': selected }"
   >
-    {{ data.title }}
+    <Play class="w-6 h-6" />
 
     <!-- Single source handle, centered at the right - uses global styling -->
     <Handle

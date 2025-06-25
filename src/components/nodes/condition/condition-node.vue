@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { Handle, Position } from '@vue-flow/core'
-import { Plus } from 'lucide-vue-next'
+import { Plus, GitBranch } from 'lucide-vue-next'
 import CardNodeWrapper from '@/components/nodes/base/card-node-wrapper.vue'
 import BlockContainer from '@/components/nodes/base/block-container.vue'
 import { useFlowEditor } from '@/composables/use-flow-editor.js'
@@ -48,7 +48,7 @@ function handleTitleChange() {
 </script>
 
 <template>
-  <CardNodeWrapper v-model="title" :selected="selected" @blur="handleTitleChange">
+  <CardNodeWrapper v-model="title" :selected="selected" :icon="GitBranch" icon-color="text-warning" @blur="handleTitleChange">
     <!-- Input handle -->
     <Handle type="target" :position="Position.Left" id="default" />
 

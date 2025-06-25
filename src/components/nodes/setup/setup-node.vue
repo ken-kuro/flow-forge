@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { Handle, Position } from '@vue-flow/core'
+import { Settings } from 'lucide-vue-next'
 import CardNodeWrapper from '@/components/nodes/base/card-node-wrapper.vue'
 import BlockContainer from '@/components/nodes/base/block-container.vue'
 import { useFlowEditor } from '@/composables/use-flow-editor.js'
@@ -69,7 +70,7 @@ function handleTitleChange() {
 </script>
 
 <template>
-  <CardNodeWrapper v-model="title" :selected="selected" @blur="handleTitleChange">
+  <CardNodeWrapper v-model="title" :selected="selected" :icon="Settings" icon-color="text-primary" @blur="handleTitleChange">
     <!-- Input handle on the left, named 'default' for specific styling -->
     <Handle type="target" :position="Position.Left" id="default" />
 
