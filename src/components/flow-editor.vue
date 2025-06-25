@@ -1,6 +1,6 @@
 <script setup>
 
-import { VueFlow } from "@vue-flow/core";
+import { ConnectionMode,VueFlow } from "@vue-flow/core";
 import { Background } from "@vue-flow/background";
 import { Controls } from "@vue-flow/controls";
 import { MiniMap } from "@vue-flow/minimap";
@@ -54,7 +54,7 @@ onMounted(() => {
  * @param {Object} connection - The connection being validated
  * @returns {boolean} - Whether the connection is valid
  */
-const isValidConnection = () => true;
+// const isValidConnection = () => true;
 </script>
 
 <template>
@@ -101,11 +101,11 @@ const isValidConnection = () => true;
       :edges="edges"
       :node-types="nodeTypes"
       :apply-default="false"
-      :is-valid-connection="isValidConnection"
       :nodes-draggable="true"
       :pan-on-scroll="true"
       :delete-key-code="['Backspace', 'Delete']"
       :multi-selection-key-code="['Control']"
+      :connection-mode="ConnectionMode.Strict"
       fit-view-on-init
       class="vue-flow-instance w-full h-full"
     >
