@@ -438,6 +438,7 @@ export const useFlowStore = defineStore('flow', () => {
       nodeBlocks.value[nodeId] = [];
     }
 
+    // TODO: Revisit this, this might be a performance bottleneck
     // Find the node for the description
     const node = nodes.value.find(n => n.id === nodeId);
 
@@ -469,6 +470,8 @@ export const useFlowStore = defineStore('flow', () => {
   function removeBlock(nodeId, blockId) {
     if (nodeBlocks.value[nodeId]) {
       const block = nodeBlocks.value[nodeId].find(b => b.id === blockId);
+       // TODO: Revisit this, this might be a performance bottleneck
+      const node = nodes.value.find(n => n.id === nodeId);
       nodeBlocks.value[nodeId] = nodeBlocks.value[nodeId].filter(b => b.id !== blockId);
       
       // If this was a condition branch block, remove associated edges
@@ -541,20 +544,33 @@ export const useFlowStore = defineStore('flow', () => {
   /**
    * Resolves an asset reference from a setup node
    * @param {string} setupNodeId - The ID of the setup node
-   * @param {string} assetId - The ID of the asset
+   * @param {string} assetId - The ID of the asset (block ID)
    * @returns {Object|null} The asset block data or null if not found
    */
   function getAssetFromSetup(setupNodeId, assetId) {
     const setupBlocks = nodeBlocks.value[setupNodeId] || []
     return setupBlocks.find(block => 
       (block.type === 'asset-image' || block.type === 'asset-video') && 
-      block.data.assetId === assetId
+      block.id === assetId
     ) || null
   }
 
   /**
    * Gets all available assets from setup nodes
    * TODO: MED_PRIORITY - Optimize asset lookup with memoization for large flows
+   * TODO: HIGH_PRIORITY - Scope asset finding to only setup nodes that are connected to the current node and come before it in the flow
+   *       Implementation approach:
+   *       1. Add flow execution order analysis - traverse edges to determine which nodes come before current node
+   *       2. Implement path-finding algorithm to check connectivity from setup nodes to current lecture node
+   *       3. Filter assets to only include those from:
+   *          - Setup nodes that have a valid execution path to the current node
+   *          - Setup nodes that appear earlier in the flow execution sequence
+   *       4. Consider edge cases: 
+   *          - Conditional branches (multiple paths)
+   *          - Loops in the flow (prevent infinite recursion)
+   *          - Disconnected setup nodes (should be excluded)
+   *       5. Update getAvailableAssets to accept currentNodeId parameter for scoped filtering
+   *       6. Modify assets-applied-block to pass its parent nodeId to getAvailableAssets
    * @returns {Array} Array of available assets with metadata
    */
   function getAvailableAssets() {
@@ -570,7 +586,7 @@ export const useFlowStore = defineStore('flow', () => {
           assets.push({
             setupNodeId: setupNode.id,
             setupNodeTitle: setupNode.data.title,
-            assetId: block.data.assetId,
+            assetId: block.id, // Use block ID as asset ID
             assetTitle: block.data.title,
             assetType: block.type,
             assetData: block.data

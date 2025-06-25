@@ -35,57 +35,42 @@ onUnmounted(() => {
 
 // Local reactive copies for editing
 const title = ref(props.block.data.title || '');
-const setupNodeId = ref(props.block.data.setupNodeId || '');
-const assetId = ref(props.block.data.assetId || '');
+const selectedAssetKey = ref(props.block.data.selectedAssetKey || '');
 
 // Get available assets from setup nodes
 const availableAssets = computed(() => getAvailableAssets());
 
-// Get the currently selected asset data
-const selectedAsset = computed(() => {
-  if (!setupNodeId.value || !assetId.value) return null;
-  const asset = getAssetFromSetup(setupNodeId.value, assetId.value);
-  return asset;
+// Create options for the select dropdown
+const assetOptions = computed(() => {
+  const options = [];
+  availableAssets.value.forEach(asset => {
+    const key = `${asset.setupNodeId}-${asset.assetId}`;
+    options.push({
+      value: key,
+      label: `${asset.setupNodeTitle} > ${asset.assetTitle || 'Untitled Asset'} (${asset.assetType.replace('asset-', '')})`
+    });
+  });
+  return options;
 });
 
-// Grouped assets by setup node for easier selection
-const groupedAssets = computed(() => {
-  const groups = {};
-  availableAssets.value.forEach(asset => {
-    if (!groups[asset.setupNodeId]) {
-      groups[asset.setupNodeId] = {
-        setupNodeTitle: asset.setupNodeTitle,
-        assets: []
-      };
-    }
-    groups[asset.setupNodeId].assets.push(asset);
-  });
-  return groups;
+// Get the currently selected asset data
+const selectedAsset = computed(() => {
+  if (!selectedAssetKey.value) return null;
+  const [setupNodeId, assetId] = selectedAssetKey.value.split('-');
+  return getAssetFromSetup(setupNodeId, assetId);
 });
 
 // Update the store when values change
 const updateBlockData = (immediate = false) => {
   const newData = {
     title: title.value,
-    setupNodeId: setupNodeId.value,
-    assetId: assetId.value,
+    selectedAssetKey: selectedAssetKey.value,
   };
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
 
 const handleDelete = () => {
   removeBlock(props.nodeId, props.block.id);
-};
-
-const handleAssetSelection = (selectedSetupNodeId, selectedAssetId) => {
-  setupNodeId.value = selectedSetupNodeId;
-  assetId.value = selectedAssetId;
-  updateBlockData(true);
-};
-
-// Get icon for asset type
-const getAssetIcon = (assetType) => {
-  return assetType === 'asset-image' ? ImageIcon : VideoIcon;
 };
 </script>
 
@@ -116,54 +101,65 @@ const getAssetIcon = (assetType) => {
       <label class="label">
         <span class="label-text text-xs">Select Asset</span>
       </label>
-      <div v-if="Object.keys(groupedAssets).length === 0" class="text-xs text-base-content/50 p-2 bg-base-200 rounded">
+      <select
+        v-model="selectedAssetKey"
+        @change="updateBlockData(true)"
+        class="select select-bordered select-xs"
+      >
+        <option value="">Choose an asset...</option>
+        <option v-for="option in assetOptions" :key="option.value" :value="option.value">
+          {{ option.label }}
+        </option>
+      </select>
+      <div v-if="assetOptions.length === 0" class="text-xs text-base-content/50 mt-1">
         No assets available. Create assets in Setup nodes first.
-      </div>
-      <div v-else class="space-y-2">
-        <div v-for="(group, nodeId) in groupedAssets" :key="nodeId" class="border border-base-300 rounded p-2">
-          <div class="text-xs font-medium text-base-content/70 mb-1">{{ group.setupNodeTitle }}</div>
-          <div class="space-y-1">
-            <div 
-              v-for="asset in group.assets" 
-              :key="asset.assetId"
-              @click="handleAssetSelection(nodeId, asset.assetId)"
-              :class="[
-                'flex items-center gap-2 p-2 rounded cursor-pointer text-xs transition-colors',
-                setupNodeId === nodeId && assetId === asset.assetId
-                  ? 'bg-secondary text-secondary-content' 
-                  : 'hover:bg-base-200'
-              ]"
-            >
-              <component :is="getAssetIcon(asset.assetType)" class="w-3 h-3" />
-              <span class="flex-1">{{ asset.assetTitle || 'Untitled Asset' }}</span>
-              <span class="text-xs opacity-50">{{ asset.assetType.replace('asset-', '') }}</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
 
-    <!-- Asset Preview -->
+        <!-- Asset Preview -->
     <div v-if="selectedAsset" class="preview-container space-y-2">
       <label class="label">
         <span class="label-text text-xs">Preview</span>
       </label>
+      
+      <!-- Debug info (remove after testing) -->
+      <div class="text-xs text-base-content/50 p-2 bg-base-300 rounded">
+        <div>Type: {{ selectedAsset.type }}</div>
+        <div>imageUrl: {{ selectedAsset.data?.imageUrl || 'not set' }}</div>
+        <div>videoUrl: {{ selectedAsset.data?.videoUrl || 'not set' }}</div>
+        <div>Data keys: {{ Object.keys(selectedAsset.data || {}).join(', ') }}</div>
+      </div>
+      
       <div class="w-full h-32 bg-base-200 rounded flex items-center justify-center overflow-hidden relative">
         <!-- Image Preview -->
         <img
-          v-if="selectedAsset.type === 'asset-image'"
+          v-if="selectedAsset.type === 'asset-image' && selectedAsset.data.imageUrl"
           :src="selectedAsset.data.imageUrl"
           :alt="selectedAsset.data.title"
           class="max-w-full max-h-full object-contain"
         />
         <!-- Video Preview -->
         <video
-          v-else-if="selectedAsset.type === 'asset-video'"
+          v-else-if="selectedAsset.type === 'asset-video' && selectedAsset.data.videoUrl"
           :src="selectedAsset.data.videoUrl"
           controls
           class="max-w-full max-h-full"
           preload="metadata"
         ></video>
+        <!-- Fallback for missing or invalid assets -->
+        <div v-else class="flex flex-col items-center gap-2 text-base-content/50 text-xs text-center">
+          <component 
+            :is="selectedAsset.type === 'asset-image' ? ImageIcon : VideoIcon" 
+            class="w-8 h-8" 
+          />
+          <span v-if="selectedAsset.type === 'asset-image'">
+            {{ selectedAsset.data.imageUrl ? 'Image failed to load' : 'No image URL set' }}
+          </span>
+          <span v-else-if="selectedAsset.type === 'asset-video'">
+            {{ selectedAsset.data.videoUrl ? 'Video failed to load' : 'No video URL set' }}
+          </span>
+          <span v-else>No preview available</span>
+        </div>
       </div>
     </div>
 
