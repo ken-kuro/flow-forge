@@ -1,7 +1,7 @@
 <script setup>
 import { useFlowEditor } from "@/composables/use-flow-editor";
 import { Plus, History, Undo, Redo, Download, Upload, Bug } from "lucide-vue-next";
-import { useMagicKeys, whenever } from "@vueuse/core";
+import { useMagicKeys } from "@vueuse/core";
 import { ref, computed } from "vue";
 
 /**
@@ -31,24 +31,48 @@ const {
   nodeBlocks,
 } = useFlowEditor();
 
-// Keyboard shortcuts
-const { ctrl_z, ctrl_y, ctrl_shift_z, cmd_z, cmd_y, cmd_shift_z } = useMagicKeys()
-
 // Ref for the create button to programmatically open the dropdown
 const createButtonRef = ref(null);
 
 // --- Keyboard Shortcuts ---
-// The `whenever` utility from @vueuse/core is used here instead of `watch` or `watchEffect`
-// to treat key presses as one-time events. This prevents infinite loops that can occur
-// when a watcher's callback modifies its own reactive dependencies.
+// Using useMagicKeys with onEventFired for more precise control
+// This prevents multiple triggers from key repeat or event phases
 
-// Undo shortcuts: Ctrl+Z or Cmd+Z
-const undoKeys = computed(() => (ctrl_z.value && !ctrl_shift_z.value) || (cmd_z.value && !cmd_shift_z.value));
-whenever(undoKeys, undo);
+// Track the last action time to prevent duplicate executions
+let lastUndoTime = 0;
+let lastRedoTime = 0;
+const DEBOUNCE_DELAY = 100; // 100ms debounce
 
-// Redo shortcuts: Ctrl+Y, Ctrl+Shift+Z, Cmd+Y, or Cmd+Shift+Z
-const redoKeys = computed(() => ctrl_y.value || ctrl_shift_z.value || cmd_y.value || cmd_shift_z.value);
-whenever(redoKeys, redo);
+const { ctrl_z, ctrl_y, ctrl_shift_z, cmd_z, cmd_y, cmd_shift_z } = useMagicKeys({
+  passive: false,
+  onEventFired(e) {
+    const now = Date.now();
+    
+    // Only handle keydown events to avoid duplicates
+    if (e.type !== 'keydown') return;
+    
+    // Undo: Ctrl+Z or Cmd+Z (but not Ctrl+Shift+Z)
+    if (((e.ctrlKey && e.key.toLowerCase() === 'z' && !e.shiftKey) || (e.metaKey && e.key.toLowerCase() === 'z' && !e.shiftKey)) 
+        && canUndo.value && (now - lastUndoTime) > DEBOUNCE_DELAY) {
+      e.preventDefault();
+      e.stopPropagation();
+      lastUndoTime = now;
+      undo();
+      return;
+    }
+    
+    // Redo: Ctrl+Y, Ctrl+Shift+Z, Cmd+Y, or Cmd+Shift+Z
+    if (((e.ctrlKey && e.key.toLowerCase() === 'y') || (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'z') || 
+         (e.metaKey && e.key.toLowerCase() === 'y') || (e.metaKey && e.shiftKey && e.key.toLowerCase() === 'z'))
+        && canRedo.value && (now - lastRedoTime) > DEBOUNCE_DELAY) {
+      e.preventDefault();
+      e.stopPropagation();
+      lastRedoTime = now;
+      redo();
+      return;
+    }
+  },
+});
 
 // Keyboard shortcut for creating a new node
 const { ctrl_alt_n, cmd_option_n } = useMagicKeys({
