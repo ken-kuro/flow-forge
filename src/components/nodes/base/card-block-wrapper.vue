@@ -154,8 +154,4 @@ function handleDelete() {
 .block-content :deep(.preview-container) {
   /* Standard preview container styling */
 }
-
-.block-content :deep(.preview-container .label) {
-  margin-bottom: 0.5rem; /* 8px - consistent preview label spacing */
-}
 </style> 
