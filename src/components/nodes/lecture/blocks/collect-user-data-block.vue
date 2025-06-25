@@ -35,26 +35,22 @@ onUnmounted(() => {
 
 // Local reactive copies for editing
 const title = ref(props.block.data.title || '');
-const collectionTypes = ref(props.block.data.collectionTypes || []);
-const prompt = ref(props.block.data.prompt || '');
-const variableName = ref(props.block.data.variableName || '');
-const showSummary = ref(props.block.data.showSummary !== false); // Default true
+const methods = ref(props.block.data.methods || []);
+const saveToField = ref(props.block.data.saveToField || '');
 
-// Available collection types
-const availableTypes = [
-  { value: 'voice', label: 'Voice', icon: '🎤' },
-  { value: 'choice', label: 'Choose answer', icon: '✅' },
-  { value: 'text', label: 'Text input', icon: '📝' },
+// Available collection methods (multiple choice)
+const availableMethods = [
+  { value: 'voice', label: 'Voice' },
+  { value: 'choose-answer', label: 'Choose Answer' },
+  { value: 'text-input', label: 'Text Input' },
 ];
 
 // Update the store when values change
 const updateBlockData = (immediate = false) => {
   const newData = {
     title: title.value,
-    collectionTypes: collectionTypes.value,
-    prompt: prompt.value,
-    variableName: variableName.value,
-    showSummary: showSummary.value,
+    methods: methods.value,
+    saveToField: saveToField.value,
   };
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
@@ -63,19 +59,19 @@ const handleDelete = () => {
   removeBlock(props.nodeId, props.block.id);
 };
 
-// Handle collection type selection
-const toggleCollectionType = (type) => {
-  const index = collectionTypes.value.indexOf(type);
+// Handle method selection (multiple choice)
+const toggleMethod = (method) => {
+  const index = methods.value.indexOf(method);
   if (index > -1) {
-    collectionTypes.value.splice(index, 1);
+    methods.value.splice(index, 1);
   } else {
-    collectionTypes.value.push(type);
+    methods.value.push(method);
   }
   updateBlockData(true);
 };
 
-const isTypeSelected = (type) => {
-  return collectionTypes.value.includes(type);
+const isMethodSelected = (method) => {
+  return methods.value.includes(method);
 };
 </script>
 
@@ -101,66 +97,45 @@ const isTypeSelected = (type) => {
       </button>
     </div>
 
-    <!-- Collection Types -->
+    <!-- Method Selection (Multiple Choice) -->
     <div class="form-control">
       <label class="label">
-        <span class="label-text text-xs">Collection Methods</span>
+        <span class="label-text text-xs">Method</span>
       </label>
-      <div class="space-y-2">
-        <div v-for="type in availableTypes" :key="type.value" class="form-control">
-          <label class="label cursor-pointer justify-start gap-2 p-0">
-            <input
-              type="checkbox"
-              :checked="isTypeSelected(type.value)"
-              @change="toggleCollectionType(type.value)"
-              class="checkbox checkbox-xs checkbox-warning"
-            />
-            <span class="label-text text-xs">
-              {{ type.icon }} {{ type.label }}
-            </span>
-          </label>
+      <div class="dropdown w-full">
+        <div tabindex="0" role="button" class="select select-bordered select-xs w-full flex items-center cursor-pointer">
+          <span v-if="methods.length === 0" class="text-base-content/50">Select methods...</span>
+          <span v-else class="text-left">{{ methods.map(m => availableMethods.find(am => am.value === m)?.label || m).join(', ') }}</span>
         </div>
+        <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-full p-2 shadow-lg border border-base-300 mt-1">
+          <li v-for="method in availableMethods" :key="method.value">
+            <label class="label cursor-pointer justify-start gap-2 p-2 hover:bg-base-200 rounded">
+              <input
+                type="checkbox"
+                :checked="isMethodSelected(method.value)"
+                @change="toggleMethod(method.value)"
+                class="checkbox checkbox-xs checkbox-warning"
+              />
+              <span class="label-text text-xs">{{ method.label }}</span>
+            </label>
+          </li>
+        </ul>
       </div>
     </div>
 
-    <!-- Prompt -->
+    <!-- Save To Field -->
     <div class="form-control">
       <label class="label">
-        <span class="label-text text-xs">Prompt</span>
-      </label>
-      <textarea
-        v-model="prompt"
-        @blur="updateBlockData()"
-        placeholder="Please provide your response..."
-        class="textarea textarea-bordered textarea-xs h-16 resize-none"
-      ></textarea>
-    </div>
-
-    <!-- Variable Name -->
-    <div class="form-control">
-      <label class="label">
-        <span class="label-text text-xs">Store in Variable</span>
+        <span class="label-text text-xs">Save to</span>
       </label>
       <input
-        v-model="variableName"
+        v-model="saveToField"
         @blur="updateBlockData()"
         type="text"
-        placeholder="user-response"
+        placeholder="TODO: Variable reference system"
         class="input input-bordered input-xs"
       />
-    </div>
-
-    <!-- Settings -->
-    <div class="form-control">
-      <label class="label cursor-pointer justify-start gap-2 p-0">
-        <input
-          type="checkbox"
-          v-model="showSummary"
-          @change="updateBlockData(true)"
-          class="checkbox checkbox-xs checkbox-warning"
-        />
-        <span class="label-text text-xs">Show summary after collection</span>
-      </label>
+      <!-- TODO: Implement variable reference similar to assets reference in asset applied block -->
     </div>
 
 

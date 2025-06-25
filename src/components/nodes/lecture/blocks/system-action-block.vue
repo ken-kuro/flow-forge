@@ -35,16 +35,21 @@ onUnmounted(() => {
 
 // Local reactive copies for editing
 const title = ref(props.block.data.title || '');
-const action = ref(props.block.data.action || 'set-variable');
-const value = ref(props.block.data.value || '');
+const action = ref(props.block.data.action || 'asset-interaction');
+const delay = ref(props.block.data.delay || '');
+const methods = ref(props.block.data.methods || []);
+const object = ref(props.block.data.object || '');
 
-// Available actions
+// Available actions (extensible for future API calls, jobs, etc.)
 const actionOptions = [
-  { value: 'set-variable', label: 'Set Variable' },
-  { value: 'clear-variable', label: 'Clear Variable' },
-  { value: 'api-call', label: 'API Call' },
-  { value: 'send-notification', label: 'Send Notification' },
-  { value: 'log-event', label: 'Log Event' },
+  { value: 'asset-interaction', label: 'Asset Interaction' },
+  // Future: api-call, do-job, etc.
+];
+
+// Available methods for asset interaction (multiple choice)
+const availableMethods = [
+  { value: 'circle', label: 'Circle' },
+  { value: 'score', label: 'Score' },
 ];
 
 // Update the store when values change
@@ -52,9 +57,26 @@ const updateBlockData = (immediate = false) => {
   const newData = {
     title: title.value,
     action: action.value,
-    value: value.value,
+    delay: delay.value,
+    methods: methods.value,
+    object: object.value,
   };
   updateBlock(props.nodeId, props.block.id, newData, immediate);
+};
+
+// Handle method selection (multiple choice)
+const toggleMethod = (method) => {
+  const index = methods.value.indexOf(method);
+  if (index > -1) {
+    methods.value.splice(index, 1);
+  } else {
+    methods.value.push(method);
+  }
+  updateBlockData(true);
+};
+
+const isMethodSelected = (method) => {
+  return methods.value.includes(method);
 };
 
 const handleDelete = () => {
@@ -100,18 +122,62 @@ const handleDelete = () => {
       </select>
     </div>
 
-    <!-- Value Field -->
-    <div class="form-control">
-      <label class="label">
-        <span class="label-text text-xs">Value</span>
-      </label>
-      <input
-        v-model="value"
-        @blur="updateBlockData()"
-        type="text"
-        placeholder="Enter value"
-        class="input input-bordered input-xs"
-      />
+    <!-- Asset Interaction Fields (show only when action is asset-interaction) -->
+    <div v-if="action === 'asset-interaction'" class="space-y-3">
+      <!-- Delay Field -->
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text text-xs">Delay (in seconds)</span>
+        </label>
+        <input
+          v-model="delay"
+          @blur="updateBlockData()"
+          type="text"
+          placeholder="e.g., 2.5"
+          class="input input-bordered input-xs"
+        />
+      </div>
+
+      <!-- Method Selection (Multiple Choice) -->
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text text-xs">Method view</span>
+        </label>
+        <div class="dropdown w-full">
+          <div tabindex="0" role="button" class="select select-bordered select-xs w-full flex items-center cursor-pointer">
+            <span v-if="methods.length === 0" class="text-base-content/50">Select view methods...</span>
+            <span v-else class="text-left">{{ methods.map(m => availableMethods.find(am => am.value === m)?.label || m).join(', ') }}</span>
+          </div>
+          <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-[1] w-full p-2 shadow-lg border border-base-300 mt-1">
+            <li v-for="method in availableMethods" :key="method.value">
+              <label class="label cursor-pointer justify-start gap-2 p-2 hover:bg-base-200 rounded">
+                <input
+                  type="checkbox"
+                  :checked="isMethodSelected(method.value)"
+                  @change="toggleMethod(method.value)"
+                  class="checkbox checkbox-xs checkbox-success"
+                />
+                <span class="label-text text-xs">{{ method.label }}</span>
+              </label>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Object Field -->
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text text-xs">Object</span>
+        </label>
+        <input
+          v-model="object"
+          @blur="updateBlockData()"
+          type="text"
+          placeholder="TODO: Object reference system"
+          class="input input-bordered input-xs"
+        />
+        <!-- TODO: Implement object reference similar to variable reference system -->
+      </div>
     </div>
   </div>
 </template>
