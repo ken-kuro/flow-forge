@@ -70,7 +70,7 @@ const handleDelete = () => {
         v-model="condition"
         @blur="updateBlockData"
         class="input input-bordered input-sm w-full text-xs"
-        placeholder="e.g., user_name !== '' or score > 80"
+        placeholder="e.g., score > 80"
       />
     </div>
 
@@ -78,7 +78,7 @@ const handleDelete = () => {
     <Handle
       type="source"
       :position="Position.Right"
-      :id="`${nodeId}-${block.id}`"
+      :id="block.id"
       class="branch-handle"
     />
   </div>

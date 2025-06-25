@@ -133,11 +133,49 @@ export function useFlowEditor() {
     // We handle onConnect here in the controller to ensure the correct event is emitted.
     onConnect((connection) => {
       console.log('🔌 New connection:', connection);
+      console.log('🔍 Source handle:', connection.sourceHandle);
       
       const newEdge = {
         ...connection,
         id: connection.id || generateId('edge'),
       };
+
+      // Check if this connection is from a condition branch handle
+      // Now we just need to check if the sourceHandle is a block ID from any condition node
+      const branchId = connection.sourceHandle;
+      if (branchId) {
+        console.log('🔍 Checking if handle is a condition branch:', branchId);
+        
+        // Search through all condition nodes to find the branch
+        let foundBranch = null;
+        let sourceNodeId = null;
+        
+        for (const node of nodes.value) {
+          if (node.type === NODE_TYPES.CONDITION) {
+            const sourceBlocks = nodeBlocks.value[node.id] || [];
+            const branch = sourceBlocks.find(b => b.id === branchId && b.type === 'condition-branch');
+            if (branch) {
+              foundBranch = branch;
+              sourceNodeId = node.id;
+              break;
+            }
+          }
+        }
+        
+        if (foundBranch && sourceNodeId) {
+          console.log('✅ Found condition branch:', foundBranch, 'on node:', sourceNodeId);
+          newEdge.data = {
+            ...newEdge.data,
+            branchId: branchId,
+            branchLabel: foundBranch.data.label || `Branch ${branchId}`,
+            conditionExpression: foundBranch.data.condition || '',
+            isConditionBranch: true
+          };
+          console.log(`🔀 Adding condition branch edge for "${foundBranch.data.label}"`, newEdge.data);
+        } else {
+          console.log('🔍 Handle is not a condition branch, treating as regular connection');
+        }
+      }
       
       console.log('➕ Adding new edge:', newEdge);
       
