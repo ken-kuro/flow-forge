@@ -311,8 +311,6 @@ const handleDebugDump = () => {
 <style scoped>
 .app-toolbar {
   user-select: none;
-  margin-right: 8px;
-  margin-top: 8px;
   animation: slideInFromRight 0.3s ease-out;
 }
 
