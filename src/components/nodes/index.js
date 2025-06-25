@@ -16,7 +16,6 @@ import EndNode from './end-node.vue';
 import SetupNode from './setup/setup-node.vue';
 import LectureNode from './lecture/lecture-node.vue'
 import ConditionNode from './condition/condition-node.vue'
-import ConditionBranchNode from './condition/condition-branch-node.vue'
 import { NODE_TYPES } from '@/utils/constants';
 
 // The nodeTypes object maps a string key to a Vue component.
@@ -27,5 +26,4 @@ export const nodeTypes = {
   [NODE_TYPES.SETUP]: markRaw(SetupNode),
   [NODE_TYPES.LECTURE]: markRaw(LectureNode),
   [NODE_TYPES.CONDITION]: markRaw(ConditionNode),
-  [NODE_TYPES.CONDITION_BRANCH]: markRaw(ConditionBranchNode),
 }; 

@@ -244,7 +244,7 @@ export function useFlowEditor() {
         }
       };
 
-      if (nodeData.type === NODE_TYPES.SETUP || nodeData.type === NODE_TYPES.LECTURE) {
+      if (nodeData.type === NODE_TYPES.SETUP || nodeData.type === NODE_TYPES.LECTURE || nodeData.type === NODE_TYPES.CONDITION) {
         nodeBlocks.value[newNode.id] = [];
         newNode.data.hasBlocks = true;
       }
@@ -254,29 +254,7 @@ export function useFlowEditor() {
       // which our store will then use to save the history state.
       addNodes([newNode]);
     },
-    addChildNode: (parentNodeId, childNodeData) => {
-      // Find parent to calculate position, but this is a view concern.
-      // The core logic is creating the node and adding it via the API.
-      const parentNode = vueFlowApi.findNode(parentNodeId);
-      if (!parentNode) {
-        console.error(`Parent node with ID ${parentNodeId} not found.`);
-        return;
-      }
 
-      // Find existing children for this parent to calculate the new position
-      const existingChildren = nodes.value.filter(n => n.parentNode === parentNodeId);
-      const newYPosition = (existingChildren.length * 60) + 50;
-
-      const newChildNode = {
-        id: generateId(childNodeData.type || 'node'),
-        ...childNodeData,
-        position: { x: 10, y: newYPosition }, // Position relative to parent
-        parentNode: parentNodeId,
-        extent: 'parent', // Constrain node to parent bounds
-      };
-
-      addNodes([newChildNode]);
-    },
     
     updateNodeData: (nodeId, data) => {
       flowStore.updateNodeData(nodeId, data);

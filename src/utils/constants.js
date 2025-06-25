@@ -14,5 +14,4 @@ export const NODE_TYPES = {
   SETUP: 'custom-setup',
   LECTURE: 'custom-lecture',
   CONDITION: 'custom-condition',
-  CONDITION_BRANCH: 'custom-condition-branch',
 }; 
