@@ -154,7 +154,7 @@ const handleSourceTypeChange = () => {
         v-model="transcript"
         @blur="updateBlockData()"
         placeholder="Enter video transcript"
-        class="textarea textarea-bordered textarea-xs h-20 resize-none"
+        class="textarea textarea-bordered textarea-xs min-h-18 resize-none"
       ></textarea>
     </div>
   </div>
