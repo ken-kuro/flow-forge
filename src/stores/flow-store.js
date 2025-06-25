@@ -359,23 +359,12 @@ export const useFlowStore = defineStore('flow', () => {
           const blockName = block.data.title || `Block #${block.id.slice(0,4)}`;
           const nodeIdentifier = `${formatNodeTypeName(node?.type)} "${node?.data.title}"`;
 
-          // Handle specific field updates with proper logic
+          // Simple, consistent approach: only handle title renames specially
           if (newData.title && newData.title !== oldTitle) {
             description = `Rename block from "${oldTitle}" to "${newData.title}" in ${nodeIdentifier}`;
-          } else if (newData.objects) {
-            description = `Finish setting up object(s) in "${blockName}" in ${nodeIdentifier}`;
-          } else if (newData.condition !== undefined) {
-            description = `Update condition for "${blockName}" in ${nodeIdentifier}`;
-          } else if (newData.label !== undefined) {
-            description = `Update label for "${blockName}" in ${nodeIdentifier}`;
           } else {
-            // Fallback for any other field updates
-            const updatedFields = Object.keys(newData);
-            if (updatedFields.length === 1) {
-              description = `Update ${updatedFields[0]} for "${blockName}" in ${nodeIdentifier}`;
-            } else {
-              description = `Update block "${blockName}" in ${nodeIdentifier}`;
-            }
+            // Generic message for all other updates
+            description = `Update block "${blockName}" in ${nodeIdentifier}`;
           }
 
           // Perform the update
