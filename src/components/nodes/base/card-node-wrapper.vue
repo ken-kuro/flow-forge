@@ -4,7 +4,7 @@ import InlineEditText from '@/components/shared/inline-edit-text.vue';
 defineProps({
   modelValue: String, // for v-model
   selected: Boolean,
-  icon: Object, // Lucide icon component
+  icon: [Object, Function], // Lucide icon component (can be Function or Object)
   iconColor: {
     type: String,
     default: 'text-primary'
