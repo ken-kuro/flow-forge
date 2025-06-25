@@ -71,7 +71,7 @@ function handleTitleChange() {
 <template>
   <CardNodeWrapper v-model="title" :selected="selected" @blur="handleTitleChange">
     <!-- Input handle on the left, named 'default' for specific styling -->
-    <Handle type="target" :position="Position.Left" id="default" class="!bg-base-content"/>
+    <Handle type="target" :position="Position.Left" id="default" />
 
     <BlockContainer empty-message="No setup blocks yet. Add one below.">
       <!-- Render blocks based on their type -->
@@ -133,7 +133,7 @@ function handleTitleChange() {
     </BlockContainer>
 
     <!-- Output handle on the right, named 'default' for specific styling -->
-    <Handle type="source" :position="Position.Right" id="default" class="!bg-base-content"/>
+    <Handle type="source" :position="Position.Right" id="default" />
   </CardNodeWrapper>
 </template>
 

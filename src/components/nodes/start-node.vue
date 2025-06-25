@@ -29,18 +29,14 @@ const props = defineProps({
   >
     {{ data.title }}
 
-    <!-- Single source handle, centered at the right -->
+    <!-- Single source handle, centered at the right - uses global styling -->
     <Handle
       type="source"
       :position="Position.Right"
-      class="!bg-success-content"
     />
   </div>
 </template>
 
 <style scoped>
-/*
-  The global handle style in main.css is now used.
-  This scoped style block is removed to ensure consistency.
-*/
+/* No handle styling needed - uses global styling from main.css */
 </style> 

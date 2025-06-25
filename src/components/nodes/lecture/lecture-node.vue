@@ -27,10 +27,10 @@ function handleTitleChange() {
 
 <template>
   <CardNodeWrapper v-model="title" :selected="selected" @blur="handleTitleChange" node-color="hsl(var(--p))">
-    <Handle type="target" :position="Position.Left" />
+    <Handle type="target" :position="Position.Left" id="default" />
     <div class="p-4 text-center text-sm text-base-content/70">
       Lecture blocks will be displayed here.
     </div>
-    <Handle type="source" :position="Position.Right" />
+    <Handle type="source" :position="Position.Right" id="default" />
   </CardNodeWrapper>
 </template> 

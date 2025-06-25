@@ -50,11 +50,12 @@ function handleUpdate(newValue) {
   child Handle components and adjust the 'default' handles for a better
   top-to-bottom flow, leaving other potential handles unaffected.
 */
+/* Custom positioning for default handles - ONLY applies to card-based nodes */
 :deep(.vue-flow__handle[data-handleid="default"].target) {
-  top: 35%;
+  top: 35% !important;
 }
 
 :deep(.vue-flow__handle[data-handleid="default"].source) {
-  top: 65%;
+  top: 65% !important;
 }
 </style> 
