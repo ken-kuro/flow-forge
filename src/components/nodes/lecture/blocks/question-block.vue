@@ -35,13 +35,13 @@ onUnmounted(() => {
 
 // Local reactive copies for editing
 const title = ref(props.block.data.title || '');
-const question = ref(props.block.data.question || '');
+const questionId = ref(props.block.data.questionId || '');
 
 // Update the store when values change
 const updateBlockData = (immediate = false) => {
   const newData = {
     title: title.value,
-    question: question.value,
+    questionId: questionId.value,
   };
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
@@ -73,17 +73,18 @@ const handleDelete = () => {
       </button>
     </div>
 
-    <!-- Question Text -->
+    <!-- Question ID -->
     <div class="form-control">
       <label class="label">
-        <span class="label-text text-xs">Question</span>
+        <span class="label-text text-xs">Question ID</span>
       </label>
-      <textarea
-        v-model="question"
+      <input
+        v-model="questionId"
         @blur="updateBlockData()"
-        placeholder="What is your question?"
-        class="textarea textarea-bordered textarea-xs h-16 resize-none"
-      ></textarea>
+        type="text"
+        placeholder="Enter question ID"
+        class="input input-bordered input-xs"
+      />
     </div>
   </div>
 </template>
