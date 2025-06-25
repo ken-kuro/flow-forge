@@ -1,0 +1,264 @@
+{
+  "id": "5e9b189c-3985-41ea-9ad2-358d03470294",
+  "name": "Sample Flow",
+  "description": "Created with Flow Forge",
+  "createdAt": "2025-06-25T13:34:11.937Z",
+  "updatedAt": "2025-06-25T13:34:11.937Z",
+  "_version": 16,
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "nodes": [
+    {
+      "id": "node-start-001",
+      "type": "custom-start",
+      "position": {
+        "x": 100,
+        "y": 200
+      },
+      "data": {
+        "title": "Course Introduction",
+        "config": {}
+      }
+    },
+    {
+      "id": "node-setup-001",
+      "type": "custom-setup",
+      "position": {
+        "x": 350,
+        "y": 100
+      },
+      "data": {
+        "title": "Course Assets",
+        "config": {},
+        "hasBlocks": true
+      },
+      "selected": false
+    },
+    {
+      "id": "node-lecture-001",
+      "type": "custom-lecture",
+      "position": {
+        "x": 650,
+        "y": 200
+      },
+      "data": {
+        "title": "Introduction Lesson",
+        "config": {},
+        "hasBlocks": true
+      },
+      "selected": true
+    },
+    {
+      "id": "node-condition-001",
+      "type": "custom-condition",
+      "position": {
+        "x": 950,
+        "y": 200
+      },
+      "data": {
+        "title": "Check Understanding",
+        "config": {},
+        "hasBlocks": true
+      },
+      "selected": false
+    },
+    {
+      "id": "node-end-success",
+      "type": "custom-end",
+      "position": {
+        "x": 1250,
+        "y": 150
+      },
+      "data": {
+        "title": "Course Complete",
+        "config": {}
+      },
+      "selected": false
+    },
+    {
+      "id": "node-end-retry",
+      "type": "custom-end",
+      "position": {
+        "x": 1250,
+        "y": 300
+      },
+      "data": {
+        "title": "Need Review",
+        "config": {}
+      },
+      "selected": false
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-start-setup",
+      "source": "node-start-001",
+      "target": "node-setup-001",
+      "animated": false
+    },
+    {
+      "id": "edge-setup-lecture",
+      "source": "node-setup-001",
+      "target": "node-lecture-001",
+      "animated": false
+    },
+    {
+      "id": "edge-lecture-condition",
+      "source": "node-lecture-001",
+      "target": "node-condition-001",
+      "animated": false
+    },
+    {
+      "id": "edge-condition-success",
+      "source": "node-condition-001",
+      "sourceHandle": "branch-success-001",
+      "target": "node-end-success",
+      "animated": false,
+      "data": {
+        "branchId": "branch-success-001",
+        "branchLabel": "Quiz Passed",
+        "conditionExpression": "quiz_score >= 80",
+        "isConditionBranch": true
+      }
+    },
+    {
+      "id": "edge-condition-retry",
+      "source": "node-condition-001",
+      "sourceHandle": "branch-retry-001",
+      "target": "node-end-retry",
+      "animated": false,
+      "data": {
+        "branchId": "branch-retry-001",
+        "branchLabel": "Need Review",
+        "conditionExpression": "quiz_score < 80",
+        "isConditionBranch": true
+      }
+    }
+  ],
+  "nodeBlocks": {
+    "node-setup-001": [
+      {
+        "id": "setup-block-001",
+        "type": "asset-image",
+        "data": {
+          "assetId": "welcome-banner",
+          "imageUrl": "https://picsum.photos/800/400?random=1",
+          "title": "Welcome Banner",
+          "alt": "Course welcome banner showing learning objectives"
+        }
+      },
+      {
+        "id": "setup-block-002",
+        "type": "asset-video",
+        "data": {
+          "assetId": "intro-video",
+          "videoUrl": "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+          "title": "Introduction Video",
+          "duration": 60,
+          "thumbnail": "https://picsum.photos/320/180?random=2"
+        }
+      },
+      {
+        "id": "setup-block-003",
+        "type": "variable",
+        "data": {
+          "variableName": "student_name",
+          "variableType": "text",
+          "defaultValue": "",
+          "title": "Student Name Variable"
+        }
+      },
+      {
+        "id": "setup-block-004",
+        "type": "variable",
+        "data": {
+          "variableName": "quiz_score",
+          "variableType": "number",
+          "defaultValue": 0,
+          "title": "Quiz Score Variable"
+        }
+      }
+    ],
+    "node-lecture-001": [
+      {
+        "id": "lecture-block-001",
+        "type": "teacher-video",
+        "data": {
+          "videoSource": "url",
+          "videoUrl": "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+          "transcript": "Welcome to our learning journey! In this lesson, we'll explore the fundamentals of effective learning strategies...",
+          "title": "Welcome Video"
+        }
+      },
+      {
+        "id": "lecture-block-002",
+        "type": "assets-applied",
+        "data": {
+          "setupNodeId": "node-setup-001",
+          "assetId": "welcome-banner",
+          "displayDuration": 5000,
+          "title": "Display Welcome Banner"
+        }
+      },
+      {
+        "id": "lecture-block-003",
+        "type": "question",
+        "data": {
+          "questionTitle": "Introduction Quiz",
+          "questionId": "intro_understanding",
+          "title": "Understanding Check"
+        }
+      },
+      {
+        "id": "lecture-block-004",
+        "type": "collect-user-data",
+        "data": {
+          "collectionMethod": "text",
+          "prompt": "Please share your learning goals for this course:",
+          "variableName": "learning_goals",
+          "title": "Collect Learning Goals"
+        }
+      },
+      {
+        "id": "lecture-block-005",
+        "type": "system-action",
+        "data": {
+          "actionMethod": "Show Asset",
+          "targetObject": "Course Progress Tracker",
+          "delay": 2000,
+          "title": "Show Progress Tracker"
+        }
+      }
+    ],
+    "node-condition-001": [
+      {
+        "id": "branch-success-001",
+        "type": "condition-branch",
+        "data": {
+          "label": "Quiz Passed",
+          "condition": "quiz_score >= 80",
+          "title": "Success Branch"
+        }
+      },
+      {
+        "id": "branch-retry-001",
+        "type": "condition-branch",
+        "data": {
+          "label": "Need Review",
+          "condition": "quiz_score < 80",
+          "title": "Retry Branch"
+        }
+      }
+    ]
+  },
+  "_meta": {
+    "documentSize": 3915,
+    "nodeCount": 6,
+    "totalBlocks": 11,
+    "lastModified": "2025-06-25T13:34:11.937Z",
+    "version": "2.1"
+  }
+}

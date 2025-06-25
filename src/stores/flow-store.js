@@ -630,7 +630,6 @@ export const useFlowStore = defineStore('flow', () => {
    * @param {object} options - Export options
    * @param {string} options.name - Flow name
    * @param {string} options.description - Flow description
-   * @param {object} options.viewport - Current viewport state from Vue Flow
    * @returns {object} The complete flow data structure
    */
   function exportFlow(options = {}) {
@@ -655,8 +654,8 @@ export const useFlowStore = defineStore('flow', () => {
       updatedAt: timestamp,
       _version: version.value,
       
-      // Vue Flow viewport state (use provided viewport or default)
-      viewport: options.viewport || { x: 0, y: 0, zoom: 1 },
+      // Vue Flow viewport state (default values - viewport is user-specific, not flow data)
+      viewport: { x: 0, y: 0, zoom: 1 },
       
       // Vue Flow structure
       nodes: JSON.parse(JSON.stringify(nodes.value)),

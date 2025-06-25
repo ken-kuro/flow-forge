@@ -50,7 +50,6 @@ export function useFlowEditor() {
     zoomOut,
     applyNodeChanges,
     applyEdgeChanges,
-    setViewport,
   } = vueFlowApi;
 
   /**
@@ -292,16 +291,6 @@ export function useFlowEditor() {
       // Vue Flow sees the changes by triggering reactivity
       await nextTick();
       
-      // Restore viewport state if provided in the imported data
-      if (flowData.viewport) {
-        console.log('🔍 Restoring viewport state:', flowData.viewport);
-        setViewport({
-          x: flowData.viewport.x || 0,
-          y: flowData.viewport.y || 0,
-          zoom: flowData.viewport.zoom || 1
-        });
-      }
-      
       console.log('✅ Import completed with proper Vue Flow synchronization');
     }
     
@@ -312,27 +301,10 @@ export function useFlowEditor() {
   }
 
   /**
-   * Exports flow data with current viewport state captured from Vue Flow.
-   * This ensures that positions and zoom level are properly preserved.
+   * Exports flow data using the store method.
    */
   function exportFlow(options = {}) {
-    console.log('📤 Exporting flow data');
-    
-    // Capture current viewport state from Vue Flow
-    const { viewport } = vueFlowApi;
-    const currentViewport = {
-      x: viewport.x || 0,
-      y: viewport.y || 0,
-      zoom: viewport.zoom || 1
-    };
-    
-    console.log('📍 Current viewport state:', currentViewport);
-    
-    // Export with the current viewport state
-    return flowStore.exportFlow({
-      ...options,
-      viewport: currentViewport
-    });
+    return flowStore.exportFlow(options);
   }
 
   // --- Exposed API ---
