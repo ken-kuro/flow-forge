@@ -623,6 +623,185 @@ export const useFlowStore = defineStore('flow', () => {
     );
   }
 
+  // --- IMPORT/EXPORT METHODS ---
+  
+  /**
+   * Exports the current flow data as a JSON structure compatible with the architecture specification
+   * @param {object} options - Export options
+   * @param {string} options.name - Flow name
+   * @param {string} options.description - Flow description
+   * @param {object} options.viewport - Current viewport state from Vue Flow
+   * @returns {object} The complete flow data structure
+   */
+  function exportFlow(options = {}) {
+    const timestamp = new Date().toISOString();
+    
+    // Calculate document size for monitoring
+    const flowData = {
+      nodes: nodes.value,
+      edges: edges.value,
+      nodeBlocks: nodeBlocks.value
+    };
+    const documentSize = new Blob([JSON.stringify(flowData)]).size;
+    
+    // Count total blocks
+    const totalBlocks = Object.values(nodeBlocks.value).reduce((sum, blocks) => sum + blocks.length, 0);
+    
+    const exportData = {
+      id: generateId('flow'),
+      name: options.name || 'Untitled Flow',
+      description: options.description || 'Exported from Flow Forge',
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      _version: version.value,
+      
+      // Vue Flow viewport state (use provided viewport or default)
+      viewport: options.viewport || { x: 0, y: 0, zoom: 1 },
+      
+      // Vue Flow structure
+      nodes: JSON.parse(JSON.stringify(nodes.value)),
+      edges: JSON.parse(JSON.stringify(edges.value)),
+      
+      // Custom blocks data
+      nodeBlocks: JSON.parse(JSON.stringify(nodeBlocks.value)),
+      
+      // Size monitoring for migration planning
+      _meta: {
+        documentSize: documentSize,
+        nodeCount: nodes.value.length,
+        totalBlocks: totalBlocks,
+        lastModified: timestamp,
+        version: "2.1" // Data structure version
+      }
+    };
+    
+    return exportData;
+  }
+  
+  /**
+   * Imports flow data from a JSON structure and replaces the current flow
+   * @param {object} flowData - The flow data to import
+   * @param {boolean} clearHistoryOnImport - Whether to clear history after import (default: true)
+   * @returns {boolean} Success status
+   */
+  function importFlow(flowData, clearHistoryOnImport = true) {
+    try {
+      // Validate the imported data structure
+      if (!flowData || typeof flowData !== 'object') {
+        throw new Error('Invalid flow data: must be an object');
+      }
+      
+      if (!Array.isArray(flowData.nodes)) {
+        throw new Error('Invalid flow data: nodes must be an array');
+      }
+      
+      if (!Array.isArray(flowData.edges)) {
+        throw new Error('Invalid flow data: edges must be an array');
+      }
+      
+      if (flowData.nodeBlocks && typeof flowData.nodeBlocks !== 'object') {
+        throw new Error('Invalid flow data: nodeBlocks must be an object');
+      }
+      
+      // Set flag to prevent history saves during import
+      isRestoringHistory.value = true;
+      
+      // Replace current state with imported data
+      nodes.value = JSON.parse(JSON.stringify(flowData.nodes));
+      edges.value = JSON.parse(JSON.stringify(flowData.edges));
+      nodeBlocks.value = JSON.parse(JSON.stringify(flowData.nodeBlocks || {}));
+      
+      // Update version
+      if (typeof flowData._version === 'number') {
+        version.value = flowData._version;
+      } else {
+        version.value++;
+      }
+      
+      // Reset restoration flag
+      isRestoringHistory.value = false;
+      
+      // Clear or update history
+      if (clearHistoryOnImport) {
+        // Clear history and save current imported state
+        history.value = [];
+        historyIndex.value = -1;
+        saveState(`Import flow "${flowData.name || 'Untitled'}"`);
+      } else {
+        // Just save the import as a new history entry
+        saveState(`Import flow "${flowData.name || 'Untitled'}"`);
+      }
+      
+      console.log('✅ Flow imported successfully:', {
+        name: flowData.name,
+        nodes: nodes.value.length,
+        edges: edges.value.length,
+        blocks: Object.keys(nodeBlocks.value).length
+      });
+      
+      return true;
+    } catch (error) {
+      console.error('❌ Flow import failed:', error);
+      isRestoringHistory.value = false;
+      return false;
+    }
+  }
+  
+  /**
+   * Creates a new empty flow with default start and end nodes
+   * @param {object} options - New flow options
+   * @param {string} options.name - Flow name
+   * @param {string} options.description - Flow description
+   */
+  function createNewFlow(options = {}) {
+    // Generate new IDs for initial nodes
+    const startNodeId = generateId();
+    const endNodeId = generateId();
+    
+    const defaultNodes = [
+      { 
+        id: startNodeId, 
+        type: NODE_TYPES.START, 
+        position: { x: 50, y: 150 },
+        data: {
+          title: 'Start',
+          config: {}
+        }
+      },
+      { 
+        id: endNodeId, 
+        type: NODE_TYPES.END, 
+        position: { x: 2000, y: 150 },
+        data: {
+          title: 'End',
+          config: {}
+        }
+      },
+    ];
+    
+    // Set flag to prevent history saves during reset
+    isRestoringHistory.value = true;
+    
+    // Reset all state
+    nodes.value = defaultNodes;
+    edges.value = [];
+    nodeBlocks.value = {};
+    version.value = 0;
+    
+    // Reset restoration flag
+    isRestoringHistory.value = false;
+    
+    // Clear history and save initial state
+    history.value = [];
+    historyIndex.value = -1;
+    saveState(`Create new flow "${options.name || 'Untitled Flow'}"`);
+    
+    console.log('✅ New flow created:', {
+      name: options.name || 'Untitled Flow',
+      nodes: nodes.value.length
+    });
+  }
+
   return {
     // --- STATE ---
     nodes,
@@ -659,5 +838,10 @@ export const useFlowStore = defineStore('flow', () => {
     // --- Condition Branch Edge Management ---
     removeEdgesForBranch,
     getEdgesForBranch,
+    
+    // --- IMPORT/EXPORT METHODS ---
+    exportFlow,
+    importFlow,
+    createNewFlow,
   }
 }) 
