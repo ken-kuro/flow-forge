@@ -374,6 +374,7 @@ export function useFlowEditor() {
     canUndo,
     canRedo,
     flushPendingSaves: flowStore.flushPendingSaves,
+    getHistoryStats: flowStore.getHistoryStats,
 
     // --- Viewport Operations ---
     fitToView: fitView,

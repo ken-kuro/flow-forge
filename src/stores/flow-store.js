@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { generateId } from '@/utils/id-generator'
-import { NODE_TYPES } from '@/utils/constants'
+import { NODE_TYPES, CONFIG } from '@/utils/constants'
 
 
 
@@ -103,8 +103,18 @@ export const useFlowStore = defineStore('flow', () => {
     if (historyIndex.value < history.value.length - 1) {
       history.value.splice(historyIndex.value + 1)
     }
+    
+    // Add the new state
     history.value.push(currentState)
     historyIndex.value = history.value.length - 1
+    
+    // Limit history size to prevent memory issues
+    if (history.value.length > CONFIG.MAX_HISTORY_ENTRIES) {
+      const entriesToRemove = history.value.length - CONFIG.MAX_HISTORY_ENTRIES
+      console.log(`📚 History limit reached (${CONFIG.MAX_HISTORY_ENTRIES}). Removing ${entriesToRemove} oldest entries.`)
+      history.value.splice(0, entriesToRemove)
+      historyIndex.value = history.value.length - 1
+    }
   }
 
 
@@ -606,6 +616,30 @@ export const useFlowStore = defineStore('flow', () => {
     isRestoringHistory.value = value;
   }
 
+  /**
+   * Returns current history statistics for debugging and monitoring.
+   * @returns {object} History stats including current index, total entries, and memory usage estimate.
+   */
+  function getHistoryStats() {
+    const totalEntries = history.value.length
+    const currentIndex = historyIndex.value
+    const canUndo = currentIndex > 0
+    const canRedo = currentIndex < totalEntries - 1
+    
+    // Rough estimate of memory usage (JSON stringify gives approximate size)
+    const estimatedSizeKB = Math.round(JSON.stringify(history.value).length / 1024)
+    
+    return {
+      totalEntries,
+      currentIndex,
+      canUndo,
+      canRedo,
+      maxEntries: CONFIG.MAX_HISTORY_ENTRIES,
+      estimatedSizeKB,
+      isAtLimit: totalEntries >= CONFIG.MAX_HISTORY_ENTRIES
+    }
+  }
+
   // Save the initial state to the history
   saveState('Initialize Flow with Start and End nodes')
 
@@ -817,6 +851,7 @@ export const useFlowStore = defineStore('flow', () => {
     clearHistory,
     flushPendingSaves,
     setRestoringHistory,
+    getHistoryStats,
     
     // --- VUE FLOW EVENT HANDLERS (for history) ---
     onNodesChange,

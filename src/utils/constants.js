@@ -14,4 +14,16 @@ export const NODE_TYPES = {
   SETUP: 'custom-setup',
   LECTURE: 'custom-lecture',
   CONDITION: 'custom-condition',
+};
+
+/**
+ * Configuration constants for the application.
+ */
+export const CONFIG = {
+  /**
+   * Maximum number of history entries to keep for undo/redo functionality.
+   * Older entries are automatically removed to prevent memory issues.
+   * @const {number}
+   */
+  MAX_HISTORY_ENTRIES: 50,
 }; 
