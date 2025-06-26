@@ -91,6 +91,14 @@ export function useFlowEditor() {
       // See: https://github.com/bcakmakoglu/vue-flow/discussions/1884
       applyNodeChanges(validatedChanges);
       
+                  // TODO: POSITION_SYNC_ISSUE - applyChanges from Vue Flow has inconsistent behavior
+      // for position updates depending on how nodes were created:
+      // - Initial/imported nodes: Positions match but applyChanges doesn't update to target
+      // - API-created nodes: Similar behavior, positions often don't match change.from
+      // This causes position changes to not be persisted in our store, breaking import/export.
+      // Need to investigate Vue Flow's applyChanges implementation and potentially implement
+      // custom position change handling for reliable state synchronization.
+      
       // ALSO, update our external store to keep it in sync with the view
       nodes.value = applyChanges(validatedChanges, nodes.value);
       
