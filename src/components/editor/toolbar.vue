@@ -31,6 +31,7 @@ const {
   historyIndex,
   clearHistory,
   createNode,
+  vueFlowApi,
 } = useFlowEditor();
 
 // Ref for the create button to programmatically open the dropdown
@@ -114,13 +115,118 @@ const jumpToHistoryState = (targetIndex) => {
   }
 }
 
+// --- Smart Positioning System ---
+/**
+ * Calculates an intelligent position for a new node based on:
+ * 1. Current viewport (always visible to user)
+ * 2. Right half of viewport (anticipates left-to-right flow direction)
+ * 3. Selected node hints (slight offset if nodes are selected)
+ * 4. Vertical stacking and random jitter to avoid overlaps
+ */
+const calculateSmartPosition = () => {
+  // Get selected nodes for minor positioning hints
+  const selectedNodes = nodes.value.filter(node => node.selected);
+  
+  // Default spacing and offsets
+  const HORIZONTAL_MARGIN = 100; // Margin from viewport edges
+  const SELECTION_OFFSET = 50; // Small offset when nodes are selected
+  
+  try {
+    // Access viewport information
+    const { viewport } = vueFlowApi;
+    
+    if (viewport?.value) {
+      // Calculate viewport bounds in flow coordinates
+      const viewportBounds = {
+        left: -viewport.value.x / viewport.value.zoom,
+        right: (-viewport.value.x + window.innerWidth) / viewport.value.zoom,
+        top: -viewport.value.y / viewport.value.zoom,
+        bottom: (-viewport.value.y + window.innerHeight) / viewport.value.zoom,
+        width: window.innerWidth / viewport.value.zoom,
+        height: window.innerHeight / viewport.value.zoom
+      };
+      
+      // Position in the right half of viewport
+      const rightHalfStart = viewportBounds.left + (viewportBounds.width * 0.5);
+      
+      // Calculate base position in right half, with some margin
+      let baseX = rightHalfStart + HORIZONTAL_MARGIN;
+      let baseY = viewportBounds.top + (viewportBounds.height * 0.4); // Slightly above center
+      
+      // If we have selected nodes visible in viewport, place new node near them
+      if (selectedNodes.length > 0) {
+        const visibleSelected = selectedNodes.filter(node => 
+          node.position.x >= viewportBounds.left && 
+          node.position.x <= viewportBounds.right &&
+          node.position.y >= viewportBounds.top && 
+          node.position.y <= viewportBounds.bottom
+        );
+        
+        if (visibleSelected.length > 0) {
+          // Use the average position of visible selected nodes as a hint
+          const avgY = visibleSelected.reduce((sum, node) => sum + node.position.y, 0) / visibleSelected.length;
+          baseY = avgY + SELECTION_OFFSET;
+          
+          console.log(`📍 [Viewport + Selection] Positioning near ${visibleSelected.length} visible selected node(s)`);
+        } else {
+          console.log(`📍 [Viewport Only] Selected nodes outside viewport, using right-half positioning`);
+        }
+      } else {
+        console.log(`📍 [Viewport Only] No selection, positioning in right half of viewport`);
+      }
+      
+      // Add stacking and jitter to avoid overlaps
+      const JITTER_AMOUNT = 40; // Max random offset
+      const STACKING_OFFSET = 100; // Vertical offset for stacking
+
+      const nearbyNodes = nodes.value.filter(node =>
+        Math.abs(node.position.x - baseX) < 150 &&
+        Math.abs(node.position.y - baseY) < 150
+      );
+      
+      if (nearbyNodes.length > 0) {
+        baseY += nearbyNodes.length * STACKING_OFFSET;
+        console.log(`📍 Stacking new node below ${nearbyNodes.length} nearby node(s)`);
+      }
+
+      // Add random jitter to final position
+      baseX += (Math.random() - 0.5) * JITTER_AMOUNT;
+      baseY += (Math.random() - 0.5) * JITTER_AMOUNT;
+      
+      // Ensure final position stays within viewport bounds
+      const finalX = Math.max(
+        viewportBounds.left + HORIZONTAL_MARGIN, 
+        Math.min(baseX, viewportBounds.right - HORIZONTAL_MARGIN)
+      );
+      
+      const finalY = Math.max(
+        viewportBounds.top + HORIZONTAL_MARGIN, 
+        Math.min(baseY, viewportBounds.bottom - HORIZONTAL_MARGIN)
+      );
+      
+      console.log(`📍 Final position: (${Math.round(finalX)}, ${Math.round(finalY)}) in viewport [${Math.round(viewportBounds.left)}, ${Math.round(viewportBounds.right)}] × [${Math.round(viewportBounds.top)}, ${Math.round(viewportBounds.bottom)}], zoom: ${viewport.value.zoom.toFixed(2)}`);
+      
+      return {
+        x: finalX,
+        y: finalY
+      };
+    }
+  } catch (error) {
+    console.warn('📍 Could not access viewport, using fallback position:', error);
+  }
+  
+  // Fallback: reasonable default position
+  console.log(`📍 [Fallback] Using default position`);
+  return {
+    x: 400 + (Math.random() - 0.5) * 50, // Add jitter to fallback as well
+    y: 150 + Math.random() * 100
+  };
+};
+
 // Node operations
 const handleCreateNodeByType = (type) => {
-  // TODO: Add a more robust system for positioning new nodes
-  const position = {
-    x: Math.random() * 400 + 100,
-    y: Math.random() * 300 + 100
-  }
+  // Use smart positioning instead of random positioning
+  const position = calculateSmartPosition();
 
   let nodeData;
 
@@ -278,7 +384,7 @@ const handleDebugDump = () => {
           tabindex="0"
           role="button"
           class="btn btn-primary btn-sm"
-          title="Create Node (Ctrl+Alt+N)"
+          title="Create Node (Ctrl+Alt+N) - Smart positioning: places nodes in the right half of your current viewport for immediate visibility"
         >
           <Plus class="w-4 h-4" />
         </div>
