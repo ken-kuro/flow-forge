@@ -1,10 +1,10 @@
 {
-  "id": "97a27484-ef3b-45c8-88ba-5cff9ef2b377",
+  "id": "7701ad06-5ae3-4eb5-816e-786760263343",
   "name": "Sample Flow",
   "description": "Created with Flow Forge",
-  "createdAt": "2025-07-03T02:24:05.317Z",
-  "updatedAt": "2025-07-03T02:24:05.317Z",
-  "_version": 24,
+  "createdAt": "2025-07-03T12:30:33.789Z",
+  "updatedAt": "2025-07-03T12:30:33.789Z",
+  "_version": 34,
   "viewport": {
     "x": 0,
     "y": 0,
@@ -58,12 +58,12 @@
       "type": "custom-setup",
       "dimensions": {
         "width": 320,
-        "height": 1362
+        "height": 1464
       },
       "computedPosition": {
         "x": 384.615625,
         "y": -383.4648958333334,
-        "z": 1000
+        "z": 0
       },
       "handleBounds": {
         "source": [
@@ -72,8 +72,8 @@
             "type": "source",
             "nodeId": "node-setup-001",
             "position": "right",
-            "x": 311.9998849887312,
-            "y": 877.124593969701,
+            "x": 311.9998145630904,
+            "y": 943.7496798168668,
             "width": 16,
             "height": 16
           }
@@ -85,13 +85,13 @@
             "nodeId": "node-setup-001",
             "position": "left",
             "x": -8.000000662564428,
-            "y": 468.6091853398056,
+            "y": 504.4841828089898,
             "width": 16,
             "height": 16
           }
         ]
       },
-      "selected": true,
+      "selected": false,
       "dragging": false,
       "resizing": false,
       "initialized": false,
@@ -112,7 +112,7 @@
       "type": "custom-lecture",
       "dimensions": {
         "width": 320,
-        "height": 1276
+        "height": 1706
       },
       "computedPosition": {
         "x": 839.2320833333333,
@@ -127,7 +127,7 @@
             "nodeId": "node-lecture-001",
             "position": "right",
             "x": 311.9998849887312,
-            "y": 821.2340307774969,
+            "y": 1101.0620393396862,
             "width": 16,
             "height": 16
           }
@@ -139,7 +139,7 @@
             "nodeId": "node-lecture-001",
             "position": "left",
             "x": -8.000000662564428,
-            "y": 438.499829441493,
+            "y": 589.1872665440715,
             "width": 16,
             "height": 16
           }
@@ -166,7 +166,7 @@
       "type": "custom-condition",
       "dimensions": {
         "width": 320,
-        "height": 359
+        "height": 356
       },
       "computedPosition": {
         "x": 1241.9251041666666,
@@ -181,7 +181,7 @@
             "nodeId": "node-condition-001",
             "position": "right",
             "x": 299.99984878206413,
-            "y": 112.85927251886118,
+            "y": 109.35932944982237,
             "width": 16,
             "height": 16
           },
@@ -191,7 +191,7 @@
             "nodeId": "node-condition-001",
             "position": "right",
             "x": 299.99984878206413,
-            "y": 234.57802022016827,
+            "y": 231.07804193830907,
             "width": 16,
             "height": 16
           }
@@ -202,8 +202,8 @@
             "type": "target",
             "nodeId": "node-condition-001",
             "position": "left",
-            "x": -8.000000662564428,
-            "y": 117.79681419281155,
+            "x": -8.000071088205193,
+            "y": 116.5780984793939,
             "width": 16,
             "height": 16
           }
@@ -288,7 +288,7 @@
             "nodeId": "node-end-retry",
             "position": "left",
             "x": -7.999930236923665,
-            "y": 23.99993156205252,
+            "y": 24.000001987693285,
             "width": 16,
             "height": 16
           }
@@ -367,12 +367,12 @@
         "type": "custom-setup",
         "dimensions": {
           "width": 320,
-          "height": 1362
+          "height": 1464
         },
         "computedPosition": {
           "x": 384.615625,
           "y": -383.4648958333334,
-          "z": 1000
+          "z": 0
         },
         "handleBounds": {
           "source": [
@@ -381,8 +381,8 @@
               "type": "source",
               "nodeId": "node-setup-001",
               "position": "right",
-              "x": 311.9998849887312,
-              "y": 877.124593969701,
+              "x": 311.9998145630904,
+              "y": 943.7496798168668,
               "width": 16,
               "height": 16
             }
@@ -394,13 +394,13 @@
               "nodeId": "node-setup-001",
               "position": "left",
               "x": -8.000000662564428,
-              "y": 468.6091853398056,
+              "y": 504.4841828089898,
               "width": 16,
               "height": 16
             }
           ]
         },
-        "selected": true,
+        "selected": false,
         "dragging": false,
         "resizing": false,
         "initialized": false,
@@ -419,7 +419,7 @@
       "sourceX": 171.9999870315408,
       "sourceY": 231.99996677487292,
       "targetX": 376.6156243374356,
-      "targetY": 93.1442895064722
+      "targetY": 129.01928697565637
     },
     {
       "id": "edge-setup-lecture",
@@ -435,12 +435,12 @@
         "type": "custom-setup",
         "dimensions": {
           "width": 320,
-          "height": 1362
+          "height": 1464
         },
         "computedPosition": {
           "x": 384.615625,
           "y": -383.4648958333334,
-          "z": 1000
+          "z": 0
         },
         "handleBounds": {
           "source": [
@@ -449,8 +449,8 @@
               "type": "source",
               "nodeId": "node-setup-001",
               "position": "right",
-              "x": 311.9998849887312,
-              "y": 877.124593969701,
+              "x": 311.9998145630904,
+              "y": 943.7496798168668,
               "width": 16,
               "height": 16
             }
@@ -462,13 +462,13 @@
               "nodeId": "node-setup-001",
               "position": "left",
               "x": -8.000000662564428,
-              "y": 468.6091853398056,
+              "y": 504.4841828089898,
               "width": 16,
               "height": 16
             }
           ]
         },
-        "selected": true,
+        "selected": false,
         "dragging": false,
         "resizing": false,
         "initialized": false,
@@ -489,7 +489,7 @@
         "type": "custom-lecture",
         "dimensions": {
           "width": 320,
-          "height": 1276
+          "height": 1706
         },
         "computedPosition": {
           "x": 839.2320833333333,
@@ -504,7 +504,7 @@
               "nodeId": "node-lecture-001",
               "position": "right",
               "x": 311.9998849887312,
-              "y": 821.2340307774969,
+              "y": 1101.0620393396862,
               "width": 16,
               "height": 16
             }
@@ -516,7 +516,7 @@
               "nodeId": "node-lecture-001",
               "position": "left",
               "x": -8.000000662564428,
-              "y": 438.499829441493,
+              "y": 589.1872665440715,
               "width": 16,
               "height": 16
             }
@@ -538,10 +538,10 @@
         },
         "events": {}
       },
-      "sourceX": 712.6155099887312,
-      "sourceY": 501.6596981363676,
+      "sourceX": 712.6154395630904,
+      "sourceY": 568.2847839835333,
       "targetX": 831.2320826707689,
-      "targetY": 147.60213412899293
+      "targetY": 298.2895712315714
     },
     {
       "id": "edge-lecture-condition",
@@ -557,7 +557,7 @@
         "type": "custom-lecture",
         "dimensions": {
           "width": 320,
-          "height": 1276
+          "height": 1706
         },
         "computedPosition": {
           "x": 839.2320833333333,
@@ -572,7 +572,7 @@
               "nodeId": "node-lecture-001",
               "position": "right",
               "x": 311.9998849887312,
-              "y": 821.2340307774969,
+              "y": 1101.0620393396862,
               "width": 16,
               "height": 16
             }
@@ -584,7 +584,7 @@
               "nodeId": "node-lecture-001",
               "position": "left",
               "x": -8.000000662564428,
-              "y": 438.499829441493,
+              "y": 589.1872665440715,
               "width": 16,
               "height": 16
             }
@@ -611,7 +611,7 @@
         "type": "custom-condition",
         "dimensions": {
           "width": 320,
-          "height": 359
+          "height": 356
         },
         "computedPosition": {
           "x": 1241.9251041666666,
@@ -626,7 +626,7 @@
               "nodeId": "node-condition-001",
               "position": "right",
               "x": 299.99984878206413,
-              "y": 112.85927251886118,
+              "y": 109.35932944982237,
               "width": 16,
               "height": 16
             },
@@ -636,7 +636,7 @@
               "nodeId": "node-condition-001",
               "position": "right",
               "x": 299.99984878206413,
-              "y": 234.57802022016827,
+              "y": 231.07804193830907,
               "width": 16,
               "height": 16
             }
@@ -647,8 +647,8 @@
               "type": "target",
               "nodeId": "node-condition-001",
               "position": "left",
-              "x": -8.000000662564428,
-              "y": 117.79681419281155,
+              "x": -8.000071088205193,
+              "y": 116.5780984793939,
               "width": 16,
               "height": 16
             }
@@ -671,9 +671,9 @@
         "events": {}
       },
       "sourceX": 1167.2319683220644,
-      "sourceY": 530.3363354649969,
-      "targetX": 1233.9251035041023,
-      "targetY": 153.8725433594782
+      "sourceY": 810.1643440271862,
+      "targetX": 1233.9250330784614,
+      "targetY": 152.65382764606053
     },
     {
       "id": "edge-condition-success",
@@ -695,7 +695,7 @@
         "type": "custom-condition",
         "dimensions": {
           "width": 320,
-          "height": 359
+          "height": 356
         },
         "computedPosition": {
           "x": 1241.9251041666666,
@@ -710,7 +710,7 @@
               "nodeId": "node-condition-001",
               "position": "right",
               "x": 299.99984878206413,
-              "y": 112.85927251886118,
+              "y": 109.35932944982237,
               "width": 16,
               "height": 16
             },
@@ -720,7 +720,7 @@
               "nodeId": "node-condition-001",
               "position": "right",
               "x": 299.99984878206413,
-              "y": 234.57802022016827,
+              "y": 231.07804193830907,
               "width": 16,
               "height": 16
             }
@@ -731,8 +731,8 @@
               "type": "target",
               "nodeId": "node-condition-001",
               "position": "left",
-              "x": -8.000000662564428,
-              "y": 117.79681419281155,
+              "x": -8.000071088205193,
+              "y": 116.5780984793939,
               "width": 16,
               "height": 16
             }
@@ -797,7 +797,7 @@
         "events": {}
       },
       "sourceX": 1557.9249529487308,
-      "sourceY": 148.93500168552782,
+      "sourceY": 145.43505861648902,
       "targetX": 1837.3888197630763,
       "targetY": 60.84531448769327
     },
@@ -821,7 +821,7 @@
         "type": "custom-condition",
         "dimensions": {
           "width": 320,
-          "height": 359
+          "height": 356
         },
         "computedPosition": {
           "x": 1241.9251041666666,
@@ -836,7 +836,7 @@
               "nodeId": "node-condition-001",
               "position": "right",
               "x": 299.99984878206413,
-              "y": 112.85927251886118,
+              "y": 109.35932944982237,
               "width": 16,
               "height": 16
             },
@@ -846,7 +846,7 @@
               "nodeId": "node-condition-001",
               "position": "right",
               "x": 299.99984878206413,
-              "y": 234.57802022016827,
+              "y": 231.07804193830907,
               "width": 16,
               "height": 16
             }
@@ -857,8 +857,8 @@
               "type": "target",
               "nodeId": "node-condition-001",
               "position": "left",
-              "x": -8.000000662564428,
-              "y": 117.79681419281155,
+              "x": -8.000071088205193,
+              "y": 116.5780984793939,
               "width": 16,
               "height": 16
             }
@@ -901,7 +901,7 @@
               "nodeId": "node-end-retry",
               "position": "left",
               "x": -7.999930236923665,
-              "y": 23.99993156205252,
+              "y": 24.000001987693285,
               "width": 16,
               "height": 16
             }
@@ -923,9 +923,9 @@
         "events": {}
       },
       "sourceX": 1557.9249529487308,
-      "sourceY": 270.65374938683493,
+      "sourceY": 267.1537711049757,
       "targetX": 1837.3888197630763,
-      "targetY": 210.8452440620525
+      "targetY": 210.84531448769326
     }
   ],
   "nodeBlocks": {
@@ -990,7 +990,8 @@
           "setupNodeId": "node-setup-001",
           "assetId": "welcome-banner",
           "displayDuration": 5000,
-          "title": "Display Welcome Banner"
+          "title": "Display Welcome Banner",
+          "selectedAssetKey": "node-setup-001-setup-block-001"
         }
       },
       {
@@ -1009,7 +1010,13 @@
           "collectionMethod": "text",
           "prompt": "Please share your learning goals for this course:",
           "variableName": "learning_goals",
-          "title": "Collect Learning Goals"
+          "title": "Collect Learning Goals",
+          "saveToField": "",
+          "method": [
+            "voice",
+            "choose-answer",
+            "text-input"
+          ]
         }
       },
       {
@@ -1019,7 +1026,23 @@
           "actionMethod": "Show Asset",
           "targetObject": "Course Progress Tracker",
           "delay": 2000,
-          "title": "Show Progress Tracker"
+          "title": "Show Progress Tracker",
+          "action": "asset-interaction",
+          "method": [
+            "circle",
+            "score"
+          ],
+          "object": ""
+        }
+      },
+      {
+        "id": "2d158d1e-3868-4b9d-b160-8bbda05b398a",
+        "type": "audio",
+        "data": {
+          "title": "Audio #1",
+          "description": "",
+          "voice": "female",
+          "text": ""
         }
       }
     ],
@@ -1045,10 +1068,10 @@
     ]
   },
   "_meta": {
-    "documentSize": 14913,
+    "documentSize": 15235,
     "nodeCount": 6,
-    "totalBlocks": 11,
-    "lastModified": "2025-07-03T02:24:05.317Z",
+    "totalBlocks": 12,
+    "lastModified": "2025-07-03T12:30:33.789Z",
     "version": "2.1"
   }
 }
