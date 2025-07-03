@@ -1,4 +1,4 @@
-import { useVueFlow, applyChanges } from "@vue-flow/core";
+import { useVueFlow } from "@vue-flow/core";
 import { useFlowStore } from "@/stores/flow-store";
 import { storeToRefs } from "pinia";
 import { computed, nextTick } from "vue";
@@ -18,15 +18,16 @@ import { NODE_TYPES } from '@/utils/constants';
  * for production builds to avoid leaking debug information.
  * 
  * This composable encapsulates all Vue Flow interactions and provides
- * a clean interface between components and the store. It follows Vue 3
- * composition patterns and makes the component more testable and reusable.
+ * a clean interface between components and the store. It uses a controlled
+ * flow pattern with :apply-default="false" and v-model for optimal state sync.
  * 
  * Benefits:
  * - Separates Vue Flow logic from component presentation
- * - Provides a consistent API for flow operations
+ * - Full control over change validation with :apply-default="false"
+ * - Automatic state synchronization via v-model binding
+ * - Eliminates double-application bugs through single source of truth
  * - Makes components more testable (can mock this composable)
  * - Reduces coupling between Vue Flow and Pinia store
- * - Follows composition over inheritance principle
  */
 export function useFlowEditor() {
   // --- Store Connection ---
@@ -84,23 +85,16 @@ export function useFlowEditor() {
       
       console.log('✅ Applying validated changes through Vue Flow internal API:', validatedChanges);
       
-      // CONTROLLED FLOW: Use Vue Flow's internal store method to apply changes
-      // This updates both the internal state AND triggers UI updates
+      // CONTROLLED FLOW: Apply changes through Vue Flow's internal API
+      // With :apply-default="false", we have full control over which changes get applied
+      // v-model automatically syncs Vue Flow's internal state back to our store
       // NOTE: applyNodeChanges is deprecated but still the working pattern until
       // the replacement "store instance" approach is properly documented
       // See: https://github.com/bcakmakoglu/vue-flow/discussions/1884
       applyNodeChanges(validatedChanges);
       
-                  // TODO: POSITION_SYNC_ISSUE - applyChanges from Vue Flow has inconsistent behavior
-      // for position updates depending on how nodes were created:
-      // - Initial/imported nodes: Positions match but applyChanges doesn't update to target
-      // - API-created nodes: Similar behavior, positions often don't match change.from
-      // This causes position changes to not be persisted in our store, breaking import/export.
-      // Need to investigate Vue Flow's applyChanges implementation and potentially implement
-      // custom position change handling for reliable state synchronization.
-      
-      // ALSO, update our external store to keep it in sync with the view
-      nodes.value = applyChanges(validatedChanges, nodes.value);
+      // No need for manual applyChanges() - v-model handles store synchronization
+      // This eliminates the double-application bug that caused position sync issues
       
       console.log('📝 Changes applied, store nodes:', nodes.value.length);
       
@@ -123,14 +117,15 @@ export function useFlowEditor() {
       
       console.log('✅ Applying validated edge changes through Vue Flow internal API:', validatedChanges);
       
-      // CONTROLLED FLOW: Use Vue Flow's internal store method to apply changes
+      // CONTROLLED FLOW: Apply changes through Vue Flow's internal API
+      // With :apply-default="false", we have full control over which changes get applied
+      // v-model automatically syncs Vue Flow's internal state back to our store
       // NOTE: applyEdgeChanges is deprecated but still the working pattern until
       // the replacement "store instance" approach is properly documented
       // See: https://github.com/bcakmakoglu/vue-flow/discussions/1884
       applyEdgeChanges(validatedChanges);
       
-      // ALSO, update our external store to keep it in sync with the view
-      edges.value = applyChanges(validatedChanges, edges.value);
+      // No need for manual applyChanges() - v-model handles store synchronization
       
       console.log('🔗 Edge changes applied, store edges:', edges.value.length);
       

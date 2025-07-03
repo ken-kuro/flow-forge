@@ -97,8 +97,8 @@ onMounted(() => {
          This is a UI polish feature for future phases, not Phase 3 priority.
     -->
     <VueFlow
-      :nodes="nodes"
-      :edges="edges"
+      v-model:nodes="nodes"
+      v-model:edges="edges"
       :node-types="nodeTypes"
       :apply-default="false"
       :nodes-draggable="true"
