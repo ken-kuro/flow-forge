@@ -70,7 +70,7 @@ function handleTitleChange() {
 </script>
 
 <template>
-  <CardNodeWrapper v-model="title" :selected="selected" :icon="Settings" icon-color="text-primary" @blur="handleTitleChange">
+  <CardNodeWrapper v-model="title" :selected="selected" :icon="Settings" icon-color="text-primary" @update:modelValue="handleTitleChange">
     <!-- Input handle on the left, named 'default' for specific styling -->
     <Handle type="target" :position="Position.Left" id="default" />
 

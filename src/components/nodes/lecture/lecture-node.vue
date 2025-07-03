@@ -66,7 +66,7 @@ function handleTitleChange() {
 </script>
 
 <template>
-  <CardNodeWrapper v-model="title" :selected="selected" :icon="GraduationCap" icon-color="text-secondary" @blur="handleTitleChange">
+  <CardNodeWrapper v-model="title" :selected="selected" :icon="GraduationCap" icon-color="text-secondary" @update:modelValue="handleTitleChange">
     <!-- Input handle on the left -->
     <Handle type="target" :position="Position.Left" id="default" />
 
