@@ -98,6 +98,10 @@ const showPreview = computed(() => videoUrl.value && videoUrl.value.trim() !== '
       <textarea
         v-model="description"
         @blur="updateBlockData()"
+        @wheel.stop
+        @mousedown.stop
+        @mouseup.stop
+        @click.stop
         placeholder="Enter video description"
         class="textarea textarea-bordered textarea-xs min-h-18 resize-none"
       ></textarea>
