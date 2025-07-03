@@ -2,7 +2,6 @@
 import InlineEditText from '@/components/shared/inline-edit-text.vue';
 
 defineProps({
-  modelValue: String, // for v-model
   selected: Boolean,
   icon: [Object, Function], // Lucide icon component (can be Function or Object)
   iconColor: {
@@ -11,11 +10,11 @@ defineProps({
   }
 });
 
-const emit = defineEmits(['update:modelValue']);
-
-function handleTitleUpdate(newValue) {
-  emit('update:modelValue', newValue);
-}
+// Modern Vue 3.4+ way - much cleaner!
+const title = defineModel({
+  type: String,
+  default: '',
+});
 </script>
 
 <template>
@@ -37,8 +36,7 @@ function handleTitleUpdate(newValue) {
           :class="['w-5 h-5 flex-shrink-0', iconColor]" 
         />
         <InlineEditText
-          :model-value="modelValue"
-          @update:modelValue="handleTitleUpdate"
+          v-model="title"
           placeholder="Enter node name"
           class="w-full"
         />

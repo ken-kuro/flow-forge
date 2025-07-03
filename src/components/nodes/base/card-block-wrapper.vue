@@ -15,14 +15,6 @@ import { X } from 'lucide-vue-next';
 
 const props = defineProps({
   /**
-   * Block title for v-model
-   */
-  modelValue: {
-    type: String,
-    default: ''
-  },
-  
-  /**
    * Icon component (Lucide icon)
    */
   icon: {
@@ -63,13 +55,13 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['update:modelValue']);
+// Modern Vue 3.4+ way for v-model
+const title = defineModel({
+  type: String,
+  default: '',
+});
 
 const { removeBlock } = useFlowEditor();
-
-function handleTitleUpdate(newValue) {
-  emit('update:modelValue', newValue);
-}
 
 function handleDelete() {
   removeBlock(props.nodeId, props.blockId);
@@ -86,8 +78,7 @@ function handleDelete() {
           :class="['w-4 h-4 flex-shrink-0', iconColor]" 
         />
         <InlineEditText
-          :model-value="modelValue"
-          @update:modelValue="handleTitleUpdate"
+          v-model="title"
           :placeholder="placeholder"
           class="text-sm font-medium flex-1"
         />
