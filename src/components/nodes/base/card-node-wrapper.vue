@@ -13,7 +13,7 @@ defineProps({
 
 const emit = defineEmits(['update:modelValue']);
 
-function handleUpdate(newValue) {
+function handleTitleUpdate(newValue) {
   emit('update:modelValue', newValue);
 }
 </script>
@@ -38,7 +38,7 @@ function handleUpdate(newValue) {
         />
         <InlineEditText
           :model-value="modelValue"
-          @update:modelValue="handleUpdate"
+          @update:modelValue="handleTitleUpdate"
           placeholder="Enter node name"
           class="w-full"
         />
