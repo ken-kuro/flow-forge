@@ -1,6 +1,36 @@
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed, defineExpose } from 'vue';
 import { X } from 'lucide-vue-next';
+
+/**
+ * TODO: MODAL-SPECIFIC HISTORY MANAGEMENT
+ * 
+ * Future enhancement to add undo/redo functionality within this modal:
+ * 
+ * 1. Create a reusable ModalToolbar component
+ *    - Location: src/components/shared/modal-toolbar.vue
+ *    - Features: Undo/Redo buttons, Save/Cancel buttons, keyboard shortcuts display
+ *    - Should be modal-agnostic and accept props for button configurations
+ * 
+ * 2. Create a modal history store and composable
+ *    - Store: src/stores/modal-history-store.js (or use a lightweight composable-only approach)
+ *    - Composable: src/composables/use-modal-history.js
+ *    - Features: 
+ *      - Independent history stack (separate from main editor history)
+ *      - pushState(), undo(), redo(), canUndo, canRedo
+ *      - Keyboard shortcut handling (Ctrl+Z/Ctrl+Y within modal scope)
+ *      - Auto-save state snapshots on significant changes
+ * 
+ * 3. Integration in this modal
+ *    - Use the composable to track changes to the `objects` array
+ *    - Add ModalToolbar component to the header or footer
+ *    - Implement modal-scoped keyboard shortcuts that don't conflict with global ones
+ * 
+ * Benefits:
+ *    - Users can undo/redo bounding box creation/deletion within the modal
+ *    - Consistent UX pattern that can be reused in other complex modals
+ *    - Isolation from main editor history prevents accidental interference
+ */
 
 const props = defineProps({
   imageUrl: String,
@@ -17,16 +47,49 @@ const imageRef = ref(null);
 const isDrawing = ref(false);
 const newRect = ref(null);
 
+// Create a deep copy of the initial state for change detection.
+const initialObjectsSnapshot = ref(JSON.stringify(props.initialObjects || []));
+
 // When the modal is shown, props will be passed. We watch `initialObjects` to populate our local state.
 watch(() => props.initialObjects, (newVal) => {
   objects.value = JSON.parse(JSON.stringify(newVal || []));
+  // Update the snapshot whenever the initial data changes.
+  initialObjectsSnapshot.value = JSON.stringify(newVal || []);
 }, { immediate: true, deep: true });
+
+/**
+ * A computed property to check if the modal's data has changed.
+ * This is our "dirty" check.
+ */
+const isDirty = computed(() => {
+  return JSON.stringify(objects.value) !== initialObjectsSnapshot.value;
+});
 
 const closeModal = () => {
   if (props.onClose) {
     props.onClose();
   }
 };
+
+/**
+ * This method is called by the modal manager when the user attempts
+ * to dismiss the modal (e.g., by pressing Escape or clicking the backdrop).
+ */
+const handleAttemptClose = () => {
+  if (isDirty.value) {
+    if (window.confirm('You have unsaved changes. Are you sure you want to discard them?')) {
+      closeModal();
+    }
+  } else {
+    // If there are no changes, close the modal without asking.
+    closeModal();
+  }
+};
+
+// Expose the method so the modal manager can call it via a template ref.
+defineExpose({
+  handleAttemptClose,
+});
 
 const saveObjects = () => {
   if (props.onSave) {
@@ -89,7 +152,7 @@ const handleDrawEnd = (event) => {
       <!-- Modal Header -->
       <div class="flex justify-between items-center p-6 pb-4 border-b border-base-300">
         <h3 class="font-bold text-lg">Set up object</h3>
-        <button @click="closeModal" class="btn btn-sm btn-circle btn-ghost">
+        <button @click="handleAttemptClose" class="btn btn-sm btn-circle btn-ghost">
           <X class="w-4 h-4" />
         </button>
       </div>
@@ -212,6 +275,7 @@ const handleDrawEnd = (event) => {
       <!-- Modal Actions -->
       <div class="border-t border-base-300 p-6 pt-4 flex-shrink-0">
         <div class="flex justify-end gap-3">
+          <button @click="closeModal" class="btn btn-ghost">Cancel</button>
           <button @click="saveObjects" class="btn btn-primary">Save Objects</button>
         </div>
       </div>
