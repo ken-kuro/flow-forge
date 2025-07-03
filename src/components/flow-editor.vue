@@ -5,7 +5,7 @@ import { Background } from "@vue-flow/background";
 import { Controls } from "@vue-flow/controls";
 import { MiniMap } from "@vue-flow/minimap";
 import { useFlowEditor } from "@/composables/use-flow-editor.js";
-import { onMounted } from 'vue';
+import { onMounted, onUnmounted } from 'vue';
 import EditorToolbar from "@/components/editor/toolbar.vue";
 import ModalManager from "@/components/modal-manager.vue";
 
@@ -25,12 +25,32 @@ import { nodeTypes } from "@/components/nodes";
 
 // --- Flow Editor Logic ---
 // All Vue Flow interactions are handled by this composable
-const { nodes, edges, initFlowEvents } = useFlowEditor();
+const { nodes, edges, initFlowEvents, canUndo } = useFlowEditor();
+
+/**
+ * Warns the user about unsaved changes before they leave the page.
+ * This is triggered by browser actions like closing the tab or refreshing.
+ * @param {BeforeUnloadEvent} event
+ */
+const onBeforeUnload = (event) => {
+  if (canUndo.value) {
+    // Standard way to trigger the browser's confirmation dialog.
+    // The message is controlled by the browser and cannot be customized.
+    event.preventDefault();
+    // Legacy support for older browsers
+    event.returnValue = '';
+    return '';
+  }
+};
 
 // Initialize the event handlers for the flow editor instance.
-// This is called only once to prevent duplicate event listener registration.
 onMounted(() => {
   initFlowEvents();
+  window.addEventListener('beforeunload', onBeforeUnload);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('beforeunload', onBeforeUnload);
 });
 
 /**

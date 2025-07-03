@@ -1,6 +1,8 @@
 <script setup>
-import { useBreakpoints, breakpointsTailwind } from "@vueuse/core";
-import FlowEditor from "@/components/flow-editor.vue";
+import { useBreakpoints, breakpointsTailwind } from '@vueuse/core'
+import FlowEditor from '@/components/flow-editor.vue'
+import { onBeforeRouteLeave } from 'vue-router'
+import { useFlowEditor } from '@/composables/use-flow-editor.js'
 
 /**
  * EditorView - The editor page/view container
@@ -13,8 +15,28 @@ import FlowEditor from "@/components/flow-editor.vue";
  */
 
 // --- Responsive Breakpoints ---
-const breakpoints = useBreakpoints(breakpointsTailwind);
-const isMobile = breakpoints.smaller("md");
+const breakpoints = useBreakpoints(breakpointsTailwind)
+const isMobile = breakpoints.smaller('md')
+
+const { canUndo } = useFlowEditor()
+
+/**
+ * Warns the user about unsaved changes before they navigate away
+ * to another route within the application.
+ */
+onBeforeRouteLeave(() => {
+  if (canUndo.value) {
+    const answer = window.confirm(
+      'You have unsaved changes that will be lost. Are you sure you want to leave this page?'
+    )
+    // If the user cancels, block the navigation. Otherwise, allow it.
+    if (!answer) {
+      return false
+    }
+  }
+  // No unsaved changes, allow navigation.
+  return true
+})
 </script>
 
 <template>
