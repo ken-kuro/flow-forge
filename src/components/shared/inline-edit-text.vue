@@ -13,22 +13,22 @@
 <script setup>
 import { ref, nextTick } from 'vue';
 
-const props = defineProps({
-  modelValue: {
-    type: String,
-    required: true,
-  },
+defineProps({
   placeholder: {
     type: String,
     default: 'Enter value',
   },
 });
 
-const emit = defineEmits(['update:modelValue']);
+// Modern Vue 3.4+ way - cleaner than manual props/emits
+const model = defineModel({
+  type: String,
+  required: true,
+});
 
 const isEditing = ref(false);
 const inputRef = ref(null);
-const localValue = ref(props.modelValue);
+const localValue = ref(model.value);
 
 async function startEditing() {
   isEditing.value = true;
@@ -40,8 +40,8 @@ function finishEditing() {
   if (isEditing.value) {
     isEditing.value = false;
     // Only emit if the value has actually changed
-    if (props.modelValue !== localValue.value) {
-      emit('update:modelValue', localValue.value);
+    if (model.value !== localValue.value) {
+      model.value = localValue.value;
     }
   }
 }
