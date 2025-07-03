@@ -45,16 +45,16 @@ const updateBlockData = (immediate = false) => {
   const newData = {
     title: title.value,
     description: description.value,
-    videoUrl: videoUrl.value,
     sourceType: sourceType.value,
+    videoUrl: videoUrl.value,
     transcript: transcript.value,
   };
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
 
-// Watch for title changes and update block data immediately
+// Watch for title changes (debounced)
 watch(title, () => {
-  updateBlockData(true);
+  updateBlockData();
 });
 
 const handleAddVideo = () => {
@@ -72,7 +72,7 @@ const handleSourceTypeChange = () => {
 
 const removeVideo = () => {
   videoUrl.value = '';
-  updateBlockData(true); // Immediate update on video removal
+  updateBlockData(true);
 };
 </script>
 
@@ -92,7 +92,7 @@ const removeVideo = () => {
       </label>
       <textarea
         v-model="description"
-        @blur="updateBlockData()"
+        @blur="updateBlockData"
         @wheel.stop
         @mousedown.stop
         @mouseup.stop
@@ -125,7 +125,7 @@ const removeVideo = () => {
         </label>
         <input
           v-model="videoUrl"
-          @blur="updateBlockData()"
+          @blur="updateBlockData"
           type="url"
           placeholder="https://example.com/video.mp4"
           class="input input-bordered input-xs"
@@ -170,7 +170,7 @@ const removeVideo = () => {
       </label>
       <textarea
         v-model="transcript"
-        @blur="updateBlockData()"
+        @blur="updateBlockData"
         @wheel.stop
         @mousedown.stop
         @mouseup.stop

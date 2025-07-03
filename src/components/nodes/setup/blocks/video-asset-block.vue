@@ -40,13 +40,8 @@ const sourceType = ref(props.block.data.sourceType || 'url');
 const videoUrl = ref(props.block.data.videoUrl || '');
 const applyToAll = ref(props.block.data.applyToAll || false);
 
-// Watch for title changes and update block data immediately
-watch(title, () => {
-  updateBlockDataImmediate();
-});
-
-// Update the store immediately
-const updateBlockDataImmediate = () => {
+// Update the store when values change
+const updateBlockData = (immediate = false) => {
   const newData = {
     title: title.value,
     description: description.value,
@@ -54,28 +49,30 @@ const updateBlockDataImmediate = () => {
     videoUrl: videoUrl.value,
     applyToAll: applyToAll.value,
   };
-  updateBlock(props.nodeId, props.block.id, newData, true);
+  updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
 
-// Legacy method for other handlers
-const updateBlockData = updateBlockDataImmediate;
+// Watch for title changes (debounced)
+watch(title, () => {
+  updateBlockData();
+});
 
 const handleAddVideo = () => {
   // TODO: Implement proper video upload functionality
   alert('Video upload functionality is not implemented yet.');
   // For now, let's set a placeholder to simulate a successful "upload"
   videoUrl.value = 'https://www.w3schools.com/html/mov_bbb.mp4';
-  updateBlockDataImmediate();
+  updateBlockData(true);
 };
 
 const handleSourceTypeChange = () => {
   videoUrl.value = '';
-  updateBlockDataImmediate();
+  updateBlockData(true);
 }
 
 const removeVideo = () => {
   videoUrl.value = '';
-  updateBlockDataImmediate(); // Immediate update on video removal
+  updateBlockData(true);
 };
 
 // Preview state
@@ -98,7 +95,7 @@ const showPreview = computed(() => videoUrl.value && videoUrl.value.trim() !== '
       </label>
       <textarea
         v-model="description"
-        @blur="updateBlockData()"
+        @blur="updateBlockData"
         @wheel.stop
         @mousedown.stop
         @mouseup.stop
@@ -131,7 +128,7 @@ const showPreview = computed(() => videoUrl.value && videoUrl.value.trim() !== '
         </label>
         <input
           v-model="videoUrl"
-          @blur="updateBlockData()"
+          @blur="updateBlockData"
           type="url"
           placeholder="https://example.com/video.mp4"
           class="input input-bordered input-xs"
@@ -174,7 +171,7 @@ const showPreview = computed(() => videoUrl.value && videoUrl.value.trim() !== '
         <input
           type="checkbox"
           v-model="applyToAll"
-          @change="updateBlockData()"
+          @change="updateBlockData(true)"
           class="checkbox checkbox-xs checkbox-secondary"
         />
         <span class="label-text text-xs">Apply to all nodes of this type</span>

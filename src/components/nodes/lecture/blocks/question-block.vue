@@ -37,11 +37,6 @@ onUnmounted(() => {
 const title = ref(props.block.data.title || '');
 const questionId = ref(props.block.data.questionId || '');
 
-// Watch for title changes and update block data immediately
-watch(title, () => {
-  updateBlockDataImmediate();
-});
-
 // Update the store when values change
 const updateBlockData = (immediate = false) => {
   const newData = {
@@ -51,16 +46,11 @@ const updateBlockData = (immediate = false) => {
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
 
-// Handle title updates from the wrapper
-const handleTitleUpdate = (newTitle) => {
-  title.value = newTitle;
-  updateBlockData(true);
-};
+// Watch for title changes (debounced)
+watch(title, () => {
+  updateBlockData();
+});
 
-// Update the store immediately
-const updateBlockDataImmediate = () => {
-  updateBlockData(true);
-};
 </script>
 
 <template>
@@ -79,7 +69,7 @@ const updateBlockDataImmediate = () => {
       </label>
       <input
         v-model="questionId"
-        @blur="updateBlockData()"
+        @blur="updateBlockData"
         type="text"
         placeholder="Enter question ID"
         class="input input-bordered input-xs"

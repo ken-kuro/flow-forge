@@ -46,57 +46,38 @@ const typeOptions = [
   { value: 'boolean', label: 'Boolean' },
 ];
 
-// Watch for title changes and update block data immediately
+// Update the store when values change
+const updateBlockData = (immediate = false) => {
+  let processedValue = value.value;
+  
+  // Convert value based on type
+  if (variableType.value === 'number') {
+    processedValue = Number(value.value) || 0;
+  } else if (variableType.value === 'boolean') {
+    processedValue = value.value === 'true' || value.value === true;
+  }
+
+  const newData = {
+    title: title.value,
+    value: processedValue,
+    type: variableType.value,
+  };
+  updateBlock(props.nodeId, props.block.id, newData, immediate);
+};
+
+// Watch for title changes (debounced)
 watch(title, () => {
-  updateBlockDataImmediate();
+  updateBlockData();
 });
 
-// Update the store when values change (debounced)
-const updateBlockData = () => {
-  let processedValue = value.value;
-  
-  // Convert value based on type
-  if (variableType.value === 'number') {
-    processedValue = Number(value.value) || 0;
-  } else if (variableType.value === 'boolean') {
-    processedValue = value.value === 'true' || value.value === true;
-  }
-
-  const newData = {
-    title: title.value,
-    value: processedValue,
-    type: variableType.value,
-  };
-  updateBlock(props.nodeId, props.block.id, newData); // Debounced save
-};
-
-// Update the store immediately (for important changes like type)
-const updateBlockDataImmediate = () => {
-  let processedValue = value.value;
-  
-  // Convert value based on type
-  if (variableType.value === 'number') {
-    processedValue = Number(value.value) || 0;
-  } else if (variableType.value === 'boolean') {
-    processedValue = value.value === 'true' || value.value === true;
-  }
-
-  const newData = {
-    title: title.value,
-    value: processedValue,
-    type: variableType.value,
-  };
-  updateBlock(props.nodeId, props.block.id, newData, true); // Immediate save
-};
-
-// Handle type change - convert value appropriately
+// Handle type change - this needs to be immediate
 const handleTypeChange = () => {
   if (variableType.value === 'boolean') {
     value.value = 'false';
   } else if (variableType.value === 'number') {
     value.value = Number(value.value) || 0;
   }
-  updateBlockDataImmediate(); // Save immediately for type changes
+  updateBlockData(true);
 };
 
 // Preview the processed value
@@ -164,7 +145,7 @@ const processedValue = computed(() => {
         <select 
           v-else-if="variableType === 'boolean'"
           v-model="value"
-          @change="updateBlockData"
+          @blur="updateBlockData"
           class="select select-bordered select-xs"
         >
           <option value="false">false</option>

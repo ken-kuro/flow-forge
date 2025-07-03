@@ -43,13 +43,8 @@ const imageUrl = ref(props.block.data.imageUrl || '');
 const applyToAll = ref(props.block.data.applyToAll || false);
 const objects = ref(props.block.data.objects || []);
 
-// Watch for title changes and update block data immediately
-watch(title, () => {
-  updateBlockDataImmediate();
-});
-
-// Update the store immediately
-const updateBlockDataImmediate = () => {
+// Update the store when values change
+const updateBlockData = (immediate = false) => {
   const newData = {
     title: title.value,
     imageUrl: imageUrl.value,
@@ -57,33 +52,35 @@ const updateBlockDataImmediate = () => {
     applyToAll: applyToAll.value,
     objects: objects.value,
   };
-  updateBlock(props.nodeId, props.block.id, newData, true);
+  updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
 
-// Legacy method for other handlers
-const updateBlockData = updateBlockDataImmediate;
+// Watch for title changes (debounced)
+watch(title, () => {
+  updateBlockData();
+});
 
 const handleAddImage = () => {
   // TODO: Implement proper image upload functionality
   alert('Image upload functionality is not implemented yet.');
   // For now, let's set a placeholder image to see the preview
   imageUrl.value = `https://picsum.photos/seed/${Date.now()}/400/200`;
-  updateBlockDataImmediate(); // Immediate update on new image
+  updateBlockData(true);
 };
 
 const handleSourceTypeChange = () => {
   imageUrl.value = '';
-  updateBlockDataImmediate();
+  updateBlockData(true);
 }
 
 const removeImage = () => {
   imageUrl.value = '';
-  updateBlockDataImmediate(); // Immediate update on image removal
+  updateBlockData(true);
 };
 
 const handleSaveObjects = (newObjects) => {
   objects.value = newObjects;
-  updateBlockDataImmediate();
+  updateBlockData(true);
 };
 
 const openObjectModal = () => {
@@ -127,7 +124,7 @@ const openObjectModal = () => {
         </label>
         <input
           v-model="imageUrl"
-          @blur="updateBlockData()"
+          @blur="updateBlockData"
           type="url"
           placeholder="https://example.com/image.jpg"
           class="input input-bordered input-xs"
@@ -173,7 +170,7 @@ const openObjectModal = () => {
         <input
           type="checkbox"
           v-model="applyToAll"
-          @change="updateBlockData()"
+          @change="updateBlockData(true)"
           class="checkbox checkbox-xs checkbox-primary"
         />
         <span class="label-text text-xs">Apply to all nodes of this type</span>

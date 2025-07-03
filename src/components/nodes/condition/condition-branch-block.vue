@@ -28,19 +28,19 @@ onUnmounted(() => {
 const title = ref(props.block.data.label || '')
 const condition = ref(props.block.data.condition || '')
 
-// Watch for title changes and update block data immediately
-watch(title, () => {
-  updateBlockData()
-})
-
 // Update block data
-const updateBlockData = () => {
+const updateBlockData = (immediate = false) => {
   const newData = {
     label: title.value,
     condition: condition.value,
-  }
-  updateBlock(props.nodeId, props.block.id, newData)
-}
+  };
+  updateBlock(props.nodeId, props.block.id, newData, immediate);
+};
+
+// Watch for title changes (debounced)
+watch(title, () => {
+  updateBlockData();
+});
 </script>
 
 <template>
@@ -63,8 +63,9 @@ const updateBlockData = () => {
         <input
           v-model="condition"
           @blur="updateBlockData"
-          class="input input-bordered input-xs w-full"
-          placeholder="e.g., score > 80"
+          type="text"
+          placeholder="e.g., age > 18"
+          class="input input-bordered input-xs"
         />
       </div>
     </CardBlockWrapper>
