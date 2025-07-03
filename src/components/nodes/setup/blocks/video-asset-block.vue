@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onUnmounted } from 'vue';
+import { ref, computed, onUnmounted, watch } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
 import { X, Video as VideoIcon, Upload } from 'lucide-vue-next';
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue';
@@ -34,46 +34,48 @@ onUnmounted(() => {
 });
 
 // Local reactive copies for editing
-const videoUrl = ref(props.block.data.videoUrl || '');
 const title = ref(props.block.data.title || '');
 const description = ref(props.block.data.description || '');
 const sourceType = ref(props.block.data.sourceType || 'url');
+const videoUrl = ref(props.block.data.videoUrl || '');
 const applyToAll = ref(props.block.data.applyToAll || false);
 
-// Update the store when values change
-const updateBlockData = (immediate = false) => {
+// Watch for title changes and update block data immediately
+watch(title, () => {
+  updateBlockDataImmediate();
+});
+
+// Update the store immediately
+const updateBlockDataImmediate = () => {
   const newData = {
     title: title.value,
     description: description.value,
-    videoUrl: videoUrl.value,
     sourceType: sourceType.value,
+    videoUrl: videoUrl.value,
     applyToAll: applyToAll.value,
   };
-  updateBlock(props.nodeId, props.block.id, newData, immediate);
+  updateBlock(props.nodeId, props.block.id, newData, true);
 };
 
-// Handle title updates from the wrapper
-const handleTitleUpdate = (newTitle) => {
-  title.value = newTitle;
-  updateBlockData(true);
-};
+// Legacy method for other handlers
+const updateBlockData = updateBlockDataImmediate;
 
 const handleAddVideo = () => {
   // TODO: Implement proper video upload functionality
   alert('Video upload functionality is not implemented yet.');
   // For now, let's set a placeholder to simulate a successful "upload"
   videoUrl.value = 'https://www.w3schools.com/html/mov_bbb.mp4';
-  updateBlockData(true);
+  updateBlockDataImmediate();
 };
 
 const handleSourceTypeChange = () => {
   videoUrl.value = '';
-  updateBlockData(true);
+  updateBlockDataImmediate();
 }
 
 const removeVideo = () => {
   videoUrl.value = '';
-  updateBlockData(true); // Immediate update on video removal
+  updateBlockDataImmediate(); // Immediate update on video removal
 };
 
 // Preview state
@@ -82,8 +84,7 @@ const showPreview = computed(() => videoUrl.value && videoUrl.value.trim() !== '
 
 <template>
   <CardBlockWrapper
-    :model-value="title"
-    @update:modelValue="handleTitleUpdate"
+    v-model="title"
     :icon="VideoIcon"
     icon-color="text-secondary"
     :node-id="nodeId"
@@ -173,7 +174,7 @@ const showPreview = computed(() => videoUrl.value && videoUrl.value.trim() !== '
         <input
           type="checkbox"
           v-model="applyToAll"
-          @change="updateBlockData(true)"
+          @change="updateBlockData()"
           class="checkbox checkbox-xs checkbox-secondary"
         />
         <span class="label-text text-xs">Apply to all nodes of this type</span>

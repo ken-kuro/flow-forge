@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUnmounted } from 'vue';
+import { ref, onUnmounted, watch } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
 import { Play, Upload, X } from 'lucide-vue-next';
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue';
@@ -52,11 +52,10 @@ const updateBlockData = (immediate = false) => {
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
 
-// Handle title updates from the wrapper
-const handleTitleUpdate = (newTitle) => {
-  title.value = newTitle;
+// Watch for title changes and update block data immediately
+watch(title, () => {
   updateBlockData(true);
-};
+});
 
 const handleAddVideo = () => {
   // TODO: Implement proper video upload functionality
@@ -79,8 +78,7 @@ const removeVideo = () => {
 
 <template>
   <CardBlockWrapper
-    :model-value="title"
-    @update:modelValue="handleTitleUpdate"
+    v-model="title"
     :icon="Play"
     icon-color="text-secondary"
     :node-id="nodeId"

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUnmounted } from 'vue';
+import { ref, onUnmounted, watch } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
 import { X, Image as ImageIcon, Upload } from 'lucide-vue-next';
 import { useModal } from '@/composables/use-modal.js';
@@ -38,13 +38,18 @@ onUnmounted(() => {
 
 // Local reactive copies for editing
 const title = ref(props.block.data.title || '');
-const imageUrl = ref(props.block.data.imageUrl || '');
 const sourceType = ref(props.block.data.sourceType || 'url');
+const imageUrl = ref(props.block.data.imageUrl || '');
 const applyToAll = ref(props.block.data.applyToAll || false);
 const objects = ref(props.block.data.objects || []);
 
-// Update the store when values change
-const updateBlockData = (immediate = false) => {
+// Watch for title changes and update block data immediately
+watch(title, () => {
+  updateBlockDataImmediate();
+});
+
+// Update the store immediately
+const updateBlockDataImmediate = () => {
   const newData = {
     title: title.value,
     imageUrl: imageUrl.value,
@@ -52,36 +57,33 @@ const updateBlockData = (immediate = false) => {
     applyToAll: applyToAll.value,
     objects: objects.value,
   };
-  updateBlock(props.nodeId, props.block.id, newData, immediate);
+  updateBlock(props.nodeId, props.block.id, newData, true);
 };
 
-// Handle title updates from the wrapper
-const handleTitleUpdate = (newTitle) => {
-  title.value = newTitle;
-  updateBlockData(true);
-};
+// Legacy method for other handlers
+const updateBlockData = updateBlockDataImmediate;
 
 const handleAddImage = () => {
   // TODO: Implement proper image upload functionality
   alert('Image upload functionality is not implemented yet.');
   // For now, let's set a placeholder image to see the preview
   imageUrl.value = `https://picsum.photos/seed/${Date.now()}/400/200`;
-  updateBlockData(true); // Immediate update on new image
+  updateBlockDataImmediate(); // Immediate update on new image
 };
 
 const handleSourceTypeChange = () => {
   imageUrl.value = '';
-  updateBlockData(true);
+  updateBlockDataImmediate();
 }
 
 const removeImage = () => {
   imageUrl.value = '';
-  updateBlockData(true); // Immediate update on image removal
+  updateBlockDataImmediate(); // Immediate update on image removal
 };
 
 const handleSaveObjects = (newObjects) => {
   objects.value = newObjects;
-  updateBlockData(true);
+  updateBlockDataImmediate();
 };
 
 const openObjectModal = () => {
@@ -95,8 +97,7 @@ const openObjectModal = () => {
 
 <template>
   <CardBlockWrapper
-    :model-value="title"
-    @update:modelValue="handleTitleUpdate"
+    v-model="title"
     :icon="ImageIcon"
     icon-color="text-primary"
     :node-id="nodeId"
@@ -172,7 +173,7 @@ const openObjectModal = () => {
         <input
           type="checkbox"
           v-model="applyToAll"
-          @change="updateBlockData(true)"
+          @change="updateBlockData()"
           class="checkbox checkbox-xs checkbox-primary"
         />
         <span class="label-text text-xs">Apply to all nodes of this type</span>

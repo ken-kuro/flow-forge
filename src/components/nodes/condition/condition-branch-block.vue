@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUnmounted } from 'vue'
+import { ref, onUnmounted, watch } from 'vue'
 import { Handle, Position } from '@vue-flow/core'
 import { useFlowEditor } from '@/composables/use-flow-editor.js'
 import { GitBranch } from 'lucide-vue-next'
@@ -24,33 +24,31 @@ onUnmounted(() => {
   flushPendingSaves()
 })
 
-// Local reactive state
-const label = ref(props.block.data.label || '')
+// Local reactive copies for editing
+const title = ref(props.block.data.label || '')
 const condition = ref(props.block.data.condition || '')
+
+// Watch for title changes and update block data immediately
+watch(title, () => {
+  updateBlockData()
+})
 
 // Update block data
 const updateBlockData = () => {
   const newData = {
-    label: label.value,
+    label: title.value,
     condition: condition.value,
   }
   updateBlock(props.nodeId, props.block.id, newData)
 }
-
-// Handle title updates from the wrapper
-const handleTitleUpdate = (newTitle) => {
-  label.value = newTitle;
-  updateBlockData();
-};
 </script>
 
 <template>
   <div class="condition-branch-block relative">
-    <CardBlockWrapper
-      :model-value="label"
-      @update:modelValue="handleTitleUpdate"
-      :icon="GitBranch"
-      icon-color="text-primary"
+          <CardBlockWrapper
+        v-model="title"
+        :icon="GitBranch"
+        icon-color="text-primary"
       :node-id="nodeId"
       :block-id="block.id"
       placeholder="Branch label"

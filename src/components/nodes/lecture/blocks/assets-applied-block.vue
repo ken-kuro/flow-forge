@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onUnmounted } from 'vue';
+import { ref, computed, onUnmounted, watch } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
 import { Link, Image as ImageIcon, Video as VideoIcon } from 'lucide-vue-next';
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue';
@@ -35,7 +35,7 @@ onUnmounted(() => {
 
 // Local reactive copies for editing
 const title = ref(props.block.data.title || '');
-const selectedAssetKey = ref(props.block.data.selectedAssetKey || '');
+const selectedAssetKey = ref(props.block.data.selectedAsset || '');
 
 // Get available assets from setup nodes
 const availableAssets = computed(() => getAvailableAssets());
@@ -69,17 +69,17 @@ const updateBlockData = (immediate = false) => {
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
 
-// Handle title updates from the wrapper
-const handleTitleUpdate = (newTitle) => {
-  title.value = newTitle;
+// Watch for title changes and update block data immediately
+watch(title, () => {
   updateBlockData(true);
-};
+});
+
+
 </script>
 
 <template>
   <CardBlockWrapper
-    :model-value="title"
-    @update:modelValue="handleTitleUpdate"
+    v-model="title"
     :icon="Link"
     icon-color="text-secondary"
     :node-id="nodeId"

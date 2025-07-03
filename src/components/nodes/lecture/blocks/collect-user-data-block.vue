@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUnmounted } from 'vue';
+import { ref, onUnmounted, watch } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
 import { Database } from 'lucide-vue-next';
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue';
@@ -55,11 +55,10 @@ const updateBlockData = (immediate = false) => {
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
 
-// Handle title updates from the wrapper
-const handleTitleUpdate = (newTitle) => {
-  title.value = newTitle;
+// Watch for title changes and update block data immediately
+watch(title, () => {
   updateBlockData(true);
-};
+});
 
 // Handle method selection (multiple choice)
 const toggleMethod = (method) => {
@@ -78,11 +77,10 @@ const isMethodSelected = (method) => {
 </script>
 
 <template>
-  <CardBlockWrapper
-    :model-value="title"
-    @update:modelValue="handleTitleUpdate"
-    :icon="Database"
-    icon-color="text-warning"
+      <CardBlockWrapper
+      v-model="title"
+      :icon="Database"
+      icon-color="text-warning"
     :node-id="nodeId"
     :block-id="block.id"
     placeholder="Enter collect user data block name"

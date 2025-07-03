@@ -1,6 +1,6 @@
 <script setup>
 // TODO: Revisit this component. The current implementation is a placeholder for handling variables.
-import { ref, computed, onUnmounted } from 'vue';
+import { ref, computed, onUnmounted, watch } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
 import { Variable } from 'lucide-vue-next';
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue';
@@ -46,6 +46,11 @@ const typeOptions = [
   { value: 'boolean', label: 'Boolean' },
 ];
 
+// Watch for title changes and update block data immediately
+watch(title, () => {
+  updateBlockDataImmediate();
+});
+
 // Update the store when values change (debounced)
 const updateBlockData = () => {
   let processedValue = value.value;
@@ -84,12 +89,6 @@ const updateBlockDataImmediate = () => {
   updateBlock(props.nodeId, props.block.id, newData, true); // Immediate save
 };
 
-// Handle title updates from the wrapper
-const handleTitleUpdate = (newTitle) => {
-  title.value = newTitle;
-  updateBlockDataImmediate();
-};
-
 // Handle type change - convert value appropriately
 const handleTypeChange = () => {
   if (variableType.value === 'boolean') {
@@ -113,8 +112,7 @@ const processedValue = computed(() => {
 
 <template>
   <CardBlockWrapper
-    :model-value="title"
-    @update:modelValue="handleTitleUpdate"
+    v-model="title"
     :icon="Variable"
     :node-id="nodeId"
     :block-id="block.id"

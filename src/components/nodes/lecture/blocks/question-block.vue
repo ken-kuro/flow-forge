@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUnmounted } from 'vue';
+import { ref, onUnmounted, watch } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
 import { HelpCircle } from 'lucide-vue-next';
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue';
@@ -37,6 +37,11 @@ onUnmounted(() => {
 const title = ref(props.block.data.title || '');
 const questionId = ref(props.block.data.questionId || '');
 
+// Watch for title changes and update block data immediately
+watch(title, () => {
+  updateBlockDataImmediate();
+});
+
 // Update the store when values change
 const updateBlockData = (immediate = false) => {
   const newData = {
@@ -51,12 +56,16 @@ const handleTitleUpdate = (newTitle) => {
   title.value = newTitle;
   updateBlockData(true);
 };
+
+// Update the store immediately
+const updateBlockDataImmediate = () => {
+  updateBlockData(true);
+};
 </script>
 
 <template>
   <CardBlockWrapper
-    :model-value="title"
-    @update:modelValue="handleTitleUpdate"
+    v-model="title"
     :icon="HelpCircle"
     icon-color="text-info"
     :node-id="nodeId"
