@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Handle, Position } from '@vue-flow/core'
 import { GraduationCap } from 'lucide-vue-next'
 import CardNodeWrapper from '@/components/nodes/base/card-node-wrapper.vue'
@@ -38,6 +38,11 @@ const { addBlock, getNodeBlocks, updateNodeData } = useFlowEditor()
 
 const title = ref(props.data.title);
 
+// Watch for title changes and update the node data
+watch(title, (newTitle) => {
+  updateNodeData(props.id, { title: newTitle });
+});
+
 const blocks = computed(() => getNodeBlocks(props.id))
 
 const availableBlocks = [
@@ -59,14 +64,10 @@ function handleAddBlock(blockType) {
     document.activeElement.blur()
   }
 }
-
-function handleTitleChange() {
-  updateNodeData(props.id, { title: title.value });
-}
 </script>
 
 <template>
-  <CardNodeWrapper v-model="title" :selected="selected" :icon="GraduationCap" icon-color="text-secondary" @update:modelValue="handleTitleChange">
+  <CardNodeWrapper v-model="title" :selected="selected" :icon="GraduationCap" icon-color="text-secondary">
     <!-- Input handle on the left -->
     <Handle type="target" :position="Position.Left" id="default" />
 

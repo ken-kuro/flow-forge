@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Handle, Position } from '@vue-flow/core'
 import { Plus, GitBranch } from 'lucide-vue-next'
 import CardNodeWrapper from '@/components/nodes/base/card-node-wrapper.vue'
@@ -24,6 +24,11 @@ const { addBlock, getNodeBlocks, updateNodeData } = useFlowEditor()
 
 const title = ref(props.data.title);
 
+// Watch for title changes and update the node data
+watch(title, (newTitle) => {
+  updateNodeData(props.id, { title: newTitle });
+});
+
 // TODO: HIGH_PRIORITY - Add error boundary wrapper to handle malformed branch data
 // TODO: HIGH_PRIORITY - Add error handling for Vue Flow edge creation failures
 
@@ -41,14 +46,10 @@ function handleAddBranch() {
   }
   addBlock(props.id, blockData)
 }
-
-function handleTitleChange() {
-  updateNodeData(props.id, { title: title.value });
-}
 </script>
 
 <template>
-  <CardNodeWrapper v-model="title" :selected="selected" :icon="GitBranch" icon-color="text-warning" @update:modelValue="handleTitleChange">
+  <CardNodeWrapper v-model="title" :selected="selected" :icon="GitBranch" icon-color="text-warning">
     <!-- Input handle -->
     <Handle type="target" :position="Position.Left" id="default" />
 
