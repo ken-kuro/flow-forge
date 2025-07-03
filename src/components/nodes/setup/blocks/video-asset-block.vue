@@ -36,6 +36,7 @@ onUnmounted(() => {
 // Local reactive copies for editing
 const videoUrl = ref(props.block.data.videoUrl || '');
 const title = ref(props.block.data.title || '');
+const description = ref(props.block.data.description || '');
 const sourceType = ref(props.block.data.sourceType || 'url');
 const applyToAll = ref(props.block.data.applyToAll || false);
 
@@ -43,6 +44,7 @@ const applyToAll = ref(props.block.data.applyToAll || false);
 const updateBlockData = (immediate = false) => {
   const newData = {
     title: title.value,
+    description: description.value,
     videoUrl: videoUrl.value,
     sourceType: sourceType.value,
     applyToAll: applyToAll.value,
@@ -88,6 +90,19 @@ const showPreview = computed(() => videoUrl.value && videoUrl.value.trim() !== '
     :block-id="block.id"
     placeholder="Enter asset name"
   >
+    <!-- Description Field -->
+    <div class="form-control">
+      <label class="label">
+        <span class="label-text text-xs">Description</span>
+      </label>
+      <textarea
+        v-model="description"
+        @blur="updateBlockData()"
+        placeholder="Enter video description"
+        class="textarea textarea-bordered textarea-xs min-h-18 resize-none"
+      ></textarea>
+    </div>
+
     <!-- Source Type Selection -->
     <div class="form-control">
       <label class="label">

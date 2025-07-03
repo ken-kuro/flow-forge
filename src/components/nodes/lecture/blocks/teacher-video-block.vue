@@ -35,6 +35,7 @@ onUnmounted(() => {
 
 // Local reactive copies for editing
 const title = ref(props.block.data.title || '');
+const description = ref(props.block.data.description || '');
 const videoUrl = ref(props.block.data.videoUrl || '');
 const sourceType = ref(props.block.data.sourceType || 'url');
 const transcript = ref(props.block.data.transcript || '');
@@ -43,6 +44,7 @@ const transcript = ref(props.block.data.transcript || '');
 const updateBlockData = (immediate = false) => {
   const newData = {
     title: title.value,
+    description: description.value,
     videoUrl: videoUrl.value,
     sourceType: sourceType.value,
     transcript: transcript.value,
@@ -85,6 +87,19 @@ const removeVideo = () => {
     :block-id="block.id"
     placeholder="Enter teacher video block name"
   >
+    <!-- Description Field -->
+    <div class="form-control">
+      <label class="label">
+        <span class="label-text text-xs">Description</span>
+      </label>
+      <textarea
+        v-model="description"
+        @blur="updateBlockData()"
+        placeholder="Enter video description"
+        class="textarea textarea-bordered textarea-xs min-h-18 resize-none"
+      ></textarea>
+    </div>
+
     <!-- Source Type Selection -->
     <div class="form-control">
       <label class="label">
