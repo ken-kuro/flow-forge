@@ -34,11 +34,20 @@ onUnmounted(() => {
 });
 
 // Local reactive copies for editing
-const title = ref(props.block.data.title || '');
-const action = ref(props.block.data.action || 'asset-interaction');
-const delay = ref(props.block.data.delay || '');
-const methods = ref(props.block.data.methods || []);
+const title = ref(props.block.data.title || 'System Action');
+const action = ref(props.block.data.action || 'show');
+const delay = ref(props.block.data.delay || 0);
+const methods = ref(props.block.data.method || []);
 const object = ref(props.block.data.object || '');
+
+// Watch for external data changes (e.g., on flow import) and update local state
+watch(() => props.block.data, (newData) => {
+  title.value = newData.title || 'System Action';
+  action.value = newData.action || 'show';
+  delay.value = newData.delay || 0;
+  methods.value = newData.method || [];
+  object.value = newData.object || '';
+}, { deep: true });
 
 // Available actions (extensible for future API calls, jobs, etc.)
 const actionOptions = [
@@ -58,24 +67,24 @@ const updateBlockData = (immediate = false) => {
     title: title.value,
     action: action.value,
     delay: delay.value,
-    methods: methods.value,
+    method: methods.value,
     object: object.value,
   };
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
 
-// Watch for title changes and update block data immediately
+// Watch for title changes (debounced)
 watch(title, () => {
-  updateBlockData(true);
+  updateBlockData();
 });
 
 // Handle method selection (multiple choice)
-const toggleMethod = (method) => {
-  const index = methods.value.indexOf(method);
+const toggleMethod = (methodValue) => {
+  const index = methods.value.indexOf(methodValue);
   if (index > -1) {
     methods.value.splice(index, 1);
   } else {
-    methods.value.push(method);
+    methods.value.push(methodValue);
   }
   updateBlockData(true);
 };
@@ -97,11 +106,11 @@ const isMethodSelected = (method) => {
     <!-- Action Type -->
     <div class="form-control">
       <label class="label">
-        <span class="label-text text-xs">Action</span>
+        <span class="label-text text-xs">Action Type</span>
       </label>
       <select
         v-model="action"
-        @change="updateBlockData(true)"
+        @blur="updateBlockData"
         class="select select-bordered select-xs"
       >
         <option v-for="option in actionOptions" :key="option.value" :value="option.value">
@@ -119,7 +128,7 @@ const isMethodSelected = (method) => {
         </label>
         <input
           v-model="delay"
-          @blur="updateBlockData()"
+          @blur="updateBlockData"
           type="number"
           step="0.1"
           min="0"
@@ -161,7 +170,7 @@ const isMethodSelected = (method) => {
         </label>
         <input
           v-model="object"
-          @blur="updateBlockData()"
+          @blur="updateBlockData"
           type="text"
           placeholder="TODO: Object reference system"
           class="input input-bordered input-xs"

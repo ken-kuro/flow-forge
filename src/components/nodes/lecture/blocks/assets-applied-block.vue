@@ -34,8 +34,14 @@ onUnmounted(() => {
 });
 
 // Local reactive copies for editing
-const title = ref(props.block.data.title || '');
-const selectedAssetKey = ref(props.block.data.selectedAsset || '');
+const title = ref(props.block.data.title || 'Assets Applied');
+const selectedAssetKey = ref(props.block.data.selectedAssetKey || '');
+
+// Watch for external data changes (e.g., on flow import) and update local state
+watch(() => props.block.data, (newData) => {
+  title.value = newData.title || 'Assets Applied';
+  selectedAssetKey.value = newData.selectedAssetKey || '';
+}, { deep: true });
 
 // Get available assets from setup nodes
 const availableAssets = computed(() => getAvailableAssets());
@@ -69,9 +75,9 @@ const updateBlockData = (immediate = false) => {
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
 
-// Watch for title changes and update block data immediately
+// Watch for title changes (debounced)
 watch(title, () => {
-  updateBlockData(true);
+  updateBlockData();
 });
 
 
@@ -93,7 +99,7 @@ watch(title, () => {
       </label>
       <select
         v-model="selectedAssetKey"
-        @change="updateBlockData(true)"
+        @blur="updateBlockData"
         class="select select-bordered select-xs"
       >
         <option value="">Choose an asset...</option>

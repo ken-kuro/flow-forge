@@ -34,8 +34,8 @@ onUnmounted(() => {
 });
 
 // Local reactive copies for editing
-const title = ref(props.block.data.title || '');
-const methods = ref(props.block.data.methods || []);
+const title = ref(props.block.data.title || 'Collect User Data');
+const methods = ref(props.block.data.method || []);
 const saveToField = ref(props.block.data.saveToField || '');
 
 // Available collection methods (multiple choice)
@@ -45,28 +45,35 @@ const availableMethods = [
   { value: 'text-input', label: 'Text Input' },
 ];
 
+// Watch for external data changes (e.g., on flow import) and update local state
+watch(() => props.block.data, (newData) => {
+  title.value = newData.title || 'Collect User Data';
+  saveToField.value = newData.saveToField || '';
+  methods.value = newData.method || [];
+}, { deep: true });
+
 // Update the store when values change
 const updateBlockData = (immediate = false) => {
   const newData = {
     title: title.value,
-    methods: methods.value,
     saveToField: saveToField.value,
+    method: methods.value,
   };
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
 
-// Watch for title changes and update block data immediately
+// Watch for title changes (debounced)
 watch(title, () => {
-  updateBlockData(true);
+  updateBlockData();
 });
 
 // Handle method selection (multiple choice)
-const toggleMethod = (method) => {
-  const index = methods.value.indexOf(method);
+const toggleMethod = (methodValue) => {
+  const index = methods.value.indexOf(methodValue);
   if (index > -1) {
     methods.value.splice(index, 1);
   } else {
-    methods.value.push(method);
+    methods.value.push(methodValue);
   }
   updateBlockData(true);
 };
@@ -118,7 +125,7 @@ const isMethodSelected = (method) => {
       </label>
       <input
         v-model="saveToField"
-        @blur="updateBlockData()"
+        @blur="updateBlockData"
         type="text"
         placeholder="TODO: Variable reference system"
         class="input input-bordered input-xs"
