@@ -98,7 +98,7 @@ const removeVideo = () => {
         @mouseup.stop
         @click.stop
         placeholder="Enter video description"
-        class="textarea textarea-bordered textarea-xs min-h-18 resize-none"
+        class="textarea textarea-bordered textarea-xs min-h-18 "
       ></textarea>
     </div>
 
@@ -176,7 +176,7 @@ const removeVideo = () => {
         @mouseup.stop
         @click.stop
         placeholder="Enter video transcript"
-        class="textarea textarea-bordered textarea-xs min-h-18 resize-none"
+        class="textarea textarea-bordered textarea-xs min-h-18 "
       ></textarea>
     </div>
   </CardBlockWrapper>

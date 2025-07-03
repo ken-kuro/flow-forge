@@ -101,7 +101,7 @@ const showPreview = computed(() => videoUrl.value && videoUrl.value.trim() !== '
         @mouseup.stop
         @click.stop
         placeholder="Enter video description"
-        class="textarea textarea-bordered textarea-xs min-h-18 resize-none"
+        class="textarea textarea-bordered textarea-xs min-h-18 "
       ></textarea>
     </div>
 

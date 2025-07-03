@@ -80,7 +80,6 @@ watch(title, () => {
   updateBlockData();
 });
 
-
 </script>
 
 <template>
