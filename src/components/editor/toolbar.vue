@@ -1,5 +1,6 @@
 <script setup>
 import { useFlowEditor } from "@/composables/use-flow-editor";
+import { useModal } from '@/composables/use-modal';
 import { Plus, History, Undo, Redo, Download, Upload, Bug } from "lucide-vue-next";
 import { useMagicKeys } from "@vueuse/core";
 import { ref, computed } from "vue";
@@ -34,6 +35,10 @@ const {
   vueFlowApi,
 } = useFlowEditor();
 
+// --- Modal State ---
+// This is crucial for disabling global shortcuts when a modal is active.
+const { isModalActive } = useModal();
+
 // Ref for the create button to programmatically open the dropdown
 const createButtonRef = ref(null);
 
@@ -49,6 +54,9 @@ const DEBOUNCE_DELAY = 100; // 100ms debounce
 const { ctrl_z, ctrl_y, ctrl_shift_z, cmd_z, cmd_y, cmd_shift_z } = useMagicKeys({
   passive: false,
   onEventFired(e) {
+    // *** FIX: Do not process shortcuts if a modal is active ***
+    if (isModalActive.value) return;
+    
     const now = Date.now();
     
     // Only handle keydown events to avoid duplicates
@@ -81,6 +89,9 @@ const { ctrl_z, ctrl_y, ctrl_shift_z, cmd_z, cmd_y, cmd_shift_z } = useMagicKeys
 const { ctrl_alt_n, cmd_option_n } = useMagicKeys({
   passive: false,
   onEventFired(e) {
+    // *** FIX: Do not process shortcuts if a modal is active ***
+    if (isModalActive.value) return;
+
     if ((e.ctrlKey || e.metaKey) && e.altKey && e.key.toLowerCase() === 'n') {
       e.preventDefault();
       e.stopPropagation();
