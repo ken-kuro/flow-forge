@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
 import { Handle, Position } from '@vue-flow/core'
 import { Settings } from 'lucide-vue-next'
 import CardNodeWrapper from '@/components/nodes/base/card-node-wrapper.vue'
@@ -42,11 +42,11 @@ const props = defineProps({
 
 const { addBlock, getNodeBlocks, updateNodeData } = useFlowEditor()
 
-const title = ref(props.data.title);
-
-// Watch for title changes and update the node data
-watch(title, (newTitle) => {
-  updateNodeData(props.id, { title: newTitle });
+const title = computed({
+  get: () => props.data.title,
+  set: (newTitle) => {
+    updateNodeData(props.id, { title: newTitle });
+  }
 });
 
 const blocks = computed(() => getNodeBlocks(props.id))
@@ -144,4 +144,4 @@ function handleAddBlock(blockType) {
 .unknown-block:hover {
   border-color: hsl(var(--bc) / 0.3);
 }
-</style> 
+</style>
