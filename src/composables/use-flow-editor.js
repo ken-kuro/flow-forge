@@ -177,7 +177,7 @@ export function useFlowEditor() {
             ...newEdge.data,
             branchId: branchId,
             branchLabel: foundBranch.data.label || `Branch ${branchId}`,
-            conditionExpression: foundBranch.data.condition || '',
+            conditionExpression: foundBranch.data.condition ?? '',
             isConditionBranch: true
           };
           console.log(`🔀 Adding condition branch edge for "${foundBranch.data.label}"`, newEdge.data);

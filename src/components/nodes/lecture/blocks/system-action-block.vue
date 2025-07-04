@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUnmounted, watch } from 'vue';
+import { ref, onUnmounted, computed } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
 import { Settings } from 'lucide-vue-next';
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue';
@@ -34,11 +34,17 @@ onUnmounted(() => {
 });
 
 // Local reactive copies for editing
-const title = ref(props.block.data.title || 'System Action');
-const action = ref(props.block.data.action || 'show');
-const delay = ref(props.block.data.delay || 0);
+const title = computed({
+  get: () => props.block.data.title ?? 'System Action',
+  set: (val) => {
+    props.block.data.title = val;
+    updateBlockData();
+  }
+});
+const action = ref(props.block.data.action ?? 'show');
+const delay = ref(props.block.data.delay ?? 0);
 const methods = ref(props.block.data.method || []);
-const object = ref(props.block.data.object || '');
+const object = ref(props.block.data.object ?? '');
 
 // Available actions (extensible for future API calls, jobs, etc.)
 const actionOptions = [
@@ -63,11 +69,6 @@ const updateBlockData = (immediate = false) => {
   };
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
-
-// Watch for title changes (debounced)
-watch(title, () => {
-  updateBlockData();
-});
 
 // Handle method selection (multiple choice)
 const toggleMethod = (methodValue) => {
@@ -174,4 +175,4 @@ const isMethodSelected = (method) => {
 
 <style scoped>
 /* All styles now handled by CardBlockWrapper */
-</style> 
+</style>

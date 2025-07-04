@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUnmounted, watch } from 'vue';
+import { ref, onUnmounted, computed } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
 import { HelpCircle } from 'lucide-vue-next';
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue';
@@ -34,8 +34,14 @@ onUnmounted(() => {
 });
 
 // Local reactive copies for editing
-const title = ref(props.block.data.title || '');
-const questionId = ref(props.block.data.questionId || '');
+const title = computed({
+  get: () => props.block.data.title ?? '',
+  set: (val) => {
+    props.block.data.title = val;
+    updateBlockData();
+  }
+});
+const questionId = ref(props.block.data.questionId ?? '');
 
 // Update the store when values change
 const updateBlockData = (immediate = false) => {
@@ -45,11 +51,6 @@ const updateBlockData = (immediate = false) => {
   };
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
-
-// Watch for title changes (debounced)
-watch(title, () => {
-  updateBlockData();
-});
 
 </script>
 
@@ -80,4 +81,4 @@ watch(title, () => {
 
 <style scoped>
 /* All styles now handled by CardBlockWrapper */
-</style> 
+</style>

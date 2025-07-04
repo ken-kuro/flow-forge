@@ -1,6 +1,6 @@
 <script setup>
 // TODO: Revisit this component. The current implementation is a placeholder for handling variables.
-import { ref, computed, onUnmounted, watch } from 'vue';
+import { ref, computed, onUnmounted } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
 import { Variable } from 'lucide-vue-next';
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue';
@@ -35,9 +35,15 @@ onUnmounted(() => {
 });
 
 // Local reactive copies for editing
-const title = ref(props.block.data.title || '');
-const value = ref(props.block.data.value || '');
-const variableType = ref(props.block.data.type || 'string');
+const title = computed({
+  get: () => props.block.data.title ?? '',
+  set: (val) => {
+    props.block.data.title = val;
+    updateBlockData();
+  }
+});
+const value = ref(props.block.data.value ?? '');
+const variableType = ref(props.block.data.type ?? 'string');
 
 // Variable type options
 const typeOptions = [
@@ -52,7 +58,7 @@ const updateBlockData = (immediate = false) => {
   
   // Convert value based on type
   if (variableType.value === 'number') {
-    processedValue = Number(value.value) || 0;
+    processedValue = Number(value.value) ?? 0;
   } else if (variableType.value === 'boolean') {
     processedValue = value.value === 'true' || value.value === true;
   }
@@ -65,17 +71,12 @@ const updateBlockData = (immediate = false) => {
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
 
-// Watch for title changes (debounced)
-watch(title, () => {
-  updateBlockData();
-});
-
 // Handle type change - this needs to be immediate
 const handleTypeChange = () => {
   if (variableType.value === 'boolean') {
     value.value = 'false';
   } else if (variableType.value === 'number') {
-    value.value = Number(value.value) || 0;
+    value.value = Number(value.value) ?? 0;
   }
   updateBlockData(true);
 };
@@ -83,7 +84,7 @@ const handleTypeChange = () => {
 // Preview the processed value
 const processedValue = computed(() => {
   if (variableType.value === 'number') {
-    return Number(value.value) || 0;
+    return Number(value.value) ?? 0;
   } else if (variableType.value === 'boolean') {
     return value.value === 'true' || value.value === true;
   }
@@ -169,4 +170,4 @@ const processedValue = computed(() => {
 
 <style scoped>
 /* All styles now handled by CardBlockWrapper */
-</style> 
+</style>

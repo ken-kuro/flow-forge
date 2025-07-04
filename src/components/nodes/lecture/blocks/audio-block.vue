@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUnmounted, watch } from 'vue';
+import { ref, onUnmounted, computed } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
 import { Volume2 as AudioIcon } from 'lucide-vue-next';
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue';
@@ -34,10 +34,16 @@ onUnmounted(() => {
 });
 
 // Local reactive copies for editing
-const title = ref(props.block.data.title || 'Audio');
-const description = ref(props.block.data.description || '');
-const voice = ref(props.block.data.voice || 'male');
-const text = ref(props.block.data.text || '');
+const title = computed({
+  get: () => props.block.data.title ?? 'Audio',
+  set: (val) => {
+    props.block.data.title = val;
+    updateBlockData();
+  }
+});
+const description = ref(props.block.data.description ?? '');
+const voice = ref(props.block.data.voice ?? 'male');
+const text = ref(props.block.data.text ?? '');
 
 // Update the store when values change
 const updateBlockData = (immediate = false) => {
@@ -49,11 +55,6 @@ const updateBlockData = (immediate = false) => {
   };
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
-
-// Watch for title changes (debounced)
-watch(title, () => {
-  updateBlockData();
-});
 
 </script> 
 

@@ -25,8 +25,8 @@ onUnmounted(() => {
 })
 
 // Local reactive copies for editing
-const title = ref(props.block.data.label || '')
-const condition = ref(props.block.data.condition || '')
+const title = ref(props.block.data.label ?? '')
+const condition = ref(props.block.data.condition ?? '')
 
 // Update block data
 const updateBlockData = (immediate = false) => {

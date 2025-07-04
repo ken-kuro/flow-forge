@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUnmounted, watch } from 'vue';
+import { ref, onUnmounted, computed } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
 import { Database } from 'lucide-vue-next';
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue';
@@ -34,9 +34,15 @@ onUnmounted(() => {
 });
 
 // Local reactive copies for editing
-const title = ref(props.block.data.title || 'Collect User Data');
+const title = computed({
+  get: () => props.block.data.title ?? 'Collect User Data',
+  set: (val) => {
+    props.block.data.title = val;
+    updateBlockData();
+  }
+});
 const methods = ref(props.block.data.method || []);
-const saveToField = ref(props.block.data.saveToField || '');
+const saveToField = ref(props.block.data.saveToField ?? '');
 
 // Available collection methods (multiple choice)
 const availableMethods = [
@@ -54,11 +60,6 @@ const updateBlockData = (immediate = false) => {
   };
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
-
-// Watch for title changes (debounced)
-watch(title, () => {
-  updateBlockData();
-});
 
 // Handle method selection (multiple choice)
 const toggleMethod = (methodValue) => {
@@ -130,4 +131,4 @@ const isMethodSelected = (method) => {
 
 <style scoped>
 /* All styles now handled by CardBlockWrapper */
-</style> 
+</style>

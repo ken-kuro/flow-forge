@@ -231,7 +231,7 @@ export const useFlowStore = defineStore('flow', () => {
         if (addChanges.length > 0) {
           if (addChanges.length === 1) {
             const node = addChanges[0].item;
-            const description = `Add ${formatNodeTypeName(node.type)} "${node?.data?.title || ''}"`;
+            const description = `Add ${formatNodeTypeName(node.type)} "${node?.data?.title ?? ''}"`;
             console.log(`💾 Saving state for single node addition: ${description}`);
             saveState(description);
           } else {

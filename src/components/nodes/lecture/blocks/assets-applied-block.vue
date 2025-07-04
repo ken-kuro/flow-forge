@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onUnmounted, watch } from 'vue';
+import { ref, computed, onUnmounted } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
 import { Link, Image as ImageIcon, Video as VideoIcon } from 'lucide-vue-next';
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue';
@@ -34,8 +34,14 @@ onUnmounted(() => {
 });
 
 // Local reactive copies for editing
-const title = ref(props.block.data.title || 'Assets Applied');
-const selectedAssetKey = ref(props.block.data.selectedAssetKey || '');
+const title = computed({
+  get: () => props.block.data.title ?? 'Assets Applied',
+  set: (val) => {
+    props.block.data.title = val;
+    updateBlockData();
+  }
+});
+const selectedAssetKey = ref(props.block.data.selectedAssetKey ?? '');
 
 // Get available assets from setup nodes
 const availableAssets = computed(() => getAvailableAssets());
@@ -47,7 +53,7 @@ const assetOptions = computed(() => {
     const key = `${asset.setupNodeId}-${asset.assetId}`;
     options.push({
       value: key,
-      label: `${asset.setupNodeTitle} > ${asset.assetTitle || 'Untitled Asset'} (${asset.assetType.replace('asset-', '')})`
+      label: `${asset.setupNodeTitle} > ${asset.assetTitle ?? 'Untitled Asset'} (${asset.assetType.replace('asset-', '')})`
     });
   });
   return options;
@@ -70,9 +76,9 @@ const updateBlockData = (immediate = false) => {
 };
 
 // Watch for title changes (debounced)
-watch(title, () => {
-  updateBlockData();
-});
+// watch(title, () => {
+//   updateBlockData();
+// });
 
 </script>
 
@@ -114,8 +120,8 @@ watch(title, () => {
       <!-- Debug info (remove after testing) -->
       <div class="text-xs text-base-content/50 p-2 bg-base-300 rounded">
         <div>Type: {{ selectedAsset.type }}</div>
-        <div>imageUrl: {{ selectedAsset.data?.imageUrl || 'not set' }}</div>
-        <div>videoUrl: {{ selectedAsset.data?.videoUrl || 'not set' }}</div>
+        <div>imageUrl: {{ selectedAsset.data?.imageUrl ?? 'not set' }}</div>
+        <div>videoUrl: {{ selectedAsset.data?.videoUrl ?? 'not set' }}</div>
         <div>Data keys: {{ Object.keys(selectedAsset.data || {}).join(', ') }}</div>
       </div>
       
@@ -156,4 +162,4 @@ watch(title, () => {
 
 <style scoped>
 /* All styles now handled by CardBlockWrapper */
-</style> 
+</style>

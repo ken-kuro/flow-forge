@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUnmounted, watch } from 'vue';
+import { ref, onUnmounted, computed } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
 import { X, Image as ImageIcon, Upload } from 'lucide-vue-next';
 import { useModal } from '@/composables/use-modal.js';
@@ -37,10 +37,16 @@ onUnmounted(() => {
 });
 
 // Local reactive copies for editing
-const title = ref(props.block.data.title || '');
-const sourceType = ref(props.block.data.sourceType || 'url');
-const imageUrl = ref(props.block.data.imageUrl || '');
-const applyToAll = ref(props.block.data.applyToAll || false);
+const title = computed({
+  get: () => props.block.data.title ?? '',
+  set: (val) => {
+    props.block.data.title = val;
+    updateBlockData();
+  }
+});
+const sourceType = ref(props.block.data.sourceType ?? 'url');
+const imageUrl = ref(props.block.data.imageUrl ?? '');
+const applyToAll = ref(props.block.data.applyToAll ?? false);
 const objects = ref(props.block.data.objects || []);
 
 // Update the store when values change
@@ -55,10 +61,7 @@ const updateBlockData = (immediate = false) => {
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
 
-// Watch for title changes (debounced)
-watch(title, () => {
-  updateBlockData();
-});
+// Removed watcher for title
 
 const handleAddImage = () => {
   // TODO: Implement proper image upload functionality
@@ -149,7 +152,7 @@ const openObjectModal = () => {
       <div class="relative w-full h-32 bg-base-200 rounded flex items-center justify-center overflow-hidden">
         <img
           :src="imageUrl"
-          :alt="title || 'Image preview'"
+          :alt="title ?? 'Image preview'"
           class="max-w-full max-h-full object-contain"
         />
         <!-- Action buttons on preview -->

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onUnmounted, watch } from 'vue';
+import { ref, computed, onUnmounted } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
 import { X, Video as VideoIcon, Upload } from 'lucide-vue-next';
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue';
@@ -34,11 +34,17 @@ onUnmounted(() => {
 });
 
 // Local reactive copies for editing
-const title = ref(props.block.data.title || '');
-const description = ref(props.block.data.description || '');
-const sourceType = ref(props.block.data.sourceType || 'url');
-const videoUrl = ref(props.block.data.videoUrl || '');
-const applyToAll = ref(props.block.data.applyToAll || false);
+const title = computed({
+  get: () => props.block.data.title ?? '',
+  set: (val) => {
+    props.block.data.title = val;
+    updateBlockData();
+  }
+});
+const description = ref(props.block.data.description ?? '');
+const sourceType = ref(props.block.data.sourceType ?? 'url');
+const videoUrl = ref(props.block.data.videoUrl ?? '');
+const applyToAll = ref(props.block.data.applyToAll ?? false);
 
 // Update the store when values change
 const updateBlockData = (immediate = false) => {
@@ -52,10 +58,7 @@ const updateBlockData = (immediate = false) => {
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
 
-// Watch for title changes (debounced)
-watch(title, () => {
-  updateBlockData();
-});
+// Removed watcher for title
 
 const handleAddVideo = () => {
   // TODO: Implement proper video upload functionality
@@ -182,4 +185,4 @@ const showPreview = computed(() => videoUrl.value && videoUrl.value.trim() !== '
 
 <style scoped>
 /* All styles now handled by CardBlockWrapper */
-</style> 
+</style>
