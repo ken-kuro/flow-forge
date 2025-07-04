@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUnmounted, watch } from "vue";
+import { ref, onUnmounted } from "vue";
 import { Handle, Position } from "@vue-flow/core";
 import { useFlowEditor } from "@/composables/use-flow-editor.js";
 import { GitBranch as BranchIcon } from "lucide-vue-next";
