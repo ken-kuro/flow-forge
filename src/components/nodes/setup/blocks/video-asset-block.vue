@@ -58,8 +58,6 @@ const updateBlockData = (immediate = false) => {
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
 
-// Removed watcher for title
-
 const handleAddVideo = () => {
   // TODO: Implement proper video upload functionality
   alert('Video upload functionality is not implemented yet.');
