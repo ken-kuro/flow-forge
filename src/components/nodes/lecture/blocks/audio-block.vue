@@ -75,6 +75,7 @@ const updateBlockData = (immediate = false) => {
       <textarea
         v-model="description"
         @blur="updateBlockData"
+        <!-- TODO: THIS_APPLY_FOR_ALL - Maybe we need to consider a shared component <StopPropagationTextArea> instead of this -->
         @wheel.stop
         @mousedown.stop
         @mouseup.stop

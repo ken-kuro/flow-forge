@@ -9,6 +9,7 @@ import CardBlockWrapper from "@/components/nodes/base/card-block-wrapper.vue";
  * ConditionBranchBlock - A block for defining the condition branch in Condition nodes.
  * Allow editing the condition expression.
  */
+// TODO: THIS_APPLY_FOR_ALL_BLOCKS - Find a better way to define props, reuse generic props like nodeId, blockId, blockType, etc.
 const props = defineProps({
     /**
      * The node ID this block belongs to.
@@ -39,7 +40,6 @@ onUnmounted(() => {
 const title = ref(props.block.data.title ?? "");
 const condition = ref(props.block.data.condition ?? "");
 
-// Update block data
 const updateBlockData = (immediate = false) => {
     const newData = {
         title: title.value,
