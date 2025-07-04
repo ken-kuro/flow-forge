@@ -35,13 +35,13 @@ onUnmounted(() => {
 
 // Local reactive copies for editing
 const title = computed({
-  get: () => props.block.data.title ?? 'System Action',
+  get: () => props.block.data.title || 'System Action',
   set: (val) => {
     props.block.data.title = val;
     updateBlockData();
   }
 });
-const action = ref(props.block.data.action ?? 'show');
+const action = ref(props.block.data.action || 'show');
 const delay = ref(props.block.data.delay ?? 0);
 const methods = ref(props.block.data.method || []);
 const object = ref(props.block.data.object ?? '');

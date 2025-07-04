@@ -44,7 +44,7 @@ const title = computed({
     updateBlockData();
   }
 });
-const sourceType = ref(props.block.data.sourceType ?? 'url');
+const sourceType = ref(props.block.data.sourceType || 'url');
 const imageUrl = ref(props.block.data.imageUrl ?? '');
 const applyToAll = ref(props.block.data.applyToAll ?? false);
 const objects = ref(props.block.data.objects || []);

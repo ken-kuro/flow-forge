@@ -43,7 +43,7 @@ const title = computed({
 });
 const description = ref(props.block.data.description ?? '');
 const videoUrl = ref(props.block.data.videoUrl ?? '');
-const sourceType = ref(props.block.data.sourceType ?? 'url');
+const sourceType = ref(props.block.data.sourceType || 'url');
 const transcript = ref(props.block.data.transcript ?? '');
 
 // Update the store when values change

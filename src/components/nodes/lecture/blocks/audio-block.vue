@@ -35,7 +35,7 @@ onUnmounted(() => {
 
 // Local reactive copies for editing
 const title = computed({
-  get: () => props.block.data.title ?? 'Audio',
+  get: () => props.block.data.title || 'Audio',
   set: (val) => {
     props.block.data.title = val;
     updateBlockData();

@@ -35,7 +35,7 @@ onUnmounted(() => {
 
 // Local reactive copies for editing
 const title = computed({
-  get: () => props.block.data.title ?? 'Assets Applied',
+  get: () => props.block.data.title || 'Assets Applied',
   set: (val) => {
     props.block.data.title = val;
     updateBlockData();
@@ -53,7 +53,7 @@ const assetOptions = computed(() => {
     const key = `${asset.setupNodeId}-${asset.assetId}`;
     options.push({
       value: key,
-      label: `${asset.setupNodeTitle} > ${asset.assetTitle ?? 'Untitled Asset'} (${asset.assetType.replace('asset-', '')})`
+      label: `${asset.setupNodeTitle} > ${asset.assetTitle || 'Untitled Asset'} (${asset.assetType.replace('asset-', '')})`
     });
   });
   return options;
@@ -120,8 +120,8 @@ const updateBlockData = (immediate = false) => {
       <!-- Debug info (remove after testing) -->
       <div class="text-xs text-base-content/50 p-2 bg-base-300 rounded">
         <div>Type: {{ selectedAsset.type }}</div>
-        <div>imageUrl: {{ selectedAsset.data?.imageUrl ?? 'not set' }}</div>
-        <div>videoUrl: {{ selectedAsset.data?.videoUrl ?? 'not set' }}</div>
+        <div>imageUrl: {{ selectedAsset.data?.imageUrl ||'not set' }}</div>
+        <div>videoUrl: {{ selectedAsset.data?.videoUrl || 'not set' }}</div>
         <div>Data keys: {{ Object.keys(selectedAsset.data || {}).join(', ') }}</div>
       </div>
       

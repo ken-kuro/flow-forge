@@ -10,6 +10,7 @@ import { useFlowEditor } from '@/composables/use-flow-editor.js'
 import VariableBlock from './blocks/variable-block.vue'
 import ImageAssetBlock from './blocks/image-asset-block.vue'
 import VideoAssetBlock from './blocks/video-asset-block.vue'
+import LMSBlock from './blocks/lms-block.vue'
 
 /**
  * SetupNode - A container node for defining initial configuration blocks.
@@ -55,6 +56,7 @@ const availableBlocks = [
   { type: 'variable', label: 'Variable', description: 'Define a typed variable' },
   { type: 'asset-image', label: 'Image Asset', description: 'Reference an image' },
   { type: 'asset-video', label: 'Video Asset', description: 'Reference a video' },
+  { type: 'lms', label: 'Lms', description: 'Reference an Lms' },
 ]
 
 function handleAddBlock(blockType) {
@@ -96,6 +98,13 @@ function handleAddBlock(blockType) {
           <!-- Video Asset Block -->
           <VideoAssetBlock
             v-else-if="block.type === 'asset-video'"
+            :node-id="id"
+            :block="block"
+          />
+
+          <!-- Lms Block -->
+          <LMSBlock
+            v-else-if="block.type === 'lms'"
             :node-id="id"
             :block="block"
           />

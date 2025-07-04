@@ -19,7 +19,7 @@ const props = defineProps({
   },
   /**
    * The block data object.
-   * @type {{id: string, type: string, data: {name: string, value: any, type: 'string'|'number'|'boolean'}}}
+   * @type {{id: string, type: string, data: {title: string, value: any, type: 'string'|'number'|'boolean'}}}
    */
   block: {
     type: Object,
@@ -43,7 +43,7 @@ const title = computed({
   }
 });
 const value = ref(props.block.data.value ?? '');
-const variableType = ref(props.block.data.type ?? 'string');
+const variableType = ref(props.block.data.type || 'string');
 
 // Variable type options
 const typeOptions = [

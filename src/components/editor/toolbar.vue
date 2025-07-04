@@ -271,7 +271,7 @@ const handleImport = () => {
         
         if (hasContent) {
           const confirmed = confirm(
-            `Import "${flowData.name ?? 'Untitled Flow'}"?\n\n` +
+            `Import "${flowData.name || 'Untitled Flow'}"?\n\n` +
             'This will replace your current flow. Make sure to export your current work first if you want to keep it.'
           );
           
@@ -282,7 +282,7 @@ const handleImport = () => {
         const success = importFlow(flowData);
         
         if (success) {
-          alert(`✅ Flow "${flowData.name ?? 'Untitled'}" imported successfully!`);
+          alert(`✅ Flow "${flowData.name || 'Untitled'}" imported successfully!`);
         } else {
           alert('❌ Failed to import flow. Please check the file format and try again.');
         }
@@ -307,10 +307,10 @@ const handleImport = () => {
 
 const handleExport = () => {
   // Show a simple prompt for flow name and description
-  const flowName = prompt('Enter a name for your flow:', 'My Learning Flow') ?? 'Untitled Flow';
+  const flowName = prompt('Enter a name for your flow:', 'My Learning Flow') || 'Untitled Flow';
   if (flowName === null) return; // User cancelled
   
-  const flowDescription = prompt('Enter a description (optional):', 'Created with Flow Forge') ?? 'Created with Flow Forge';
+  const flowDescription = prompt('Enter a description (optional):', 'Created with Flow Forge') || 'Created with Flow Forge';
   
   try {
     // Export the flow data

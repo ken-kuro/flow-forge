@@ -42,7 +42,7 @@ const title = computed({
   }
 });
 const description = ref(props.block.data.description ?? '');
-const sourceType = ref(props.block.data.sourceType ?? 'url');
+const sourceType = ref(props.block.data.sourceType || 'url');
 const videoUrl = ref(props.block.data.videoUrl ?? '');
 const applyToAll = ref(props.block.data.applyToAll ?? false);
 

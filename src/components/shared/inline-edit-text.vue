@@ -57,9 +57,9 @@ function finishEditing() {
              break-all leading-tight max-h-12 border border-transparent overflow-hidden 
              whitespace-pre-wrap line-clamp-2"
       :class="{ 'text-base-content/50 italic': !localValue }"
-      :title="localValue ?? placeholder"
+      :title="localValue || placeholder"
     >
-      {{ localValue ?? placeholder }}
+      {{ localValue || placeholder }}
     </div>
     <!-- Edit Mode: Textarea with same dimensions, scrollable if content exceeds 2 lines -->
     <textarea
