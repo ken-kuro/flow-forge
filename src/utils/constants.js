@@ -25,5 +25,5 @@ export const CONFIG = {
    * Older entries are automatically removed to prevent memory issues.
    * @const {number}
    */
-  MAX_HISTORY_ENTRIES: 50,
+  MAX_HISTORY_ENTRIES: 20,
 }; 
