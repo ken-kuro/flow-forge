@@ -96,10 +96,14 @@ export function useFlowEditor() {
       // No need for manual applyChanges() - v-model handles store synchronization
       // This eliminates the double-application bug that caused position sync issues
       
-      console.log('📝 Changes applied, store nodes:', nodes.value.length);
-      
-      // Notify the store to save history for significant changes
-      flowStore.onNodesChange(validatedChanges);
+      // FIX: v-model updates are not synchronous. We must wait for the next
+      // DOM update cycle to ensure the store's `nodes` ref is updated
+      // before we try to save the state to history.
+      nextTick(() => {
+        console.log('📝 Changes applied, store nodes:', nodes.value.length);
+        // Notify the store to save history for significant changes
+        flowStore.onNodesChange(validatedChanges);
+      });
     });
 
     onEdgesChange((changes) => {
@@ -127,10 +131,14 @@ export function useFlowEditor() {
       
       // No need for manual applyChanges() - v-model handles store synchronization
       
-      console.log('🔗 Edge changes applied, store edges:', edges.value.length);
-      
-      // Notify the store to save history
-      flowStore.onEdgesChange(validatedChanges);
+      // FIX: v-model updates are not synchronous. We must wait for the next
+      // DOM update cycle to ensure the store's `edges` ref is updated
+      // before we try to save the state to history.
+      nextTick(() => {
+        console.log('🔗 Edge changes applied, store edges:', edges.value.length);
+        // Notify the store to save history
+        flowStore.onEdgesChange(validatedChanges);
+      });
     });
     
     // We handle onConnect here in the controller to ensure the correct event is emitted.
@@ -266,6 +274,38 @@ export function useFlowEditor() {
   }
 
   /**
+   * Jumps to a specific state in history and applies it.
+   * This function gets a specific state object from the store and uses
+   * imperative Vue Flow actions to force the view to update.
+   * @param {number} index - The history index to jump to.
+   */
+  async function jumpToHistoryState(index) {
+    console.log(`⏯️ Jumping to history state ${index}`);
+    const stateToRestore = flowStore.jumpToState(index);
+
+    if (stateToRestore) {
+      console.log('📖 Restoring state from history:', stateToRestore);
+      
+      // Set flag to prevent history saves during restoration
+      flowStore.setRestoringHistory(true);
+      
+      // Apply the same "empty-then-set" pattern as undo/redo for reactivity
+      nodes.value = [];
+      edges.value = [];
+      await nextTick();
+
+      // Now, apply the actual restored state
+      nodes.value = stateToRestore.nodes;
+      edges.value = stateToRestore.edges;
+      nodeBlocks.value = stateToRestore.nodeBlocks || {};
+      
+      flowStore.setRestoringHistory(false);
+    } else {
+      console.log(`❌ Invalid history index: ${index}`);
+    }
+  }
+
+  /**
    * Imports flow data with proper Vue Flow state synchronization.
    * This method handles the Vue Flow reactivity issue by using the same
    * "empty-then-set" pattern as undo/redo to force a complete re-render.
@@ -370,6 +410,8 @@ export function useFlowEditor() {
     canRedo,
     flushPendingSaves: flowStore.flushPendingSaves,
     getHistoryStats: flowStore.getHistoryStats,
+    jumpToHistoryState,
+    clearHistory: flowStore.clearHistory,
 
     // --- Viewport Operations ---
     fitToView: fitView,
@@ -381,7 +423,6 @@ export function useFlowEditor() {
 
     // --- Utility ---
     saveState: flowStore.saveState,
-    clearHistory: flowStore.clearHistory,
 
     // --- Import/Export Operations ---
     exportFlow,
