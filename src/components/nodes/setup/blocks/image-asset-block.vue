@@ -2,8 +2,8 @@
 import { ref, onUnmounted, computed } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
 import { X, Image as ImageIcon, Upload } from 'lucide-vue-next';
-import { useModal } from '@/composables/use-modal.js';
-import ObjectDetectionModal from '@/components/editor/object-detection-modal.vue';
+import { useModal } from '@/composables/use-modal';
+import SetupImageModal from '@/components/editor/setup-image-modal.vue';
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue';
 
 /**
@@ -20,7 +20,7 @@ const props = defineProps({
   },
   /**
    * The block data object.
-   * @type {{id: string, type: string, data: {title: string, imageUrl: string, sourceType: 'url'|'upload', applyToAll: boolean, objects: Array<any>}}}
+   * @type {{id: string, type: string, data: {title: string, imageUrl: string, sourceType: 'url'|'upload', applyToAll: boolean, elements: Array<any>}}}
    */
   block: {
     type: Object,
@@ -29,7 +29,7 @@ const props = defineProps({
 });
 
 const { updateBlock, flushPendingSaves } = useFlowEditor();
-const { showModal } = useModal();
+const { showModal, openModal, closeModal } = useModal();
 
 // Flush any pending saves when component is unmounted
 onUnmounted(() => {
@@ -47,7 +47,7 @@ const title = computed({
 const sourceType = ref(props.block.data.sourceType || 'url');
 const imageUrl = ref(props.block.data.imageUrl ?? '');
 const applyToAll = ref(props.block.data.applyToAll ?? false);
-const objects = ref(props.block.data.objects || []);
+const elements = ref(props.block.data.elements || []);
 
 // Update the store when values change
 const updateBlockData = (immediate = false) => {
@@ -56,12 +56,11 @@ const updateBlockData = (immediate = false) => {
     imageUrl: imageUrl.value,
     sourceType: sourceType.value,
     applyToAll: applyToAll.value,
-    objects: objects.value,
+    elements: elements.value,
   };
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
 
-// Removed watcher for title
 
 const handleAddImage = () => {
   // TODO: Implement proper image upload functionality
@@ -81,16 +80,16 @@ const removeImage = () => {
   updateBlockData(true);
 };
 
-const handleSaveObjects = (newObjects) => {
-  objects.value = newObjects;
+const handleSaveElements = (newElements) => {
+  elements.value = newElements;
   updateBlockData(true);
 };
 
-const openObjectModal = () => {
-  showModal(ObjectDetectionModal, {
+const openSetupImageModal = () => {
+  showModal(SetupImageModal, {
     imageUrl: imageUrl.value,
-    initialObjects: objects.value,
-    onSave: handleSaveObjects,
+    initialElements: elements.value,
+    onSave: handleSaveElements,
   });
 };
 </script>
@@ -157,8 +156,8 @@ const openObjectModal = () => {
         />
         <!-- Action buttons on preview -->
         <div class="absolute top-1 right-1 flex flex-col gap-1">
-          <button @click="openObjectModal" class="btn btn-xs btn-primary btn-outline">
-            Set up object ({{ objects.length }})
+          <button @click="openSetupImageModal" class="btn btn-xs btn-primary btn-outline">
+            Set image elements ({{ elements.length }})
           </button>
           <button @click="removeImage" class="btn btn-xs btn-circle btn-error self-end">
             <X class="w-3 h-3" />
