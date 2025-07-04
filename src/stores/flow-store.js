@@ -179,6 +179,27 @@ export const useFlowStore = defineStore('flow', () => {
   }
   
   /**
+   * Jumps to a specific state in the history.
+   * This function DOES NOT apply the state itself. The controller is responsible
+   * for calling this and then using the Vue Flow API to apply the returned state.
+   * @param {number} index - The index of the history state to jump to.
+   * @returns {object|null} The state object to restore, or null if index is invalid.
+   */
+  function jumpToState(index) {
+    if (index < 0 || index >= history.value.length) {
+      console.warn(`❌ Invalid history index requested: ${index}`);
+      return null;
+    }
+    
+    // No need to flush pending saves here, as we are jumping to an existing state,
+    // not creating a new one. The UI should reflect the chosen state, not pending changes.
+    
+    historyIndex.value = index;
+    const targetState = history.value[historyIndex.value];
+    return JSON.parse(JSON.stringify(targetState));
+  }
+  
+  /**
    * This handler is now only responsible for history management.
    * The actual application of changes is handled by the `useFlowEditor` controller,
    * which will apply changes to the state *before* calling this handler.
@@ -332,6 +353,9 @@ export const useFlowStore = defineStore('flow', () => {
     const currentState = {
       nodes: JSON.parse(JSON.stringify(nodes.value)),
       edges: JSON.parse(JSON.stringify(edges.value)),
+      nodeBlocks: JSON.parse(JSON.stringify(nodeBlocks.value)),
+      version: version.value,
+      description: 'History cleared and reset',
     }
     history.value = [currentState]
     historyIndex.value = 0
@@ -852,6 +876,7 @@ export const useFlowStore = defineStore('flow', () => {
     flushPendingSaves,
     setRestoringHistory,
     getHistoryStats,
+    jumpToState,
     
     // --- VUE FLOW EVENT HANDLERS (for history) ---
     onNodesChange,

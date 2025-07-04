@@ -33,6 +33,7 @@ const {
   clearHistory,
   createNode,
   vueFlowApi,
+  jumpToHistoryState,
 } = useFlowEditor();
 
 // --- Modal State ---
@@ -103,28 +104,6 @@ const { ctrl_alt_n, cmd_option_n } = useMagicKeys({
 
 // History state
 const historyRef = ref(null)
-
-// History navigation functions
-const jumpToHistoryState = (targetIndex) => {
-  const currentIndex = historyIndex.value
-  
-  if (targetIndex === currentIndex) return
-  
-  // Jump directly to the target state
-  if (targetIndex < currentIndex) {
-    // Go backwards
-    const steps = currentIndex - targetIndex
-    for (let i = 0; i < steps; i++) {
-      undo()
-    }
-  } else {
-    // Go forwards
-    const steps = targetIndex - currentIndex
-    for (let i = 0; i < steps; i++) {
-      redo()
-    }
-  }
-}
 
 // --- Smart Positioning System ---
 /**
