@@ -75,11 +75,6 @@ const updateBlockData = (immediate = false) => {
   updateBlock(props.nodeId, props.block.id, newData, immediate);
 };
 
-// Watch for title changes (debounced)
-// watch(title, () => {
-//   updateBlockData();
-// });
-
 </script>
 
 <template>
