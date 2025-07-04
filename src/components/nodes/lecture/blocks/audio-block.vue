@@ -39,14 +39,6 @@ const description = ref(props.block.data.description || '');
 const voice = ref(props.block.data.voice || 'male');
 const text = ref(props.block.data.text || '');
 
-// Watch for external data changes (e.g., on flow import) and update local state
-watch(() => props.block.data, (newData) => {
-  title.value = newData.title || 'Audio';
-  description.value = newData.description || '';
-  voice.value = newData.voice || 'male';
-  text.value = newData.text || '';
-}, { deep: true });
-
 // Update the store when values change
 const updateBlockData = (immediate = false) => {
   const newData = {

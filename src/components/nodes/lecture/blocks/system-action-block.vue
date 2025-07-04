@@ -40,15 +40,6 @@ const delay = ref(props.block.data.delay || 0);
 const methods = ref(props.block.data.method || []);
 const object = ref(props.block.data.object || '');
 
-// Watch for external data changes (e.g., on flow import) and update local state
-watch(() => props.block.data, (newData) => {
-  title.value = newData.title || 'System Action';
-  action.value = newData.action || 'show';
-  delay.value = newData.delay || 0;
-  methods.value = newData.method || [];
-  object.value = newData.object || '';
-}, { deep: true });
-
 // Available actions (extensible for future API calls, jobs, etc.)
 const actionOptions = [
   { value: 'asset-interaction', label: 'Asset Interaction' },

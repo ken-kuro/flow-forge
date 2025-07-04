@@ -37,12 +37,6 @@ onUnmounted(() => {
 const title = ref(props.block.data.title || 'Assets Applied');
 const selectedAssetKey = ref(props.block.data.selectedAssetKey || '');
 
-// Watch for external data changes (e.g., on flow import) and update local state
-watch(() => props.block.data, (newData) => {
-  title.value = newData.title || 'Assets Applied';
-  selectedAssetKey.value = newData.selectedAssetKey || '';
-}, { deep: true });
-
 // Get available assets from setup nodes
 const availableAssets = computed(() => getAvailableAssets());
 

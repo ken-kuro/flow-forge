@@ -45,13 +45,6 @@ const availableMethods = [
   { value: 'text-input', label: 'Text Input' },
 ];
 
-// Watch for external data changes (e.g., on flow import) and update local state
-watch(() => props.block.data, (newData) => {
-  title.value = newData.title || 'Collect User Data';
-  saveToField.value = newData.saveToField || '';
-  methods.value = newData.method || [];
-}, { deep: true });
-
 // Update the store when values change
 const updateBlockData = (immediate = false) => {
   const newData = {
