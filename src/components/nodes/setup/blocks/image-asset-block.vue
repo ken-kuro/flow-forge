@@ -3,7 +3,7 @@ import { ref, onUnmounted, computed } from 'vue';
 import { useFlowEditor } from '@/composables/use-flow-editor';
 import { X, Image as ImageIcon, Upload } from 'lucide-vue-next';
 import { useModal } from '@/composables/use-modal';
-import SetupImageModal from '@/components/editor/setup-image-modal.vue';
+import SetupImageModal from '../setup-image-modal.vue';
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue';
 
 /**
@@ -90,6 +90,14 @@ const openSetupImageModal = () => {
     imageUrl: imageUrl.value,
     initialElements: elements.value,
     onSave: handleSaveElements,
+  }, {
+    size: 'full',
+    height: 'full',
+    title: 'Set up image',
+    showFooter: true,
+    primaryButtonText: 'Save',
+    secondaryButtonText: 'Cancel',
+    bodyPadding: false
   });
 };
 </script>
