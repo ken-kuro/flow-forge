@@ -411,7 +411,7 @@ const handleDragEnd = () => {
   <!-- Two Column Layout -->
   <div class="flex-1 flex gap-0 min-h-0">
     <!-- Left Column - Objects Panel -->
-    <div class="w-80 flex-shrink-0 flex flex-col p-6 border-r border-base-300 overflow-y-auto">
+    <div class="w-96 flex-shrink-0 flex flex-col p-6 border-r border-base-300 overflow-y-auto">
       <!-- Marked Objects -->
       <div class="mb-6">
         <h4 class="font-semibold text-base mb-4">Marked objects</h4>
@@ -509,7 +509,7 @@ const handleDragEnd = () => {
     <!-- Right Column - Image Panel -->
     <div class="flex-1 flex flex-col p-6">
       <div class="flex justify-between items-center mb-4">
-        <p class="text-sm text-base-content/70">Click/Tap and drag on the image to create a bounding box. Use <kbd class="kbd kbd-xs">R</kbd>, <kbd class="kbd kbd-xs">E</kbd>, <kbd class="kbd kbd-xs">T</kbd> to switch tools.</p>
+        <p class="text-sm text-base-content/70">Click/Tap and drag to create bounding boxes. Use <kbd class="kbd kbd-xs">R</kbd>, <kbd class="kbd kbd-xs">E</kbd>, <kbd class="kbd kbd-xs">T</kbd> to switch tools.</p>
         <SetupImageToolbar v-model:active-tool="activeTool" />
       </div>
       <div class="flex-1 bg-base-200 rounded-lg p-4 flex items-center justify-center min-h-0 overflow-hidden">
