@@ -106,7 +106,8 @@ const updateBlockData = (immediate = false) => {
       </div>
     </div>
 
-        <!-- Asset Preview -->
+    TODO: FIX THIS NEXT
+    <!-- Asset Preview -->
     <div v-if="selectedAsset" class="preview-container">
       <label class="label">
         <span class="label-text text-xs">Preview</span>
