@@ -3,7 +3,6 @@ import { RouterView, RouterLink, useRoute } from 'vue-router'
 import { useColorMode, useStorage } from '@vueuse/core'
 import { Sun, Moon, Monitor } from 'lucide-vue-next'
 import { computed } from 'vue'
-import ModalManager from '@/components/modal-manager.vue'
 
 const route = useRoute()
 const isEditorPage = computed(() => route.path === '/editor')
@@ -116,7 +115,7 @@ function setTheme(theme) {
         </div>
       </div>
 
-        <RouterView />
+        <slot />
       </main>
     </div>
     
@@ -155,7 +154,4 @@ function setTheme(theme) {
       </aside>
     </div>
   </div>
-  
-  <!-- Global Modal Manager -->
-  <ModalManager />
 </template> 
