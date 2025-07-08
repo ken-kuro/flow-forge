@@ -181,11 +181,21 @@ const handleSecondaryClick = () => {
 </script>
 
 <template>
-  <div class="modal modal-open" @click.self="handleClose">
+  <div 
+    class="modal modal-open" 
+    @click.self="handleClose"
+    @keydown.stop
+    @keyup.stop
+    @keypress.stop
+  >
     <div 
       class="modal-box p-0 flex flex-col" 
       :class="[modalWidthClass, modalHeightClass]" 
       :style="modalCustomStyle"
+      @click.stop
+      @keydown.stop
+      @keyup.stop
+      @keypress.stop
     >
       <!-- Modal Header - shown if title is provided or header slot is used -->
       <div 
