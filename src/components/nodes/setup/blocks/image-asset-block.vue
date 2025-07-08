@@ -174,17 +174,20 @@ const openSetupImageModal = () => {
       </div>
     </div>
     
+    <!-- TODO: Revisit this after we decide on the behavior of apply to all nodes, hide for now -->
+    <div v-if="false">
     <!-- Apply to all nodes checkbox -->
-    <div class="form-control">
-      <label class="label cursor-pointer justify-start gap-2 p-0">
-        <input
-          type="checkbox"
-          v-model="applyToAll"
-          @change="updateBlockData(true)"
-          class="checkbox checkbox-xs checkbox-primary"
-        />
-        <span class="label-text text-xs">Apply to all nodes of this type</span>
-      </label>
+      <div class="form-control">
+        <label class="label cursor-pointer justify-start gap-2 p-0">
+          <input
+            type="checkbox"
+            v-model="applyToAll"
+            @change="updateBlockData(true)"
+            class="checkbox checkbox-xs checkbox-primary"
+          />
+          <span class="label-text text-xs">Apply to all nodes of this type</span>
+        </label>
+      </div>
     </div>
   </CardBlockWrapper>
 </template>
