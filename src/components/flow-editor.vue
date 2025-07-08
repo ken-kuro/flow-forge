@@ -11,6 +11,7 @@ import EditorToolbar from "@/components/editor/toolbar.vue";
 // Import custom node registry
 import { nodeTypes } from "@/components/nodes";
 
+// TODO: This is not really that important, but we need to revisit tablet mode in the future since it requires a lot of event handling.
 /**
  * FlowEditor - The core flow editor component
  * 
