@@ -3,6 +3,7 @@ import { ref, watch, computed } from 'vue';
 import { X, RectangleHorizontal, MessageSquare, ChevronDown } from 'lucide-vue-next';
 import { useMagicKeys } from '@vueuse/core';
 import SetupImageToolbar from './setup-image-toolbar.vue';
+import SelectionHandles from './selection-handles.vue';
 import { DRAWING_TOOLS, TEXT_DISPLAY_TYPES, MIN_DRAWING_SIZE } from '@/utils/modal-constants';
 import { useModal } from '@/composables/use-modal';
 
@@ -52,6 +53,16 @@ const imageRef = ref(null);
 const isDrawing = ref(false);
 const newRect = ref(null);
 const activeTool = ref(DRAWING_TOOLS.RECTANGLE); // Default tool
+
+// Selection state - minimal addition
+const selectedObjectIndex = ref(-1);
+const selectedTextIndex = ref(-1);
+
+// Drag state
+const isDragging = ref(false);
+const dragMode = ref(''); // 'move' or 'resize'
+const dragStart = ref({ x: 0, y: 0 });
+const originalRect = ref(null);
 
 const displayTypeIcons = {
   [TEXT_DISPLAY_TYPES.RECTANGLE]: RectangleHorizontal,
@@ -196,6 +207,63 @@ const removeText = (index) => {
   texts.value.splice(index, 1);
 };
 
+// Selection functions - minimal addition
+const selectObject = (index, type = 'object') => {
+  console.log('Selecting:', index, type); // Debug log
+  selectedObjectIndex.value = type === 'object' ? index : -1;
+  selectedTextIndex.value = type === 'text' ? index : -1;
+  console.log('Selected object index:', selectedObjectIndex.value); // Debug log
+  console.log('Selected text index:', selectedTextIndex.value); // Debug log
+};
+
+const clearSelection = () => {
+  console.log('Clearing selection'); // Debug log
+  selectedObjectIndex.value = -1;
+  selectedTextIndex.value = -1;
+};
+
+// Mouse position helper - get position relative to the image
+const getMousePosition = (event) => {
+  if (!imageRef.value) return { x: 0, y: 0 };
+  const imageRect = imageRef.value.getBoundingClientRect();
+  return {
+    x: event.clientX - imageRect.left,
+    y: event.clientY - imageRect.top
+  };
+};
+
+const handleIdMouseDown = (event, index, type = 'object') => {
+  console.log('ID mousedown:', index, type); // Debug log
+  event.stopPropagation();
+  event.preventDefault();
+  
+  selectObject(index, type);
+  
+  // Start drag for moving
+  const targetArray = type === 'object' ? objects.value : texts.value;
+  originalRect.value = { ...targetArray[index].rect };
+  isDragging.value = true;
+  dragMode.value = 'move';
+  dragStart.value = getMousePosition(event);
+};
+
+const handleResizeMouseDown = (event, index, type, handle) => {
+  console.log('Resize mousedown:', index, type, handle); // Debug log
+  event.stopPropagation();
+  event.preventDefault();
+  
+  selectObject(index, type);
+  
+  // Start drag for resizing
+  const targetArray = type === 'object' ? objects.value : texts.value;
+  originalRect.value = { ...targetArray[index].rect };
+  isDragging.value = true;
+  dragMode.value = 'resize';
+  dragStart.value = getMousePosition(event);
+  // Store which handle is being dragged
+  // This will be used in handleDragMove for resize logic
+};
+
 const getEventPosition = (event) => {
   if (event.touches) {
     return { x: event.touches[0].clientX, y: event.touches[0].clientY };
@@ -204,8 +272,22 @@ const getEventPosition = (event) => {
 };
 
 const handleDrawStart = (event) => {
+  console.log('Draw start triggered', event.target, event.target.tagName); // Debug log
+  // Don't start drawing if we're dragging
+  if (isDragging.value) return;
+  
+  // Don't start drawing if clicking on interactive elements
+  if (event.target.closest('span[data-id-tag]')) {
+    console.log('Clicked on ID tag, not starting draw');
+    return;
+  }
+  
   if (!imageRef.value) return;
   event.preventDefault(); // Prevent text selection and scrolling on touch
+  
+  // Clear selection when starting to draw
+  clearSelection();
+  
   isDrawing.value = true;
   const bounds = imageRef.value.getBoundingClientRect();
   const { x, y } = getEventPosition(event);
@@ -215,7 +297,7 @@ const handleDrawStart = (event) => {
 };
 
 const handleDrawMove = (event) => {
-  if (!isDrawing.value || !newRect.value) return;
+  if (!isDrawing.value || !newRect.value || isDragging.value) return;
   event.preventDefault();
   const bounds = imageRef.value.getBoundingClientRect();
   const { x, y } = getEventPosition(event);
@@ -223,11 +305,34 @@ const handleDrawMove = (event) => {
   newRect.value.height = (y - bounds.top) - newRect.value.y;
 };
 
+// Handle drag movement
+const handleDragMove = (event) => {
+  if (!isDragging.value) return;
+  
+  const currentPos = getMousePosition(event);
+  const deltaX = currentPos.x - dragStart.value.x;
+  const deltaY = currentPos.y - dragStart.value.y;
+  
+  const isObject = selectedObjectIndex.value >= 0;
+  const targetArray = isObject ? objects.value : texts.value;
+  const targetIndex = isObject ? selectedObjectIndex.value : selectedTextIndex.value;
+  
+  if (targetIndex < 0 || !originalRect.value) return;
+  
+  if (dragMode.value === 'move') {
+    // Move the object from original position
+    targetArray[targetIndex].rect.x = originalRect.value.x + deltaX;
+    targetArray[targetIndex].rect.y = originalRect.value.y + deltaY;
+  }
+};
+
 const handleDrawEnd = (event) => {
   if (!isDrawing.value) return;
   event.preventDefault();
   
-  if (newRect.value && Math.abs(newRect.value.width) > 5 && Math.abs(newRect.value.height) > 5) {
+  console.log('Draw end - newRect:', newRect.value); // Debug log
+  if (newRect.value && Math.abs(newRect.value.width) > MIN_DRAWING_SIZE && Math.abs(newRect.value.height) > MIN_DRAWING_SIZE) {
+    console.log('Creating object - size check passed'); // Debug log
     const { x, y, width, height } = newRect.value;
     const finalRect = {
       x: width < 0 ? x + width : x,
@@ -260,6 +365,13 @@ const handleDrawEnd = (event) => {
   }
   isDrawing.value = false;
   newRect.value = null;
+};
+
+// Handle drag end
+const handleDragEnd = () => {
+  isDragging.value = false;
+  dragMode.value = '';
+  originalRect.value = null;
 };
 </script>
 
@@ -373,9 +485,9 @@ const handleDrawEnd = (event) => {
           class="relative cursor-crosshair select-none max-w-full max-h-full"
           ref="imageContainer"
           @mousedown="handleDrawStart"
-          @mousemove="handleDrawMove"
-          @mouseup="handleDrawEnd"
-          @mouseleave="handleDrawEnd"
+          @mousemove="(event) => { handleDrawMove(event); handleDragMove(event); }"
+          @mouseup="(event) => { handleDrawEnd(event); handleDragEnd(); }"
+          @mouseleave="(event) => { handleDrawEnd(event); handleDragEnd(); }"
           @touchstart="handleDrawStart"
           @touchmove="handleDrawMove"
           @touchend="handleDrawEnd"
@@ -392,7 +504,11 @@ const handleDrawEnd = (event) => {
           />
           <!-- Existing objects -->
           <div v-for="(obj, index) in objects" :key="`obj-${index}`" 
-                class="absolute border-2 border-error box-border select-none pointer-events-none" 
+                class="absolute border-2 box-border select-none pointer-events-none"
+                :class="{
+                  'border-error': selectedObjectIndex !== index,
+                  'border-purple-500 border-4': selectedObjectIndex === index
+                }"
                 :style="{ 
                   left: `${obj.rect.x}px`, 
                   top: `${obj.rect.y}px`, 
@@ -400,27 +516,38 @@ const handleDrawEnd = (event) => {
                   height: `${obj.rect.height}px`,
                   borderRadius: obj.type === DRAWING_TOOLS.ELLIPSE ? '50%' : '0'
                 }">
-            <span class="absolute -top-1.5 -left-1.5 bg-error text-error-content text-xs px-1.5 py-0.5 rounded font-medium min-w-[1.5rem] text-center select-none">
-              {{ index + 1 }}
-            </span>
+            <SelectionHandles
+              :is-selected="selectedObjectIndex === index"
+              :index="index"
+              type="object"
+              @mousedown-id="handleIdMouseDown($event, index, 'object')"
+              @mousedown-resize="(event, handle) => handleResizeMouseDown(event, index, 'object', handle)"
+            />
           </div>
           <!-- Existing texts -->
           <div v-for="(txt, index) in texts" :key="`txt-${index}`"
                 class="absolute box-border select-none pointer-events-none p-1 flex items-center justify-center"
+                :class="{
+                  'outline outline-4 outline-purple-500': selectedTextIndex === index
+                }"
                 :style="{
                   left: `${txt.rect.x}px`,
                   top: `${txt.rect.y}px`,
                   width: `${txt.rect.width}px`,
                   height: `${txt.rect.height}px`
                 }">
-              <span class="absolute -top-1.5 -left-1.5 bg-primary text-primary-content text-xs px-1.5 py-0.5 rounded font-medium min-w-[1.5rem] text-center select-none z-10">
-              {{ index + 1 }}
-            </span>
+              <SelectionHandles
+                :is-selected="selectedTextIndex === index"
+                :index="index"
+                type="text"
+                @mousedown-id="handleIdMouseDown($event, index, 'text')"
+                @mousedown-resize="(event, handle) => handleResizeMouseDown(event, index, 'text', handle)"
+              />
             <div 
               class="w-full h-full flex items-center justify-center text-center p-2"
               :class="{
-                [TEXT_DISPLAY_TYPES.BUBBLE_LEFT]: txt.displayType === TEXT_DISPLAY_TYPES.BUBBLE_LEFT,
-                [TEXT_DISPLAY_TYPES.BUBBLE_RIGHT]: txt.displayType === TEXT_DISPLAY_TYPES.BUBBLE_RIGHT,
+                'bubble-left': txt.displayType === TEXT_DISPLAY_TYPES.BUBBLE_LEFT,
+                'bubble-right': txt.displayType === TEXT_DISPLAY_TYPES.BUBBLE_RIGHT,
                 'bg-base-100/80 border-2 border-primary': txt.displayType === DRAWING_TOOLS.RECTANGLE
               }"
               >
