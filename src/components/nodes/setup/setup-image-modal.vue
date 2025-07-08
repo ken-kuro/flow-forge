@@ -1,8 +1,9 @@
 <script setup>
-import { ref, watch, computed, defineExpose } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { X, RectangleHorizontal, MessageSquare, ChevronDown } from 'lucide-vue-next';
 import SetupImageToolbar from './setup-image-toolbar.vue';
 import { DRAWING_TOOLS, TEXT_DISPLAY_TYPES, MIN_DRAWING_SIZE } from '@/utils/modal-constants';
+import { useModal } from '@/composables/use-modal';
 
 /**
  * TODO: MODAL-SPECIFIC HISTORY MANAGEMENT
@@ -106,10 +107,10 @@ const isDirty = computed(() => {
   return JSON.stringify(currentState) !== initialElementsSnapshot.value;
 });
 
+const { hideModal } = useModal();
+
 const closeModal = () => {
-  if (props.onClose) {
-    props.onClose();
-  }
+  hideModal();
 };
 
 /**
