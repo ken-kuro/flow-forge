@@ -1,5 +1,5 @@
 <script setup>
-import { RouterView, RouterLink, useRoute } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 import { useColorMode, useStorage } from '@vueuse/core'
 import { Sun, Moon, Monitor } from 'lucide-vue-next'
 import { computed } from 'vue'
