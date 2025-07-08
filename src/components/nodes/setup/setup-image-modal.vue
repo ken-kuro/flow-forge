@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch, computed } from 'vue';
 import { X, RectangleHorizontal, MessageSquare, ChevronDown } from 'lucide-vue-next';
+import { useMagicKeys } from '@vueuse/core';
 import SetupImageToolbar from './setup-image-toolbar.vue';
 import { DRAWING_TOOLS, TEXT_DISPLAY_TYPES, MIN_DRAWING_SIZE } from '@/utils/modal-constants';
 import { useModal } from '@/composables/use-modal';
@@ -141,6 +142,37 @@ const handlePrimaryAction = () => {
 const handleSecondaryAction = () => {
   handleAttemptClose();
 };
+
+/**
+ * Keyboard shortcut handling using VueUse magic keys
+ */
+const { r, e, t, escape } = useMagicKeys({
+  passive: false,
+  onEventFired(e) {
+    // Only handle shortcuts if not typing in an input field
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+      return;
+    }
+    e.preventDefault();
+  }
+});
+
+// Watch for keyboard shortcuts
+watch(r, (pressed) => {
+  if (pressed) activeTool.value = DRAWING_TOOLS.RECTANGLE;
+});
+
+watch(e, (pressed) => {
+  if (pressed) activeTool.value = DRAWING_TOOLS.ELLIPSE;
+});
+
+watch(t, (pressed) => {
+  if (pressed) activeTool.value = DRAWING_TOOLS.TEXT;
+});
+
+watch(escape, (pressed) => {
+  if (pressed) handleAttemptClose();
+});
 
 // Expose methods so the modal manager can call them via a template ref.
 defineExpose({
@@ -333,7 +365,7 @@ const handleDrawEnd = (event) => {
     <!-- Right Column - Image Panel -->
     <div class="flex-1 flex flex-col p-6">
       <div class="flex justify-between items-center mb-4">
-        <p class="text-sm text-base-content/70">Click/Tap and drag on the image to create a bounding box.</p>
+        <p class="text-sm text-base-content/70">Click/Tap and drag on the image to create a bounding box. Use <kbd class="kbd kbd-xs">R</kbd>, <kbd class="kbd kbd-xs">E</kbd>, <kbd class="kbd kbd-xs">T</kbd> to switch tools.</p>
         <SetupImageToolbar v-model:active-tool="activeTool" />
       </div>
       <div class="flex-1 bg-base-200 rounded-lg p-4 flex items-center justify-center min-h-0 overflow-hidden">

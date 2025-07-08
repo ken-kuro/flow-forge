@@ -10,21 +10,21 @@ const activeTool = defineModel('activeTool');
     <button
       @click="activeTool = 'rectangle'"
       :class="['btn btn-sm btn-ghost', { 'btn-active': activeTool === 'rectangle' }]"
-      title="Draw Rectangle"
+      title="Draw Rectangle (R)"
     >
       <RectangleHorizontal class="w-5 h-5" />
     </button>
     <button
       @click="activeTool = 'ellipse'"
       :class="['btn btn-sm btn-ghost', { 'btn-active': activeTool === 'ellipse' }]"
-      title="Draw Ellipse"
+      title="Draw Ellipse (E)"
     >
       <Circle class="w-5 h-5" />
     </button>
     <button
       @click="activeTool = 'text'"
       :class="['btn btn-sm btn-ghost', { 'btn-active': activeTool === 'text' }]"
-      title="Add Text"
+      title="Add Text (T)"
     >
       <Type class="w-5 h-5" />
     </button>
