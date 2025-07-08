@@ -2,6 +2,7 @@
 import { ref, watch, computed, defineExpose } from 'vue';
 import { X, RectangleHorizontal, MessageSquare, ChevronDown } from 'lucide-vue-next';
 import SetupImageToolbar from './setup-image-toolbar.vue';
+import { DRAWING_TOOLS, TEXT_DISPLAY_TYPES, MIN_DRAWING_SIZE } from '@/utils/modal-constants';
 
 /**
  * TODO: MODAL-SPECIFIC HISTORY MANAGEMENT
@@ -48,13 +49,12 @@ const texts = ref([]);
 const imageRef = ref(null);
 const isDrawing = ref(false);
 const newRect = ref(null);
-const activeTool = ref('rectangle'); // Default tool
+const activeTool = ref(DRAWING_TOOLS.RECTANGLE); // Default tool
 
-// TODO: Deal with these magic strings later
 const displayTypeIcons = {
-  'rectangle': RectangleHorizontal,
-  'bubble-left': MessageSquare,
-  'bubble-right': MessageSquare, // Will be flipped in the template
+  [TEXT_DISPLAY_TYPES.RECTANGLE]: RectangleHorizontal,
+  [TEXT_DISPLAY_TYPES.BUBBLE_LEFT]: MessageSquare,
+  [TEXT_DISPLAY_TYPES.BUBBLE_RIGHT]: MessageSquare, // Will be flipped in the template
 };
 
 const getIcon = (type) => {
@@ -71,7 +71,7 @@ const previewRectStyle = computed(() => {
     top: (height < 0 ? y + height : y) + 'px',
     width: Math.abs(width) + 'px',
     height: Math.abs(height) + 'px',
-    borderRadius: activeTool.value === 'ellipse' ? '50%' : '0',
+    borderRadius: activeTool.value === DRAWING_TOOLS.ELLIPSE ? '50%' : '0',
   };
 });
 
@@ -87,8 +87,8 @@ watch(() => props.initialElements, (newVal) => {
   const allItems = JSON.parse(JSON.stringify(newVal || []));
   
   objects.value = allItems
-    .filter(item => !item.type || item.type === 'rectangle' || item.type === 'ellipse')
-    .map(item => ({ ...item, type: item.type || 'rectangle' }));
+    .filter(item => !item.type || item.type === DRAWING_TOOLS.RECTANGLE || item.type === DRAWING_TOOLS.ELLIPSE)
+    .map(item => ({ ...item, type: item.type || DRAWING_TOOLS.RECTANGLE }));
     
   texts.value = allItems.filter(item => item.type === 'text');
 
@@ -209,7 +209,7 @@ const handleDrawEnd = (event) => {
       rect: finalRect,
     };
 
-    if (activeTool.value === 'rectangle' || activeTool.value === 'ellipse') {
+    if (activeTool.value === DRAWING_TOOLS.RECTANGLE || activeTool.value === DRAWING_TOOLS.ELLIPSE) {
       objects.value.push({
         ...commonProps,
         name: `Object ${objects.value.length + 1}`,
@@ -221,7 +221,7 @@ const handleDrawEnd = (event) => {
         ...commonProps,
         text: 'New Text',
         type: 'text',
-        displayType: 'bubble-left', // Default display type
+        displayType: TEXT_DISPLAY_TYPES.BUBBLE_LEFT, // Default display type
       });
     }
   }
@@ -295,22 +295,22 @@ const handleDrawEnd = (event) => {
                       <component 
                         :is="getIcon(txt.displayType)" 
                         class="w-4 h-4"
-                        :style="{ transform: txt.displayType === 'bubble-right' ? 'scaleX(-1)' : 'none' }"
+                        :style="{ transform: txt.displayType === TEXT_DISPLAY_TYPES.BUBBLE_RIGHT ? 'scaleX(-1)' : 'none' }"
                         />
                     </label>
                     <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40 z-[100]">
                       <li>
-                        <a @click="txt.displayType = 'rectangle'">
+                        <a @click="txt.displayType = TEXT_DISPLAY_TYPES.RECTANGLE">
                           <RectangleHorizontal class="w-4 h-4" /> Rectangle
                         </a>
                       </li>
                       <li>
-                        <a @click="txt.displayType = 'bubble-left'">
+                        <a @click="txt.displayType = TEXT_DISPLAY_TYPES.BUBBLE_LEFT">
                           <MessageSquare class="w-4 h-4" /> Bubble Left
                         </a>
                       </li>
                       <li>
-                        <a @click="txt.displayType = 'bubble-right'">
+                        <a @click="txt.displayType = TEXT_DISPLAY_TYPES.BUBBLE_RIGHT">
                           <MessageSquare class="w-4 h-4" style="transform: scaleX(-1)" /> Bubble Right
                         </a>
                       </li>
@@ -365,7 +365,7 @@ const handleDrawEnd = (event) => {
                   top: `${obj.rect.y}px`, 
                   width: `${obj.rect.width}px`, 
                   height: `${obj.rect.height}px`,
-                  borderRadius: obj.type === 'ellipse' ? '50%' : '0'
+                  borderRadius: obj.type === DRAWING_TOOLS.ELLIPSE ? '50%' : '0'
                 }">
             <span class="absolute -top-1.5 -left-1.5 bg-error text-error-content text-xs px-1.5 py-0.5 rounded font-medium min-w-[1.5rem] text-center select-none">
               {{ index + 1 }}
@@ -386,9 +386,9 @@ const handleDrawEnd = (event) => {
             <div 
               class="w-full h-full flex items-center justify-center text-center p-2"
               :class="{
-                'bubble-left': txt.displayType === 'bubble-left',
-                'bubble-right': txt.displayType === 'bubble-right',
-                'bg-base-100/80 border-2 border-primary': txt.displayType === 'rectangle'
+                [TEXT_DISPLAY_TYPES.BUBBLE_LEFT]: txt.displayType === TEXT_DISPLAY_TYPES.BUBBLE_LEFT,
+                [TEXT_DISPLAY_TYPES.BUBBLE_RIGHT]: txt.displayType === TEXT_DISPLAY_TYPES.BUBBLE_RIGHT,
+                'bg-base-100/80 border-2 border-primary': txt.displayType === DRAWING_TOOLS.RECTANGLE
               }"
               >
               <span class="text-base-content text-sm">
@@ -400,7 +400,7 @@ const handleDrawEnd = (event) => {
           <div v-if="isDrawing && newRect"
                 class="absolute border-2 border-dashed box-border select-none"
                 :class="{
-                  'border-error': activeTool === 'rectangle' || activeTool === 'ellipse',
+                  'border-error': activeTool === DRAWING_TOOLS.RECTANGLE || activeTool === DRAWING_TOOLS.ELLIPSE,
                   'border-primary': activeTool === 'text'
                 }"
                 :style="previewRectStyle">
