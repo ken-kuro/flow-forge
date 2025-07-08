@@ -29,7 +29,7 @@ const props = defineProps({
 });
 
 const { updateBlock, flushPendingSaves } = useFlowEditor();
-const { showModal, openModal, closeModal } = useModal();
+const { showModal } = useModal();
 
 // Flush any pending saves when component is unmounted
 onUnmounted(() => {
