@@ -63,6 +63,7 @@ const isDragging = ref(false);
 const dragMode = ref(''); // 'move' or 'resize'
 const dragStart = ref({ x: 0, y: 0 });
 const originalRect = ref(null);
+const resizeHandle = ref(''); // Which resize handle is being dragged
 
 const displayTypeIcons = {
   [TEXT_DISPLAY_TYPES.RECTANGLE]: RectangleHorizontal,
@@ -259,9 +260,8 @@ const handleResizeMouseDown = (event, index, type, handle) => {
   originalRect.value = { ...targetArray[index].rect };
   isDragging.value = true;
   dragMode.value = 'resize';
+  resizeHandle.value = handle; // Store which handle is being dragged
   dragStart.value = getMousePosition(event);
-  // Store which handle is being dragged
-  // This will be used in handleDragMove for resize logic
 };
 
 const getEventPosition = (event) => {
@@ -323,6 +323,37 @@ const handleDragMove = (event) => {
     // Move the object from original position
     targetArray[targetIndex].rect.x = originalRect.value.x + deltaX;
     targetArray[targetIndex].rect.y = originalRect.value.y + deltaY;
+  } else if (dragMode.value === 'resize') {
+    // Resize the object based on which handle is being dragged
+    const newRect = { ...originalRect.value };
+    
+    switch (resizeHandle.value) {
+      case 'nw': // Top-left corner
+        newRect.x = originalRect.value.x + deltaX;
+        newRect.y = originalRect.value.y + deltaY;
+        newRect.width = originalRect.value.width - deltaX;
+        newRect.height = originalRect.value.height - deltaY;
+        break;
+      case 'ne': // Top-right corner
+        newRect.y = originalRect.value.y + deltaY;
+        newRect.width = originalRect.value.width + deltaX;
+        newRect.height = originalRect.value.height - deltaY;
+        break;
+      case 'sw': // Bottom-left corner
+        newRect.x = originalRect.value.x + deltaX;
+        newRect.width = originalRect.value.width - deltaX;
+        newRect.height = originalRect.value.height + deltaY;
+        break;
+      case 'se': // Bottom-right corner
+        newRect.width = originalRect.value.width + deltaX;
+        newRect.height = originalRect.value.height + deltaY;
+        break;
+    }
+    
+    // Ensure minimum size
+    if (newRect.width >= MIN_DRAWING_SIZE && newRect.height >= MIN_DRAWING_SIZE) {
+      targetArray[targetIndex].rect = newRect;
+    }
   }
 };
 
@@ -371,6 +402,7 @@ const handleDrawEnd = (event) => {
 const handleDragEnd = () => {
   isDragging.value = false;
   dragMode.value = '';
+  resizeHandle.value = '';
   originalRect.value = null;
 };
 </script>
