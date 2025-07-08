@@ -7,7 +7,6 @@ import { MiniMap } from "@vue-flow/minimap";
 import { useFlowEditor } from "@/composables/use-flow-editor.js";
 import { onMounted, onUnmounted } from 'vue';
 import EditorToolbar from "@/components/editor/toolbar.vue";
-import ModalManager from "@/components/modal-manager.vue";
 
 // Import custom node registry
 import { nodeTypes } from "@/components/nodes";
@@ -142,8 +141,6 @@ onUnmounted(() => {
     <!-- Custom Application Toolbar -->
     <EditorToolbar />
     
-    <!-- Modal Manager -->
-    <ModalManager />
   </div>
 </template>
 
