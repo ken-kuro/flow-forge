@@ -59,8 +59,7 @@ const updateBlockData = (immediate = false) => {
 
     // Convert value based on type
     if (variableType.value === 'number') {
-        // eslint-disable-next-line no-constant-binary-expression
-        processedValue = Number(value.value) ?? 0
+        processedValue = Number(value.value) || 0
     } else if (variableType.value === 'boolean') {
         processedValue = value.value === 'true' || value.value === true
     }
@@ -78,8 +77,7 @@ const handleTypeChange = () => {
     if (variableType.value === 'boolean') {
         value.value = 'false'
     } else if (variableType.value === 'number') {
-        // eslint-disable-next-line no-constant-binary-expression
-        value.value = Number(value.value) ?? 0
+        value.value = Number(value.value) || 0
     }
     updateBlockData(true)
 }
@@ -87,8 +85,7 @@ const handleTypeChange = () => {
 // Preview the processed value
 const processedValue = computed(() => {
     if (variableType.value === 'number') {
-        // eslint-disable-next-line no-constant-binary-expression
-        return Number(value.value) ?? 0
+        return Number(value.value) || 0
     } else if (variableType.value === 'boolean') {
         return value.value === 'true' || value.value === true
     }
