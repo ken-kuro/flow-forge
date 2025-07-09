@@ -7,6 +7,7 @@ This document defines the architecture for **Phase 2: Custom Nodes with Linear S
 ## 🏗️ Core Architecture Decisions
 
 ### **Database Strategy: Enhanced Single Document (MongoDB)**
+
 - **Rationale**: Balance between implementation simplicity and scalability for initial phases.
 - **Document Size Target**: < 1MB per flow (comfortable for MongoDB 16MB limit).
 - **Asset Strategy**: CDN URLs only (no binary data in database).
@@ -14,16 +15,18 @@ This document defines the architecture for **Phase 2: Custom Nodes with Linear S
 - **Migration Path**: Structure designed for future separation of `nodeBlocks` into its own collection.
 
 ### **Node Categories**
+
 1. **Nestable Nodes** (with block arrays):
-   - **Setup/Config Node**: Centralized definitions for variables, assets, and reusable resources.
-   - **Lecture Node**: Main content delivery node, containing a sequence of content and action blocks.
+    - **Setup/Config Node**: Centralized definitions for variables, assets, and reusable resources.
+    - **Lecture Node**: Main content delivery node, containing a sequence of content and action blocks.
 
 2. **Simple Nodes** (single purpose):
-   - **Input/Start Node**: Flow entry point.
-   - **Output/End Node**: Flow termination point.
-   - **Condition Node**: Decision-making logic.
+    - **Input/Start Node**: Flow entry point.
+    - **Output/End Node**: Flow termination point.
+    - **Condition Node**: Decision-making logic.
 
 ### **Asset Reusability Pattern**
+
 - **Setup Nodes**: Define reusable assets (images, videos, variables)
 - **Assets Applied Blocks**: Reference setup node assets in lecture nodes
 - **No direct cross-node sharing**: Assets only reused through setup → reference pattern
@@ -40,10 +43,10 @@ This is the primary JSON structure for a flow, designed to be stored in a MongoD
   createdAt: "2024-01-01T00:00:00Z",
   updatedAt: "2024-01-15T10:30:00Z",
   _version: 42, // Monotonically incrementing version for concurrency control
-  
+
   // Vue Flow viewport state
   viewport: { x: 0, y: 0, zoom: 1 },
-  
+
   // Vue Flow structure (lightweight)
   nodes: [
     {
@@ -58,7 +61,7 @@ This is the primary JSON structure for a flow, designed to be stored in a MongoD
       }
     },
     {
-      id: "node-2", 
+      id: "node-2",
       type: "custom-lecture",
       position: { x: 100, y: 200 },
       data: {
@@ -67,7 +70,7 @@ This is the primary JSON structure for a flow, designed to be stored in a MongoD
       }
     }
   ],
-  
+
   edges: [
     {
       id: "edge-1",
@@ -76,7 +79,7 @@ This is the primary JSON structure for a flow, designed to be stored in a MongoD
       animated: false
     }
   ],
-  
+
   // Blocks organized by node ID (easier management)
   nodeBlocks: {
     "node-2": [
@@ -94,7 +97,7 @@ This is the primary JSON structure for a flow, designed to be stored in a MongoD
       },
       {
         id: "block-2",
-        type: "assets-applied", 
+        type: "assets-applied",
         data: {
           setupNodeId: "setup-node-1",
           assetId: "welcome-image",
@@ -126,7 +129,7 @@ This is the primary JSON structure for a flow, designed to be stored in a MongoD
       }
     ]
   },
-  
+
   // Size monitoring for migration planning
   _meta: {
     documentSize: 156000, // bytes
@@ -148,7 +151,7 @@ All nodes, regardless of type, will follow this basic structure, compatible with
   id: "node-uuid",
   type: "custom-start", // e.g., custom-start, custom-end, custom-setup
   position: { x: 100, y: 200 },
-  
+
   // --- Our Enhanced Properties ---
   data: {
     title: "Welcome Message", // The primary label displayed in the node's UI.
@@ -162,6 +165,7 @@ All nodes, regardless of type, will follow this basic structure, compatible with
 ### **Block Type Definitions**
 
 #### **Setup Node Blocks**
+
 ```javascript
 // Image Asset Block
 {
@@ -175,13 +179,13 @@ All nodes, regardless of type, will follow this basic structure, compatible with
   }
 }
 
-// Video Asset Block  
+// Video Asset Block
 {
   id: "block-uuid",
   type: "asset-video",
   data: {
     assetId: "unique-asset-id",
-    videoUrl: "https://cdn.../video.mp4", 
+    videoUrl: "https://cdn.../video.mp4",
     title: "Video Title",
     duration: 120,
     thumbnail: "https://cdn.../thumb.jpg"
@@ -190,6 +194,7 @@ All nodes, regardless of type, will follow this basic structure, compatible with
 ```
 
 #### **Lecture Node Blocks**
+
 ```javascript
 // Teacher Video Block
 {
@@ -197,7 +202,7 @@ All nodes, regardless of type, will follow this basic structure, compatible with
   type: "teacher-video",
   data: {
     videoUrl: "https://cdn.../lesson.mp4",
-    title: "Lesson Introduction", 
+    title: "Lesson Introduction",
     startTime: 0,
     endTime: null, // null = full video
     autoplay: true,
@@ -221,7 +226,7 @@ All nodes, regardless of type, will follow this basic structure, compatible with
 
 // Question Block
 {
-  id: "block-uuid", 
+  id: "block-uuid",
   type: "question",
   data: {
     question: "What is your name?",
@@ -264,11 +269,12 @@ All nodes, regardless of type, will follow this basic structure, compatible with
 ```
 
 #### **Condition Node Structure**
+
 ```javascript
 // Condition node with nested branch nodes
 {
   id: "condition-node-1",
-  type: "custom-condition", 
+  type: "custom-condition",
   position: { x: 100, y: 300 },
   data: {
     nodeType: "condition",
@@ -281,19 +287,19 @@ All nodes, regardless of type, will follow this basic structure, compatible with
         condition: "user-name !== ''",
         label: "Has Name",
         position: { x: 50, y: 150 }, // Relative to parent
-        data: { 
+        data: {
           targetNodeId: "next-node-1",
           branchColor: "#22c55e"
         }
       },
       {
         id: "branch-node-2",
-        type: "condition-branch", 
+        type: "condition-branch",
         condition: "user-name === ''",
         label: "No Name",
         position: { x: 50, y: 200 },
         data: {
-          targetNodeId: "error-node-1", 
+          targetNodeId: "error-node-1",
           branchColor: "#ef4444"
         }
       }
@@ -328,28 +334,30 @@ This section captures critical architectural considerations, potential risks, an
 ### 💡 **Code Quality & Refactoring**
 
 - **Shared Node Component Patterns**: To ensure a consistent UI and developer experience, nodes are built using a composable pattern that distinguishes between UI, block layout, and node nesting:
-  - **`Simple Nodes`** (`Start`, `End`): Implemented as standalone components with a unique, non-card UI.
-  - **`Card Nodes`**: A general category for all non-simple nodes. They use **`CardNodeWrapper.vue`** to provide a consistent card shell with a header.
-  - **`Block Nodes`** (`Setup`, `Lecture`): A subset of Card Nodes. They compose **`CardNodeWrapper.vue`** for the shell and **`BlockContainer.vue`** for the UI of the nested block list. They render data from the `nodeBlocks` object.
-  - **`Parent Nodes`** (`Condition`): A subset of Card Nodes. They are responsible for rendering their own children (which are actual nodes from the main `nodes` array) inside their default slot. This enables true node-in-node nesting.
+    - **`Simple Nodes`** (`Start`, `End`): Implemented as standalone components with a unique, non-card UI.
+    - **`Card Nodes`**: A general category for all non-simple nodes. They use **`CardNodeWrapper.vue`** to provide a consistent card shell with a header.
+    - **`Block Nodes`** (`Setup`, `Lecture`): A subset of Card Nodes. They compose **`CardNodeWrapper.vue`** for the shell and **`BlockContainer.vue`** for the UI of the nested block list. They render data from the `nodeBlocks` object.
+    - **`Parent Nodes`** (`Condition`): A subset of Card Nodes. They are responsible for rendering their own children (which are actual nodes from the main `nodes` array) inside their default slot. This enables true node-in-node nesting.
 - **ID Namespacing**: To prevent ID collisions between nodes and condition branches, branch handles (which are technically nodes) will be namespaced (e.g., `node-id:branch-a`) or use UUIDs generated by the same `generateId` utility.
 
 ## 🎯 Vue Flow Integration
 
 ### **Custom Node Types Registration**
+
 ```javascript
 // In flow-editor.vue
 const nodeTypes = {
-  'custom-start': StartNode,
-  'custom-end': EndNode, 
-  'custom-setup': SetupNode,
-  'custom-lecture': LectureNode,
-  'custom-condition': ConditionNode,
-  'condition-branch': ConditionBranchNode
+    'custom-start': StartNode,
+    'custom-end': EndNode,
+    'custom-setup': SetupNode,
+    'custom-lecture': LectureNode,
+    'custom-condition': ConditionNode,
+    'condition-branch': ConditionBranchNode,
 }
 ```
 
 ### **Component Structure** ✅ SIMPLIFIED
+
 ```
 src/components/
 ├── nodes/
@@ -386,6 +394,7 @@ src/components/
 ```
 
 #### **Architectural Benefits**
+
 - **No Barrel Exports**: Eliminates complexity and improves tree shaking
 - **Clear File Paths**: Every import shows exactly where the component lives
 - **Scalable Organization**: Easy to add new node types without conflicts
@@ -393,25 +402,27 @@ src/components/
 - **Maintainability**: Related code is co-located by feature/domain
 
 #### **Import Patterns** ✅ DIRECT ONLY
+
 ```javascript
 // ✅ Only registry export (for Vue Flow registration)
-import { nodeTypes } from '@/components/nodes';
+import { nodeTypes } from '@/components/nodes'
 
 // ✅ All other imports are direct file paths
-import StartNode from '@/components/nodes/start-node.vue';
-import EndNode from '@/components/nodes/end-node.vue';
-import SetupNode from '@/components/nodes/setup/setup-node.vue';
-import CardNodeWrapper from '@/components/nodes/base/card-node-wrapper.vue';
-import BlockContainer from '@/components/nodes/base/block-container.vue';
+import StartNode from '@/components/nodes/start-node.vue'
+import EndNode from '@/components/nodes/end-node.vue'
+import SetupNode from '@/components/nodes/setup/setup-node.vue'
+import CardNodeWrapper from '@/components/nodes/base/card-node-wrapper.vue'
+import BlockContainer from '@/components/nodes/base/block-container.vue'
 
 // ✅ Internal components (when needed)
-import VariableBlock from '@/components/nodes/setup/blocks/variable-block.vue';
+import VariableBlock from '@/components/nodes/setup/blocks/variable-block.vue'
 
 // ✅ Future shared components (direct imports)
-import BlockToolbar from '@/components/nodes/shared/block-toolbar.vue';
+import BlockToolbar from '@/components/nodes/shared/block-toolbar.vue'
 ```
 
 #### **Why Direct Imports Only?**
+
 - **Maximum Tree Shaking**: Bundlers can eliminate unused code perfectly
 - **Zero Abstraction**: What you import is exactly what you get
 - **Fastest IDE Performance**: No barrel file resolution needed
@@ -421,18 +432,21 @@ import BlockToolbar from '@/components/nodes/shared/block-toolbar.vue';
 #### **Component Architecture Principles**
 
 **Base Components (Pure UI Containers):**
+
 - **`CardNodeWrapper`**: Generic card shell with consistent styling
 - **`BlockContainer`**: Pure container for linear block stacking
 - **No Business Logic**: Only provide UI structure and styling
 - **Slot-Based**: Accept content through slots for maximum flexibility
 
 **Node Components (Domain-Specific Logic):**
+
 - **Own Their Blocks**: Each node manages its specific block types
 - **Import Block Components**: Direct imports of their required block types
 - **Handle Block Logic**: Create, update, delete operations for their blocks
 - **Provide Management UI**: Custom dropdowns and actions for their use case
 
 **Block Components (Leaf Components):**
+
 - **Props**: `nodeId` (string), `block` (object with id, type, data)
 - **Composition**: Uses `useFlowEditor()` for store operations
 - **UI Pattern**: Header with icon/title/delete, form fields, preview area
@@ -440,6 +454,7 @@ import BlockToolbar from '@/components/nodes/shared/block-toolbar.vue';
 - **Styling**: DaisyUI classes with hover transitions and semantic colors
 
 This architecture ensures:
+
 - **Perfect Encapsulation**: Setup nodes can't accidentally import Lecture blocks
 - **Clean Separation**: UI containers vs business logic vs data components
 - **Reusability**: Base components work for any node type
@@ -448,11 +463,13 @@ This architecture ensures:
 ## 🔧 Implementation Plan
 
 ### **Phase 1: Foundation (Week 1)** ✅ COMPLETED
+
 1. ✅ **Update Data Structure**: Enhance flow store for nodeBlocks
 2. ✅ **Basic Node Registration**: Register custom node types with Vue Flow
 3. ✅ **Simple Nodes First**: Implement Start and End nodes (no blocks)
 
 ### **Phase 2: Setup Node (Week 2)** ✅ COMPLETED
+
 1. ✅ **Setup Node Component**: Basic container with block support
 2. ✅ **Asset Blocks**: Image and Video asset blocks with preview functionality
 3. ✅ **Variable Blocks**: Typed variable definitions (string, number, boolean)
@@ -460,11 +477,13 @@ This architecture ensures:
 5. ✅ **Asset ID System**: Unique IDs for cross-referencing
 
 #### **Implemented Block Types**
+
 - **Variable Block** (`variable`): Define typed variables with name, value, and type selection
 - **Image Asset Block** (`imageAsset`): Image resources with URL, title, alt text, and preview
 - **Video Asset Block** (`videoAsset`): Video resources with URL, title, duration, thumbnail, and preview
 
 #### **Block Management Features**
+
 - **Dropdown Interface**: Clean UI for selecting block types to add
 - **Inline Editing**: Direct editing of block properties with auto-save on blur
 - **Type Safety**: Proper type conversion for variable blocks (string/number/boolean)
@@ -473,25 +492,28 @@ This architecture ensures:
 - **Consistent Styling**: DaisyUI-based theming with hover states and transitions
 
 ### **Phase 3: Condition Node (Week 3)** `✅ Completed`
+
 1. **Condition Logic**: ✅ Implemented `custom-condition` node type with boolean expression evaluation.
 2. **Branching UI**: ✅ Added condition branches as blocks within the node using `BlockContainer` pattern.
 3. **Block-Based Architecture**: ✅ Used block system (not child nodes) for condition branches, each with its own source handle.
-https://github.com/bcakmakoglu/vue-flow/discussions/1821
+   https://github.com/bcakmakoglu/vue-flow/discussions/1821
 4. **Edge Management**: ✅ Edges connect from individual condition branch blocks to subsequent nodes.
 5. **Data Structure**: ✅ Condition branches stored in `nodeBlocks` with simple expression format and evaluation logic.
 
 ### **Phase 4: Lecture Node (Week 4-5)** ✅ COMPLETED
+
 1. ✅ **Lecture Node Component**: Implemented `custom-lecture` node using `BlockContainer` pattern for content delivery
 2. ✅ **Content Blocks**: All 5 lecture block types implemented with full functionality:
-   - **Teacher Video Block**: Video source selection (URL/upload), preview, transcript editing
-   - **Question Block**: Title and question ID fields with proper form validation
+    - **Teacher Video Block**: Video source selection (URL/upload), preview, transcript editing
+    - **Question Block**: Title and question ID fields with proper form validation
 3. ✅ **Reference Blocks**: Assets Applied block references Setup Node assets with live preview and validation
 4. ✅ **Action Blocks**: Complete implementation of system action blocks:
-   - **Collect User Data Block**: Multiple collection methods (Voice, Choose Answer, Text Input)
-   - **System Action Block**: Asset interaction with delay timing, method selection, and object targeting
+    - **Collect User Data Block**: Multiple collection methods (Voice, Choose Answer, Text Input)
+    - **System Action Block**: Asset interaction with delay timing, method selection, and object targeting
 5. ✅ **Inline Editing**: All block properties editable with auto-save, proper input types, and validation
 
 #### **Implemented Lecture Block Types**
+
 - **Teacher Video Block** (`teacher-video`): Video content with source selection, preview, and transcript
 - **Assets Applied Block** (`assets-applied`): References assets from setup nodes with live preview
 - **Question Block** (`question`): Interactive questions with title and ID management
@@ -499,6 +521,7 @@ https://github.com/bcakmakoglu/vue-flow/discussions/1821
 - **System Action Block** (`system-action`): Asset interactions with timing and method configuration
 
 #### **Enhanced Block Architecture**
+
 - **CardBlockWrapper System**: Unified wrapper providing consistent styling, spacing, and functionality
 - **Standardized Form Controls**: Consistent input types, validation, and sizing (`input-xs`, `select-xs`)
 - **Icon Color System**: Semantic color coding for different block types (secondary, info, warning, success)
@@ -506,6 +529,7 @@ https://github.com/bcakmakoglu/vue-flow/discussions/1821
 - **Input Type Validation**: Proper number inputs, URL validation, and type-specific controls
 
 ### **Phase 4.5: Import/Export System (Pre-Phase 5)** ✅ COMPLETED
+
 1. ✅ **Export Functionality**: Complete flow data export as JSON files with metadata
 2. ✅ **Import Functionality**: JSON file import with validation and confirmation dialogs
 3. ✅ **Data Structure Compliance**: Full adherence to architecture specification format
@@ -513,6 +537,7 @@ https://github.com/bcakmakoglu/vue-flow/discussions/1821
 5. ✅ **Editor Focus**: Pure editing interface with import/export for sharing (flow creation moved to templates screen)
 
 #### **Implemented Import/Export Features**
+
 - **Export Flow** (`exportFlow`): Exports complete flow data including metadata, nodes, edges, and blocks
 - **Import Flow** (`importFlow`): Validates and imports flow data with confirmation dialogs
 - **File Management UI**: Toolbar integration with clear iconography (Upload, Download)
@@ -520,12 +545,14 @@ https://github.com/bcakmakoglu/vue-flow/discussions/1821
 - **Focused Editor**: Removed flow creation from editor (belongs in templates/management screen)
 
 #### **Architectural Separation of Concerns**
+
 - **Editor Screen**: Pure flow editing with import/export for sharing
 - **Templates Screen** (future): Flow creation, template browsing, "Use Template" functionality
 - **Flow Management** (future): Browse existing flows, metadata management
 - **Clean Separation**: Editor focused solely on editing current flow, not flow lifecycle management
 
 ### **Phase 5: Polish & Testing (Week 6)**
+
 1. **UI Polish**: Consistent styling across all node/block types.
 2. **Performance**: Optimize rendering for flows with many blocks
 3. **Error Handling**: Validation and error boundaries
@@ -534,73 +561,75 @@ https://github.com/bcakmakoglu/vue-flow/discussions/1821
 ## 🛠️ Flow Store Updates
 
 ### **Enhanced Store Methods**
+
 ```javascript
 // Block management methods to add to flow-store.js
 function updateBlock(nodeId, blockId, newData) {
-  const nodeBlocks = nodes.value.find(n => n.id === nodeId)?.blocks || []
-  const blockIndex = nodeBlocks.findIndex(b => b.id === blockId)
-  if (blockIndex !== -1) {
-    nodeBlocks[blockIndex].data = { ...nodeBlocks[blockIndex].data, ...newData }
-    saveState()
-  }
+    const nodeBlocks = nodes.value.find((n) => n.id === nodeId)?.blocks || []
+    const blockIndex = nodeBlocks.findIndex((b) => b.id === blockId)
+    if (blockIndex !== -1) {
+        nodeBlocks[blockIndex].data = { ...nodeBlocks[blockIndex].data, ...newData }
+        saveState()
+    }
 }
 
 function addBlock(nodeId, blockData) {
-  if (!flowData.nodeBlocks[nodeId]) {
-    flowData.nodeBlocks[nodeId] = []
-  }
-  flowData.nodeBlocks[nodeId].push({
-    id: generateId(),
-    ...blockData
-  })
-  saveState()
+    if (!flowData.nodeBlocks[nodeId]) {
+        flowData.nodeBlocks[nodeId] = []
+    }
+    flowData.nodeBlocks[nodeId].push({
+        id: generateId(),
+        ...blockData,
+    })
+    saveState()
 }
 
 function removeBlock(nodeId, blockId) {
-  if (flowData.nodeBlocks[nodeId]) {
-    flowData.nodeBlocks[nodeId] = flowData.nodeBlocks[nodeId].filter(b => b.id !== blockId)
-    saveState()
-  }
+    if (flowData.nodeBlocks[nodeId]) {
+        flowData.nodeBlocks[nodeId] = flowData.nodeBlocks[nodeId].filter((b) => b.id !== blockId)
+        saveState()
+    }
 }
 
 function reorderBlocks(nodeId, fromIndex, toIndex) {
-  const blocks = flowData.nodeBlocks[nodeId]
-  if (blocks) {
-    const [removed] = blocks.splice(fromIndex, 1)
-    blocks.splice(toIndex, 0, removed)
-    saveState()
-  }
+    const blocks = flowData.nodeBlocks[nodeId]
+    if (blocks) {
+        const [removed] = blocks.splice(fromIndex, 1)
+        blocks.splice(toIndex, 0, removed)
+        saveState()
+    }
 }
 
 // Asset reference resolution
 function getAssetFromSetup(setupNodeId, assetId) {
-  const setupBlocks = flowData.nodeBlocks[setupNodeId] || []
-  return setupBlocks.find(block => 
-    block.type.startsWith('asset-') && 
-    block.data.assetId === assetId
-  )
+    const setupBlocks = flowData.nodeBlocks[setupNodeId] || []
+    return setupBlocks.find((block) => block.type.startsWith('asset-') && block.data.assetId === assetId)
 }
 ```
 
 ## 📈 Scalability Considerations
 
 ### **Document Size Monitoring**
+
 - **Target**: < 1MB per flow document
 - **Typical Block Size**: ~300 bytes (with CDN URLs)
 - **Estimated Capacity**: ~3,000 blocks per flow before optimization needed
-- **Warning Thresholds**: 
-  - 50+ blocks per node: UI warning
-  - 500KB document: Performance alert
-  - 1MB document: Migration recommendation
+- **Warning Thresholds**:
+    - 50+ blocks per node: UI warning
+    - 500KB document: Performance alert
+    - 1MB document: Migration recommendation
 
 ### **Migration Path (Future)**
+
 When document size becomes an issue:
+
 1. **Separate Blocks Collection**: Extract nodeBlocks to separate MongoDB collection
 2. **Reference-Based Loading**: Replace block arrays with block ID arrays
 3. **Lazy Loading**: Load blocks on-demand as nodes are viewed
 4. **Pagination**: Implement block pagination for very large nodes
 
 ### **Performance Optimizations**
+
 - **Block Virtualization**: For nodes with 20+ blocks
 - **Asset Preloading**: Prefetch referenced assets
 - **Incremental Saves**: Only save changed blocks, not entire document
@@ -609,50 +638,54 @@ When document size becomes an issue:
 ## 🔍 Asset Reference System
 
 ### **Setup Node → Lecture Node Flow**
+
 1. **Define in Setup**: Create image/video assets in setup node with unique `assetId`
 2. **Reference in Lecture**: Use "assets-applied" block with `setupNodeId` + `assetId`
 3. **Resolution**: Flow store resolves references to actual asset data
 4. **Rendering**: Asset blocks render the referenced content
 
 ### **Cross-Node Asset Discovery**
+
 ```javascript
 // Helper method for asset selection UI
 function getAvailableAssets() {
-  const assets = []
-  
-  // Find all setup nodes
-  const setupNodes = nodes.value.filter(n => n.data.nodeType === 'setup')
-  
-  for (const setupNode of setupNodes) {
-    const setupBlocks = nodeBlocks[setupNode.id] || []
-    for (const block of setupBlocks) {
-      if (block.type.startsWith('asset-')) {
-        assets.push({
-          setupNodeId: setupNode.id,
-          setupNodeTitle: setupNode.data.title,
-          assetId: block.data.assetId,
-          assetTitle: block.data.title,
-          assetType: block.type,
-          assetData: block.data
-        })
-      }
+    const assets = []
+
+    // Find all setup nodes
+    const setupNodes = nodes.value.filter((n) => n.data.nodeType === 'setup')
+
+    for (const setupNode of setupNodes) {
+        const setupBlocks = nodeBlocks[setupNode.id] || []
+        for (const block of setupBlocks) {
+            if (block.type.startsWith('asset-')) {
+                assets.push({
+                    setupNodeId: setupNode.id,
+                    setupNodeTitle: setupNode.data.title,
+                    assetId: block.data.assetId,
+                    assetTitle: block.data.title,
+                    assetType: block.type,
+                    assetData: block.data,
+                })
+            }
+        }
     }
-  }
-  
-  return assets
+
+    return assets
 }
 ```
 
 ## ✅ Success Criteria
 
 ### **Technical**
+
 - ✅ All node types render correctly in Vue Flow
 - ✅ Block editing works inline without performance issues
 - ✅ History system supports block-level changes
 - ✅ Asset references resolve correctly across nodes
 - ✅ Document size stays under 1MB for typical flows
 
-### **User Experience** 
+### **User Experience**
+
 - ✅ Drag-and-drop block reordering within nodes
 - ✅ Intuitive asset selection from setup nodes
 - ✅ Real-time preview of content blocks (images, videos)
@@ -663,6 +696,7 @@ function getAvailableAssets() {
 - ✅ Full-screen editor mode for distraction-free editing
 
 ### **Architecture**
+
 - ✅ Clean separation between Vue Flow and custom logic
 - ✅ Maintainable code structure with single responsibility components
 - ✅ Extensible block system for future block types
@@ -679,16 +713,20 @@ function getAvailableAssets() {
 To ensure a clean, maintainable, and scalable codebase, we adhere to a strict three-layer architecture pattern, inspired by Model-View-Controller (MVC).
 
 #### **1. The Three Layers**
-- **The Model (`/src/stores/flow-store.js`):** The "Brain." This is our Pinia store and the single source of truth for all application state (`nodes`, `edges`, `nodeBlocks`, `history`). It must be UI-agnostic and should not contain any Vue Flow-specific logic other than the pure `applyChanges` helper. It exposes functions for managing our application's *custom* data, like block manipulations.
+
+- **The Model (`/src/stores/flow-store.js`):** The "Brain." This is our Pinia store and the single source of truth for all application state (`nodes`, `edges`, `nodeBlocks`, `history`). It must be UI-agnostic and should not contain any Vue Flow-specific logic other than the pure `applyChanges` helper. It exposes functions for managing our application's _custom_ data, like block manipulations.
 - **The Controller (`/src/composables/use-flow-editor.js`):** The "Orchestrator." This is the central hub for all application logic. It is the **only file** in the application that should import and use the `useVueFlow()` hook. It connects the View and the Model, listening for user events and calling actions on either the store or the Vue Flow library.
-- **The View (`/src/components/**/*.vue`):** The "Face." This layer is considered "dumb" and is only responsible for displaying state and emitting user intent to the Controller. All actions (e.g., button clicks) must call a function exposed by `useFlowEditor`.
+- **The View (`/src/components/**/\*.vue`):** The "Face." This layer is considered "dumb" and is only responsible for displaying state and emitting user intent to the Controller. All actions (e.g., button clicks) must call a function exposed by `useFlowEditor`.
 
 #### **2. Unidirectional Data Flow ("Actions Up, State Down")**
+
 We enforce a strict one-way data flow to ensure predictability and ease of debugging.
+
 - **Actions Flow UP:** A user interacts with the `View`, which calls an action on the `Controller`. The `Controller` then executes logic, which may update the `Model`.
 - **State Flows DOWN:** The `Model`'s state is mutated. Vue's reactivity system then automatically updates the `View` to reflect the new state.
 
 #### **3. Vue Flow Interaction Strategy**
+
 - **State Sync via `v-model`:** For our current needs, we use `v-model:nodes` and `v-model:edges` for simple and declarative state synchronization. We have a `TODO` in the store to revisit this and switch to a fully controlled pattern if future features (like confirmation dialogs) require it.
 - **Communicate Intent with Library Actions:** To initiate a change like adding or removing a node, the `Controller` **must** use the library's provided actions (e.g., `addNodes`, `removeNodes`). This ensures Vue Flow emits clean, semantic events.
 - **Listen to Events for Custom Logic:** We use event handlers like `onNodesChange` for the sole purpose of triggering our own custom logic that the library is unaware of—primarily, to call `saveState()` and manage our undo/redo history stack.
@@ -705,7 +743,7 @@ All nodes, regardless of type, will follow this basic structure, compatible with
   id: "node-uuid",
   type: "custom-start", // e.g., custom-start, custom-end, custom-setup
   position: { x: 100, y: 200 },
-  
+
   // --- Our Enhanced Properties ---
   data: {
     title: "Welcome Message", // The primary label displayed in the node's UI.
@@ -715,4 +753,5 @@ All nodes, regardless of type, will follow this basic structure, compatible with
   }
 }
 ```
+
 }
