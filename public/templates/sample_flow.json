@@ -1,1084 +1,1077 @@
 {
-  "id": "7324905c-e1fd-44a1-8099-2310bf9d6cc9",
-  "name": "My Learning Flow",
-  "description": "Created with Flow Forge",
-  "createdAt": "2025-07-04T07:10:58.057Z",
-  "updatedAt": "2025-07-04T07:10:58.057Z",
-  "_version": 36,
-  "viewport": {
-    "x": 0,
-    "y": 0,
-    "zoom": 1
-  },
-  "nodes": [
-    {
-      "id": "node-start-001",
-      "type": "custom-start",
-      "dimensions": {
-        "width": 64,
-        "height": 64
-      },
-      "computedPosition": {
-        "x": 100,
-        "y": 200,
-        "z": 0
-      },
-      "handleBounds": {
-        "source": [
-          {
-            "id": null,
-            "type": "source",
-            "nodeId": "node-start-001",
-            "position": "right",
-            "x": 56.00001258211669,
-            "y": 23.99997322156609,
-            "width": 16,
-            "height": 16
-          }
-        ],
-        "target": null
-      },
-      "selected": false,
-      "dragging": false,
-      "resizing": false,
-      "initialized": false,
-      "isParent": false,
-      "position": {
-        "x": 100,
-        "y": 200
-      },
-      "data": {
-        "title": "Course Introduction",
-        "config": {}
-      },
-      "events": {}
+    "id": "7324905c-e1fd-44a1-8099-2310bf9d6cc9",
+    "name": "My Learning Flow",
+    "description": "Created with Flow Forge",
+    "createdAt": "2025-07-04T07:10:58.057Z",
+    "updatedAt": "2025-07-04T07:10:58.057Z",
+    "_version": 36,
+    "viewport": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1
     },
-    {
-      "id": "node-setup-001",
-      "type": "custom-setup",
-      "dimensions": {
-        "width": 320,
-        "height": 1646
-      },
-      "computedPosition": {
-        "x": 384.615625,
-        "y": -383.4648958333334,
-        "z": 0
-      },
-      "handleBounds": {
-        "source": [
-          {
-            "id": "default",
-            "type": "source",
-            "nodeId": "node-setup-001",
-            "position": "right",
-            "x": 312.0000522277146,
-            "y": 1061.6877576699635,
-            "width": 16,
-            "height": 16
-          }
-        ],
-        "target": [
-          {
-            "id": "default",
-            "type": "target",
-            "nodeId": "node-setup-001",
-            "position": "left",
-            "x": -7.999991073855363,
-            "y": 567.9845533915789,
-            "width": 16,
-            "height": 16
-          }
-        ]
-      },
-      "selected": false,
-      "dragging": false,
-      "resizing": false,
-      "initialized": false,
-      "isParent": false,
-      "position": {
-        "x": 384.615625,
-        "y": -383.4648958333334
-      },
-      "data": {
-        "title": "Course Assets",
-        "config": {},
-        "hasBlocks": true
-      },
-      "events": {}
-    },
-    {
-      "id": "node-lecture-001",
-      "type": "custom-lecture",
-      "dimensions": {
-        "width": 320,
-        "height": 1706
-      },
-      "computedPosition": {
-        "x": 839.2320833333333,
-        "y": -298.89769531250005,
-        "z": 0
-      },
-      "handleBounds": {
-        "source": [
-          {
-            "id": "default",
-            "type": "source",
-            "nodeId": "node-lecture-001",
-            "position": "right",
-            "x": 312.00010227113404,
-            "y": 1101.0627207739512,
-            "width": 16,
-            "height": 16
-          }
-        ],
-        "target": [
-          {
-            "id": "default",
-            "type": "target",
-            "nodeId": "node-lecture-001",
-            "position": "left",
-            "x": -7.999941030435931,
-            "y": 589.1876499444971,
-            "width": 16,
-            "height": 16
-          }
-        ]
-      },
-      "selected": false,
-      "dragging": false,
-      "resizing": false,
-      "initialized": false,
-      "isParent": false,
-      "position": {
-        "x": 839.2320833333333,
-        "y": -298.89769531250005
-      },
-      "data": {
-        "title": "Introduction Lesson",
-        "config": {},
-        "hasBlocks": true
-      },
-      "events": {}
-    },
-    {
-      "id": "node-condition-001",
-      "type": "custom-condition",
-      "dimensions": {
-        "width": 320,
-        "height": 356
-      },
-      "computedPosition": {
-        "x": 1241.9251041666666,
-        "y": 28.07572916666664,
-        "z": 0
-      },
-      "handleBounds": {
-        "source": [
-          {
-            "id": "branch-success-001",
-            "type": "source",
-            "nodeId": "node-condition-001",
-            "position": "right",
-            "x": 300.00009063864127,
-            "y": 109.35938405105301,
-            "width": 16,
-            "height": 16
-          },
-          {
-            "id": "branch-retry-001",
-            "type": "source",
-            "nodeId": "node-condition-001",
-            "position": "right",
-            "x": 300.00009063864127,
-            "y": 231.07814152954163,
-            "width": 16,
-            "height": 16
-          }
-        ],
-        "target": [
-          {
-            "id": "default",
-            "type": "target",
-            "nodeId": "node-condition-001",
-            "position": "left",
-            "x": -7.999941030435931,
-            "y": 116.57814730415187,
-            "width": 16,
-            "height": 16
-          }
-        ]
-      },
-      "selected": false,
-      "dragging": false,
-      "resizing": false,
-      "initialized": false,
-      "isParent": false,
-      "position": {
-        "x": 1241.9251041666666,
-        "y": 28.07572916666664
-      },
-      "data": {
-        "title": "Check Understanding",
-        "config": {},
-        "hasBlocks": true
-      },
-      "events": {}
-    },
-    {
-      "id": "node-end-success",
-      "type": "custom-end",
-      "dimensions": {
-        "width": 64,
-        "height": 64
-      },
-      "computedPosition": {
-        "x": 1845.38875,
-        "y": 28.84531249999999,
-        "z": 0
-      },
-      "handleBounds": {
-        "source": null,
-        "target": [
-          {
-            "id": null,
-            "type": "target",
-            "nodeId": "node-end-success",
-            "position": "left",
-            "x": -8.00014120411366,
-            "y": 23.99997322156609,
-            "width": 16,
-            "height": 16
-          }
-        ]
-      },
-      "selected": false,
-      "dragging": false,
-      "resizing": false,
-      "initialized": false,
-      "isParent": false,
-      "position": {
-        "x": 1845.38875,
-        "y": 28.84531249999999
-      },
-      "data": {
-        "title": "Course Complete",
-        "config": {}
-      },
-      "events": {}
-    },
-    {
-      "id": "node-end-retry",
-      "type": "custom-end",
-      "dimensions": {
-        "width": 64,
-        "height": 64
-      },
-      "computedPosition": {
-        "x": 1845.38875,
-        "y": 178.84531249999998,
-        "z": 0
-      },
-      "handleBounds": {
-        "source": null,
-        "target": [
-          {
-            "id": null,
-            "type": "target",
-            "nodeId": "node-end-retry",
-            "position": "left",
-            "x": -8.00014120411366,
-            "y": 24.000023264985522,
-            "width": 16,
-            "height": 16
-          }
-        ]
-      },
-      "selected": false,
-      "dragging": false,
-      "resizing": false,
-      "initialized": false,
-      "isParent": false,
-      "position": {
-        "x": 1845.38875,
-        "y": 178.84531249999998
-      },
-      "data": {
-        "title": "Need Review",
-        "config": {}
-      },
-      "events": {}
-    }
-  ],
-  "edges": [
-    {
-      "id": "edge-start-setup",
-      "type": "default",
-      "source": "node-start-001",
-      "target": "node-setup-001",
-      "data": {},
-      "events": {},
-      "label": "",
-      "animated": false,
-      "sourceNode": {
-        "id": "node-start-001",
-        "type": "custom-start",
-        "dimensions": {
-          "width": 64,
-          "height": 64
-        },
-        "computedPosition": {
-          "x": 100,
-          "y": 200,
-          "z": 0
-        },
-        "handleBounds": {
-          "source": [
-            {
-              "id": null,
-              "type": "source",
-              "nodeId": "node-start-001",
-              "position": "right",
-              "x": 56.00001258211669,
-              "y": 23.99997322156609,
-              "width": 16,
-              "height": 16
-            }
-          ],
-          "target": null
-        },
-        "selected": false,
-        "dragging": false,
-        "resizing": false,
-        "initialized": false,
-        "isParent": false,
-        "position": {
-          "x": 100,
-          "y": 200
-        },
-        "data": {
-          "title": "Course Introduction",
-          "config": {}
-        },
-        "events": {}
-      },
-      "targetNode": {
-        "id": "node-setup-001",
-        "type": "custom-setup",
-        "dimensions": {
-          "width": 320,
-          "height": 1646
-        },
-        "computedPosition": {
-          "x": 384.615625,
-          "y": -383.4648958333334,
-          "z": 0
-        },
-        "handleBounds": {
-          "source": [
-            {
-              "id": "default",
-              "type": "source",
-              "nodeId": "node-setup-001",
-              "position": "right",
-              "x": 312.0000522277146,
-              "y": 1061.6877576699635,
-              "width": 16,
-              "height": 16
-            }
-          ],
-          "target": [
-            {
-              "id": "default",
-              "type": "target",
-              "nodeId": "node-setup-001",
-              "position": "left",
-              "x": -7.999991073855363,
-              "y": 567.9845533915789,
-              "width": 16,
-              "height": 16
-            }
-          ]
-        },
-        "selected": false,
-        "dragging": false,
-        "resizing": false,
-        "initialized": false,
-        "isParent": false,
-        "position": {
-          "x": 384.615625,
-          "y": -383.4648958333334
-        },
-        "data": {
-          "title": "Course Assets",
-          "config": {},
-          "hasBlocks": true
-        },
-        "events": {}
-      },
-      "sourceX": 172.00001258211668,
-      "sourceY": 231.99997322156608,
-      "targetX": 376.61563392614465,
-      "targetY": 192.51965755824546
-    },
-    {
-      "id": "edge-setup-lecture",
-      "type": "default",
-      "source": "node-setup-001",
-      "target": "node-lecture-001",
-      "data": {},
-      "events": {},
-      "label": "",
-      "animated": false,
-      "sourceNode": {
-        "id": "node-setup-001",
-        "type": "custom-setup",
-        "dimensions": {
-          "width": 320,
-          "height": 1646
-        },
-        "computedPosition": {
-          "x": 384.615625,
-          "y": -383.4648958333334,
-          "z": 0
-        },
-        "handleBounds": {
-          "source": [
-            {
-              "id": "default",
-              "type": "source",
-              "nodeId": "node-setup-001",
-              "position": "right",
-              "x": 312.0000522277146,
-              "y": 1061.6877576699635,
-              "width": 16,
-              "height": 16
-            }
-          ],
-          "target": [
-            {
-              "id": "default",
-              "type": "target",
-              "nodeId": "node-setup-001",
-              "position": "left",
-              "x": -7.999991073855363,
-              "y": 567.9845533915789,
-              "width": 16,
-              "height": 16
-            }
-          ]
-        },
-        "selected": false,
-        "dragging": false,
-        "resizing": false,
-        "initialized": false,
-        "isParent": false,
-        "position": {
-          "x": 384.615625,
-          "y": -383.4648958333334
-        },
-        "data": {
-          "title": "Course Assets",
-          "config": {},
-          "hasBlocks": true
-        },
-        "events": {}
-      },
-      "targetNode": {
-        "id": "node-lecture-001",
-        "type": "custom-lecture",
-        "dimensions": {
-          "width": 320,
-          "height": 1706
-        },
-        "computedPosition": {
-          "x": 839.2320833333333,
-          "y": -298.89769531250005,
-          "z": 0
-        },
-        "handleBounds": {
-          "source": [
-            {
-              "id": "default",
-              "type": "source",
-              "nodeId": "node-lecture-001",
-              "position": "right",
-              "x": 312.00010227113404,
-              "y": 1101.0627207739512,
-              "width": 16,
-              "height": 16
-            }
-          ],
-          "target": [
-            {
-              "id": "default",
-              "type": "target",
-              "nodeId": "node-lecture-001",
-              "position": "left",
-              "x": -7.999941030435931,
-              "y": 589.1876499444971,
-              "width": 16,
-              "height": 16
-            }
-          ]
-        },
-        "selected": false,
-        "dragging": false,
-        "resizing": false,
-        "initialized": false,
-        "isParent": false,
-        "position": {
-          "x": 839.2320833333333,
-          "y": -298.89769531250005
-        },
-        "data": {
-          "title": "Introduction Lesson",
-          "config": {},
-          "hasBlocks": true
-        },
-        "events": {}
-      },
-      "sourceX": 712.6156772277146,
-      "sourceY": 686.22286183663,
-      "targetX": 831.2321423028974,
-      "targetY": 298.2899546319971
-    },
-    {
-      "id": "edge-lecture-condition",
-      "type": "default",
-      "source": "node-lecture-001",
-      "target": "node-condition-001",
-      "data": {},
-      "events": {},
-      "label": "",
-      "animated": false,
-      "sourceNode": {
-        "id": "node-lecture-001",
-        "type": "custom-lecture",
-        "dimensions": {
-          "width": 320,
-          "height": 1706
-        },
-        "computedPosition": {
-          "x": 839.2320833333333,
-          "y": -298.89769531250005,
-          "z": 0
-        },
-        "handleBounds": {
-          "source": [
-            {
-              "id": "default",
-              "type": "source",
-              "nodeId": "node-lecture-001",
-              "position": "right",
-              "x": 312.00010227113404,
-              "y": 1101.0627207739512,
-              "width": 16,
-              "height": 16
-            }
-          ],
-          "target": [
-            {
-              "id": "default",
-              "type": "target",
-              "nodeId": "node-lecture-001",
-              "position": "left",
-              "x": -7.999941030435931,
-              "y": 589.1876499444971,
-              "width": 16,
-              "height": 16
-            }
-          ]
-        },
-        "selected": false,
-        "dragging": false,
-        "resizing": false,
-        "initialized": false,
-        "isParent": false,
-        "position": {
-          "x": 839.2320833333333,
-          "y": -298.89769531250005
-        },
-        "data": {
-          "title": "Introduction Lesson",
-          "config": {},
-          "hasBlocks": true
-        },
-        "events": {}
-      },
-      "targetNode": {
-        "id": "node-condition-001",
-        "type": "custom-condition",
-        "dimensions": {
-          "width": 320,
-          "height": 356
-        },
-        "computedPosition": {
-          "x": 1241.9251041666666,
-          "y": 28.07572916666664,
-          "z": 0
-        },
-        "handleBounds": {
-          "source": [
-            {
-              "id": "branch-success-001",
-              "type": "source",
-              "nodeId": "node-condition-001",
-              "position": "right",
-              "x": 300.00009063864127,
-              "y": 109.35938405105301,
-              "width": 16,
-              "height": 16
+    "nodes": [
+        {
+            "id": "node-start-001",
+            "type": "custom-start",
+            "dimensions": {
+                "width": 64,
+                "height": 64
             },
-            {
-              "id": "branch-retry-001",
-              "type": "source",
-              "nodeId": "node-condition-001",
-              "position": "right",
-              "x": 300.00009063864127,
-              "y": 231.07814152954163,
-              "width": 16,
-              "height": 16
-            }
-          ],
-          "target": [
-            {
-              "id": "default",
-              "type": "target",
-              "nodeId": "node-condition-001",
-              "position": "left",
-              "x": -7.999941030435931,
-              "y": 116.57814730415187,
-              "width": 16,
-              "height": 16
-            }
-          ]
-        },
-        "selected": false,
-        "dragging": false,
-        "resizing": false,
-        "initialized": false,
-        "isParent": false,
-        "position": {
-          "x": 1241.9251041666666,
-          "y": 28.07572916666664
-        },
-        "data": {
-          "title": "Check Understanding",
-          "config": {},
-          "hasBlocks": true
-        },
-        "events": {}
-      },
-      "sourceX": 1167.2321856044673,
-      "sourceY": 810.1650254614513,
-      "targetX": 1233.9251631362308,
-      "targetY": 152.65387647081852
-    },
-    {
-      "id": "edge-condition-success",
-      "type": "default",
-      "source": "node-condition-001",
-      "target": "node-end-success",
-      "sourceHandle": "branch-success-001",
-      "data": {
-        "branchId": "branch-success-001",
-        "branchLabel": "Quiz Passed",
-        "conditionExpression": "quiz_score >= 80",
-        "isConditionBranch": true
-      },
-      "events": {},
-      "label": "",
-      "animated": false,
-      "sourceNode": {
-        "id": "node-condition-001",
-        "type": "custom-condition",
-        "dimensions": {
-          "width": 320,
-          "height": 356
-        },
-        "computedPosition": {
-          "x": 1241.9251041666666,
-          "y": 28.07572916666664,
-          "z": 0
-        },
-        "handleBounds": {
-          "source": [
-            {
-              "id": "branch-success-001",
-              "type": "source",
-              "nodeId": "node-condition-001",
-              "position": "right",
-              "x": 300.00009063864127,
-              "y": 109.35938405105301,
-              "width": 16,
-              "height": 16
+            "computedPosition": {
+                "x": 100,
+                "y": 200,
+                "z": 0
             },
-            {
-              "id": "branch-retry-001",
-              "type": "source",
-              "nodeId": "node-condition-001",
-              "position": "right",
-              "x": 300.00009063864127,
-              "y": 231.07814152954163,
-              "width": 16,
-              "height": 16
-            }
-          ],
-          "target": [
-            {
-              "id": "default",
-              "type": "target",
-              "nodeId": "node-condition-001",
-              "position": "left",
-              "x": -7.999941030435931,
-              "y": 116.57814730415187,
-              "width": 16,
-              "height": 16
-            }
-          ]
-        },
-        "selected": false,
-        "dragging": false,
-        "resizing": false,
-        "initialized": false,
-        "isParent": false,
-        "position": {
-          "x": 1241.9251041666666,
-          "y": 28.07572916666664
-        },
-        "data": {
-          "title": "Check Understanding",
-          "config": {},
-          "hasBlocks": true
-        },
-        "events": {}
-      },
-      "targetNode": {
-        "id": "node-end-success",
-        "type": "custom-end",
-        "dimensions": {
-          "width": 64,
-          "height": 64
-        },
-        "computedPosition": {
-          "x": 1845.38875,
-          "y": 28.84531249999999,
-          "z": 0
-        },
-        "handleBounds": {
-          "source": null,
-          "target": [
-            {
-              "id": null,
-              "type": "target",
-              "nodeId": "node-end-success",
-              "position": "left",
-              "x": -8.00014120411366,
-              "y": 23.99997322156609,
-              "width": 16,
-              "height": 16
-            }
-          ]
-        },
-        "selected": false,
-        "dragging": false,
-        "resizing": false,
-        "initialized": false,
-        "isParent": false,
-        "position": {
-          "x": 1845.38875,
-          "y": 28.84531249999999
-        },
-        "data": {
-          "title": "Course Complete",
-          "config": {}
-        },
-        "events": {}
-      },
-      "sourceX": 1557.925194805308,
-      "sourceY": 145.43511321771965,
-      "targetX": 1837.3886087958865,
-      "targetY": 60.845285721566086
-    },
-    {
-      "id": "edge-condition-retry",
-      "type": "default",
-      "source": "node-condition-001",
-      "target": "node-end-retry",
-      "sourceHandle": "branch-retry-001",
-      "data": {
-        "branchId": "branch-retry-001",
-        "branchLabel": "Need Review",
-        "conditionExpression": "quiz_score < 80",
-        "isConditionBranch": true
-      },
-      "events": {},
-      "label": "",
-      "animated": false,
-      "sourceNode": {
-        "id": "node-condition-001",
-        "type": "custom-condition",
-        "dimensions": {
-          "width": 320,
-          "height": 356
-        },
-        "computedPosition": {
-          "x": 1241.9251041666666,
-          "y": 28.07572916666664,
-          "z": 0
-        },
-        "handleBounds": {
-          "source": [
-            {
-              "id": "branch-success-001",
-              "type": "source",
-              "nodeId": "node-condition-001",
-              "position": "right",
-              "x": 300.00009063864127,
-              "y": 109.35938405105301,
-              "width": 16,
-              "height": 16
+            "handleBounds": {
+                "source": [
+                    {
+                        "id": null,
+                        "type": "source",
+                        "nodeId": "node-start-001",
+                        "position": "right",
+                        "x": 56.00001258211669,
+                        "y": 23.99997322156609,
+                        "width": 16,
+                        "height": 16
+                    }
+                ],
+                "target": null
             },
-            {
-              "id": "branch-retry-001",
-              "type": "source",
-              "nodeId": "node-condition-001",
-              "position": "right",
-              "x": 300.00009063864127,
-              "y": 231.07814152954163,
-              "width": 16,
-              "height": 16
-            }
-          ],
-          "target": [
-            {
-              "id": "default",
-              "type": "target",
-              "nodeId": "node-condition-001",
-              "position": "left",
-              "x": -7.999941030435931,
-              "y": 116.57814730415187,
-              "width": 16,
-              "height": 16
-            }
-          ]
+            "selected": false,
+            "dragging": false,
+            "resizing": false,
+            "initialized": false,
+            "isParent": false,
+            "position": {
+                "x": 100,
+                "y": 200
+            },
+            "data": {
+                "title": "Course Introduction",
+                "config": {}
+            },
+            "events": {}
         },
-        "selected": false,
-        "dragging": false,
-        "resizing": false,
-        "initialized": false,
-        "isParent": false,
-        "position": {
-          "x": 1241.9251041666666,
-          "y": 28.07572916666664
+        {
+            "id": "node-setup-001",
+            "type": "custom-setup",
+            "dimensions": {
+                "width": 320,
+                "height": 1646
+            },
+            "computedPosition": {
+                "x": 384.615625,
+                "y": -383.4648958333334,
+                "z": 0
+            },
+            "handleBounds": {
+                "source": [
+                    {
+                        "id": "default",
+                        "type": "source",
+                        "nodeId": "node-setup-001",
+                        "position": "right",
+                        "x": 312.0000522277146,
+                        "y": 1061.6877576699635,
+                        "width": 16,
+                        "height": 16
+                    }
+                ],
+                "target": [
+                    {
+                        "id": "default",
+                        "type": "target",
+                        "nodeId": "node-setup-001",
+                        "position": "left",
+                        "x": -7.999991073855363,
+                        "y": 567.9845533915789,
+                        "width": 16,
+                        "height": 16
+                    }
+                ]
+            },
+            "selected": false,
+            "dragging": false,
+            "resizing": false,
+            "initialized": false,
+            "isParent": false,
+            "position": {
+                "x": 384.615625,
+                "y": -383.4648958333334
+            },
+            "data": {
+                "title": "Course Assets",
+                "config": {},
+                "hasBlocks": true
+            },
+            "events": {}
         },
-        "data": {
-          "title": "Check Understanding",
-          "config": {},
-          "hasBlocks": true
+        {
+            "id": "node-lecture-001",
+            "type": "custom-lecture",
+            "dimensions": {
+                "width": 320,
+                "height": 1706
+            },
+            "computedPosition": {
+                "x": 839.2320833333333,
+                "y": -298.89769531250005,
+                "z": 0
+            },
+            "handleBounds": {
+                "source": [
+                    {
+                        "id": "default",
+                        "type": "source",
+                        "nodeId": "node-lecture-001",
+                        "position": "right",
+                        "x": 312.00010227113404,
+                        "y": 1101.0627207739512,
+                        "width": 16,
+                        "height": 16
+                    }
+                ],
+                "target": [
+                    {
+                        "id": "default",
+                        "type": "target",
+                        "nodeId": "node-lecture-001",
+                        "position": "left",
+                        "x": -7.999941030435931,
+                        "y": 589.1876499444971,
+                        "width": 16,
+                        "height": 16
+                    }
+                ]
+            },
+            "selected": false,
+            "dragging": false,
+            "resizing": false,
+            "initialized": false,
+            "isParent": false,
+            "position": {
+                "x": 839.2320833333333,
+                "y": -298.89769531250005
+            },
+            "data": {
+                "title": "Introduction Lesson",
+                "config": {},
+                "hasBlocks": true
+            },
+            "events": {}
         },
-        "events": {}
-      },
-      "targetNode": {
-        "id": "node-end-retry",
-        "type": "custom-end",
-        "dimensions": {
-          "width": 64,
-          "height": 64
+        {
+            "id": "node-condition-001",
+            "type": "custom-condition",
+            "dimensions": {
+                "width": 320,
+                "height": 356
+            },
+            "computedPosition": {
+                "x": 1241.9251041666666,
+                "y": 28.07572916666664,
+                "z": 0
+            },
+            "handleBounds": {
+                "source": [
+                    {
+                        "id": "branch-success-001",
+                        "type": "source",
+                        "nodeId": "node-condition-001",
+                        "position": "right",
+                        "x": 300.00009063864127,
+                        "y": 109.35938405105301,
+                        "width": 16,
+                        "height": 16
+                    },
+                    {
+                        "id": "branch-retry-001",
+                        "type": "source",
+                        "nodeId": "node-condition-001",
+                        "position": "right",
+                        "x": 300.00009063864127,
+                        "y": 231.07814152954163,
+                        "width": 16,
+                        "height": 16
+                    }
+                ],
+                "target": [
+                    {
+                        "id": "default",
+                        "type": "target",
+                        "nodeId": "node-condition-001",
+                        "position": "left",
+                        "x": -7.999941030435931,
+                        "y": 116.57814730415187,
+                        "width": 16,
+                        "height": 16
+                    }
+                ]
+            },
+            "selected": false,
+            "dragging": false,
+            "resizing": false,
+            "initialized": false,
+            "isParent": false,
+            "position": {
+                "x": 1241.9251041666666,
+                "y": 28.07572916666664
+            },
+            "data": {
+                "title": "Check Understanding",
+                "config": {},
+                "hasBlocks": true
+            },
+            "events": {}
         },
-        "computedPosition": {
-          "x": 1845.38875,
-          "y": 178.84531249999998,
-          "z": 0
+        {
+            "id": "node-end-success",
+            "type": "custom-end",
+            "dimensions": {
+                "width": 64,
+                "height": 64
+            },
+            "computedPosition": {
+                "x": 1845.38875,
+                "y": 28.84531249999999,
+                "z": 0
+            },
+            "handleBounds": {
+                "source": null,
+                "target": [
+                    {
+                        "id": null,
+                        "type": "target",
+                        "nodeId": "node-end-success",
+                        "position": "left",
+                        "x": -8.00014120411366,
+                        "y": 23.99997322156609,
+                        "width": 16,
+                        "height": 16
+                    }
+                ]
+            },
+            "selected": false,
+            "dragging": false,
+            "resizing": false,
+            "initialized": false,
+            "isParent": false,
+            "position": {
+                "x": 1845.38875,
+                "y": 28.84531249999999
+            },
+            "data": {
+                "title": "Course Complete",
+                "config": {}
+            },
+            "events": {}
         },
-        "handleBounds": {
-          "source": null,
-          "target": [
-            {
-              "id": null,
-              "type": "target",
-              "nodeId": "node-end-retry",
-              "position": "left",
-              "x": -8.00014120411366,
-              "y": 24.000023264985522,
-              "width": 16,
-              "height": 16
-            }
-          ]
-        },
-        "selected": false,
-        "dragging": false,
-        "resizing": false,
-        "initialized": false,
-        "isParent": false,
-        "position": {
-          "x": 1845.38875,
-          "y": 178.84531249999998
-        },
-        "data": {
-          "title": "Need Review",
-          "config": {}
-        },
-        "events": {}
-      },
-      "sourceX": 1557.925194805308,
-      "sourceY": 267.1538706962083,
-      "targetX": 1837.3886087958865,
-      "targetY": 210.8453357649855
-    }
-  ],
-  "nodeBlocks": {
-    "node-setup-001": [
-      {
-        "id": "setup-block-001",
-        "type": "asset-image",
-        "data": {
-          "assetId": "welcome-banner",
-          "imageUrl": "https://picsum.photos/800/400?random=1",
-          "title": "Welcome Banner",
-          "alt": "Course welcome banner showing learning objectives"
+        {
+            "id": "node-end-retry",
+            "type": "custom-end",
+            "dimensions": {
+                "width": 64,
+                "height": 64
+            },
+            "computedPosition": {
+                "x": 1845.38875,
+                "y": 178.84531249999998,
+                "z": 0
+            },
+            "handleBounds": {
+                "source": null,
+                "target": [
+                    {
+                        "id": null,
+                        "type": "target",
+                        "nodeId": "node-end-retry",
+                        "position": "left",
+                        "x": -8.00014120411366,
+                        "y": 24.000023264985522,
+                        "width": 16,
+                        "height": 16
+                    }
+                ]
+            },
+            "selected": false,
+            "dragging": false,
+            "resizing": false,
+            "initialized": false,
+            "isParent": false,
+            "position": {
+                "x": 1845.38875,
+                "y": 178.84531249999998
+            },
+            "data": {
+                "title": "Need Review",
+                "config": {}
+            },
+            "events": {}
         }
-      },
-      {
-        "id": "setup-block-002",
-        "type": "asset-video",
-        "data": {
-          "assetId": "intro-video",
-          "videoUrl": "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
-          "title": "Introduction Video",
-          "duration": 60,
-          "thumbnail": "https://picsum.photos/320/180?random=2"
-        }
-      },
-      {
-        "id": "setup-block-003",
-        "type": "variable",
-        "data": {
-          "variableName": "student_name",
-          "variableType": "text",
-          "defaultValue": "",
-          "title": "Student Name Variable"
-        }
-      },
-      {
-        "id": "setup-block-004",
-        "type": "variable",
-        "data": {
-          "variableName": "quiz_score",
-          "variableType": "number",
-          "defaultValue": 0,
-          "title": "Quiz Score Variable"
-        }
-      },
-      {
-        "id": "ce566d0a-a99e-4a38-87c8-3343d906bbb9",
-        "type": "lms",
-        "data": {
-          "title": "Lms #1"
-        }
-      }
     ],
-    "node-lecture-001": [
-      {
-        "id": "lecture-block-001",
-        "type": "teacher-video",
-        "data": {
-          "videoSource": "url",
-          "videoUrl": "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
-          "transcript": "Welcome to our learning journey! In this lesson, we'll explore the fundamentals of effective learning strategies...",
-          "title": "Welcome Video"
+    "edges": [
+        {
+            "id": "edge-start-setup",
+            "type": "default",
+            "source": "node-start-001",
+            "target": "node-setup-001",
+            "data": {},
+            "events": {},
+            "label": "",
+            "animated": false,
+            "sourceNode": {
+                "id": "node-start-001",
+                "type": "custom-start",
+                "dimensions": {
+                    "width": 64,
+                    "height": 64
+                },
+                "computedPosition": {
+                    "x": 100,
+                    "y": 200,
+                    "z": 0
+                },
+                "handleBounds": {
+                    "source": [
+                        {
+                            "id": null,
+                            "type": "source",
+                            "nodeId": "node-start-001",
+                            "position": "right",
+                            "x": 56.00001258211669,
+                            "y": 23.99997322156609,
+                            "width": 16,
+                            "height": 16
+                        }
+                    ],
+                    "target": null
+                },
+                "selected": false,
+                "dragging": false,
+                "resizing": false,
+                "initialized": false,
+                "isParent": false,
+                "position": {
+                    "x": 100,
+                    "y": 200
+                },
+                "data": {
+                    "title": "Course Introduction",
+                    "config": {}
+                },
+                "events": {}
+            },
+            "targetNode": {
+                "id": "node-setup-001",
+                "type": "custom-setup",
+                "dimensions": {
+                    "width": 320,
+                    "height": 1646
+                },
+                "computedPosition": {
+                    "x": 384.615625,
+                    "y": -383.4648958333334,
+                    "z": 0
+                },
+                "handleBounds": {
+                    "source": [
+                        {
+                            "id": "default",
+                            "type": "source",
+                            "nodeId": "node-setup-001",
+                            "position": "right",
+                            "x": 312.0000522277146,
+                            "y": 1061.6877576699635,
+                            "width": 16,
+                            "height": 16
+                        }
+                    ],
+                    "target": [
+                        {
+                            "id": "default",
+                            "type": "target",
+                            "nodeId": "node-setup-001",
+                            "position": "left",
+                            "x": -7.999991073855363,
+                            "y": 567.9845533915789,
+                            "width": 16,
+                            "height": 16
+                        }
+                    ]
+                },
+                "selected": false,
+                "dragging": false,
+                "resizing": false,
+                "initialized": false,
+                "isParent": false,
+                "position": {
+                    "x": 384.615625,
+                    "y": -383.4648958333334
+                },
+                "data": {
+                    "title": "Course Assets",
+                    "config": {},
+                    "hasBlocks": true
+                },
+                "events": {}
+            },
+            "sourceX": 172.00001258211668,
+            "sourceY": 231.99997322156608,
+            "targetX": 376.61563392614465,
+            "targetY": 192.51965755824546
+        },
+        {
+            "id": "edge-setup-lecture",
+            "type": "default",
+            "source": "node-setup-001",
+            "target": "node-lecture-001",
+            "data": {},
+            "events": {},
+            "label": "",
+            "animated": false,
+            "sourceNode": {
+                "id": "node-setup-001",
+                "type": "custom-setup",
+                "dimensions": {
+                    "width": 320,
+                    "height": 1646
+                },
+                "computedPosition": {
+                    "x": 384.615625,
+                    "y": -383.4648958333334,
+                    "z": 0
+                },
+                "handleBounds": {
+                    "source": [
+                        {
+                            "id": "default",
+                            "type": "source",
+                            "nodeId": "node-setup-001",
+                            "position": "right",
+                            "x": 312.0000522277146,
+                            "y": 1061.6877576699635,
+                            "width": 16,
+                            "height": 16
+                        }
+                    ],
+                    "target": [
+                        {
+                            "id": "default",
+                            "type": "target",
+                            "nodeId": "node-setup-001",
+                            "position": "left",
+                            "x": -7.999991073855363,
+                            "y": 567.9845533915789,
+                            "width": 16,
+                            "height": 16
+                        }
+                    ]
+                },
+                "selected": false,
+                "dragging": false,
+                "resizing": false,
+                "initialized": false,
+                "isParent": false,
+                "position": {
+                    "x": 384.615625,
+                    "y": -383.4648958333334
+                },
+                "data": {
+                    "title": "Course Assets",
+                    "config": {},
+                    "hasBlocks": true
+                },
+                "events": {}
+            },
+            "targetNode": {
+                "id": "node-lecture-001",
+                "type": "custom-lecture",
+                "dimensions": {
+                    "width": 320,
+                    "height": 1706
+                },
+                "computedPosition": {
+                    "x": 839.2320833333333,
+                    "y": -298.89769531250005,
+                    "z": 0
+                },
+                "handleBounds": {
+                    "source": [
+                        {
+                            "id": "default",
+                            "type": "source",
+                            "nodeId": "node-lecture-001",
+                            "position": "right",
+                            "x": 312.00010227113404,
+                            "y": 1101.0627207739512,
+                            "width": 16,
+                            "height": 16
+                        }
+                    ],
+                    "target": [
+                        {
+                            "id": "default",
+                            "type": "target",
+                            "nodeId": "node-lecture-001",
+                            "position": "left",
+                            "x": -7.999941030435931,
+                            "y": 589.1876499444971,
+                            "width": 16,
+                            "height": 16
+                        }
+                    ]
+                },
+                "selected": false,
+                "dragging": false,
+                "resizing": false,
+                "initialized": false,
+                "isParent": false,
+                "position": {
+                    "x": 839.2320833333333,
+                    "y": -298.89769531250005
+                },
+                "data": {
+                    "title": "Introduction Lesson",
+                    "config": {},
+                    "hasBlocks": true
+                },
+                "events": {}
+            },
+            "sourceX": 712.6156772277146,
+            "sourceY": 686.22286183663,
+            "targetX": 831.2321423028974,
+            "targetY": 298.2899546319971
+        },
+        {
+            "id": "edge-lecture-condition",
+            "type": "default",
+            "source": "node-lecture-001",
+            "target": "node-condition-001",
+            "data": {},
+            "events": {},
+            "label": "",
+            "animated": false,
+            "sourceNode": {
+                "id": "node-lecture-001",
+                "type": "custom-lecture",
+                "dimensions": {
+                    "width": 320,
+                    "height": 1706
+                },
+                "computedPosition": {
+                    "x": 839.2320833333333,
+                    "y": -298.89769531250005,
+                    "z": 0
+                },
+                "handleBounds": {
+                    "source": [
+                        {
+                            "id": "default",
+                            "type": "source",
+                            "nodeId": "node-lecture-001",
+                            "position": "right",
+                            "x": 312.00010227113404,
+                            "y": 1101.0627207739512,
+                            "width": 16,
+                            "height": 16
+                        }
+                    ],
+                    "target": [
+                        {
+                            "id": "default",
+                            "type": "target",
+                            "nodeId": "node-lecture-001",
+                            "position": "left",
+                            "x": -7.999941030435931,
+                            "y": 589.1876499444971,
+                            "width": 16,
+                            "height": 16
+                        }
+                    ]
+                },
+                "selected": false,
+                "dragging": false,
+                "resizing": false,
+                "initialized": false,
+                "isParent": false,
+                "position": {
+                    "x": 839.2320833333333,
+                    "y": -298.89769531250005
+                },
+                "data": {
+                    "title": "Introduction Lesson",
+                    "config": {},
+                    "hasBlocks": true
+                },
+                "events": {}
+            },
+            "targetNode": {
+                "id": "node-condition-001",
+                "type": "custom-condition",
+                "dimensions": {
+                    "width": 320,
+                    "height": 356
+                },
+                "computedPosition": {
+                    "x": 1241.9251041666666,
+                    "y": 28.07572916666664,
+                    "z": 0
+                },
+                "handleBounds": {
+                    "source": [
+                        {
+                            "id": "branch-success-001",
+                            "type": "source",
+                            "nodeId": "node-condition-001",
+                            "position": "right",
+                            "x": 300.00009063864127,
+                            "y": 109.35938405105301,
+                            "width": 16,
+                            "height": 16
+                        },
+                        {
+                            "id": "branch-retry-001",
+                            "type": "source",
+                            "nodeId": "node-condition-001",
+                            "position": "right",
+                            "x": 300.00009063864127,
+                            "y": 231.07814152954163,
+                            "width": 16,
+                            "height": 16
+                        }
+                    ],
+                    "target": [
+                        {
+                            "id": "default",
+                            "type": "target",
+                            "nodeId": "node-condition-001",
+                            "position": "left",
+                            "x": -7.999941030435931,
+                            "y": 116.57814730415187,
+                            "width": 16,
+                            "height": 16
+                        }
+                    ]
+                },
+                "selected": false,
+                "dragging": false,
+                "resizing": false,
+                "initialized": false,
+                "isParent": false,
+                "position": {
+                    "x": 1241.9251041666666,
+                    "y": 28.07572916666664
+                },
+                "data": {
+                    "title": "Check Understanding",
+                    "config": {},
+                    "hasBlocks": true
+                },
+                "events": {}
+            },
+            "sourceX": 1167.2321856044673,
+            "sourceY": 810.1650254614513,
+            "targetX": 1233.9251631362308,
+            "targetY": 152.65387647081852
+        },
+        {
+            "id": "edge-condition-success",
+            "type": "default",
+            "source": "node-condition-001",
+            "target": "node-end-success",
+            "sourceHandle": "branch-success-001",
+            "data": {
+                "branchId": "branch-success-001",
+                "branchLabel": "Quiz Passed",
+                "conditionExpression": "quiz_score >= 80",
+                "isConditionBranch": true
+            },
+            "events": {},
+            "label": "",
+            "animated": false,
+            "sourceNode": {
+                "id": "node-condition-001",
+                "type": "custom-condition",
+                "dimensions": {
+                    "width": 320,
+                    "height": 356
+                },
+                "computedPosition": {
+                    "x": 1241.9251041666666,
+                    "y": 28.07572916666664,
+                    "z": 0
+                },
+                "handleBounds": {
+                    "source": [
+                        {
+                            "id": "branch-success-001",
+                            "type": "source",
+                            "nodeId": "node-condition-001",
+                            "position": "right",
+                            "x": 300.00009063864127,
+                            "y": 109.35938405105301,
+                            "width": 16,
+                            "height": 16
+                        },
+                        {
+                            "id": "branch-retry-001",
+                            "type": "source",
+                            "nodeId": "node-condition-001",
+                            "position": "right",
+                            "x": 300.00009063864127,
+                            "y": 231.07814152954163,
+                            "width": 16,
+                            "height": 16
+                        }
+                    ],
+                    "target": [
+                        {
+                            "id": "default",
+                            "type": "target",
+                            "nodeId": "node-condition-001",
+                            "position": "left",
+                            "x": -7.999941030435931,
+                            "y": 116.57814730415187,
+                            "width": 16,
+                            "height": 16
+                        }
+                    ]
+                },
+                "selected": false,
+                "dragging": false,
+                "resizing": false,
+                "initialized": false,
+                "isParent": false,
+                "position": {
+                    "x": 1241.9251041666666,
+                    "y": 28.07572916666664
+                },
+                "data": {
+                    "title": "Check Understanding",
+                    "config": {},
+                    "hasBlocks": true
+                },
+                "events": {}
+            },
+            "targetNode": {
+                "id": "node-end-success",
+                "type": "custom-end",
+                "dimensions": {
+                    "width": 64,
+                    "height": 64
+                },
+                "computedPosition": {
+                    "x": 1845.38875,
+                    "y": 28.84531249999999,
+                    "z": 0
+                },
+                "handleBounds": {
+                    "source": null,
+                    "target": [
+                        {
+                            "id": null,
+                            "type": "target",
+                            "nodeId": "node-end-success",
+                            "position": "left",
+                            "x": -8.00014120411366,
+                            "y": 23.99997322156609,
+                            "width": 16,
+                            "height": 16
+                        }
+                    ]
+                },
+                "selected": false,
+                "dragging": false,
+                "resizing": false,
+                "initialized": false,
+                "isParent": false,
+                "position": {
+                    "x": 1845.38875,
+                    "y": 28.84531249999999
+                },
+                "data": {
+                    "title": "Course Complete",
+                    "config": {}
+                },
+                "events": {}
+            },
+            "sourceX": 1557.925194805308,
+            "sourceY": 145.43511321771965,
+            "targetX": 1837.3886087958865,
+            "targetY": 60.845285721566086
+        },
+        {
+            "id": "edge-condition-retry",
+            "type": "default",
+            "source": "node-condition-001",
+            "target": "node-end-retry",
+            "sourceHandle": "branch-retry-001",
+            "data": {
+                "branchId": "branch-retry-001",
+                "branchLabel": "Need Review",
+                "conditionExpression": "quiz_score < 80",
+                "isConditionBranch": true
+            },
+            "events": {},
+            "label": "",
+            "animated": false,
+            "sourceNode": {
+                "id": "node-condition-001",
+                "type": "custom-condition",
+                "dimensions": {
+                    "width": 320,
+                    "height": 356
+                },
+                "computedPosition": {
+                    "x": 1241.9251041666666,
+                    "y": 28.07572916666664,
+                    "z": 0
+                },
+                "handleBounds": {
+                    "source": [
+                        {
+                            "id": "branch-success-001",
+                            "type": "source",
+                            "nodeId": "node-condition-001",
+                            "position": "right",
+                            "x": 300.00009063864127,
+                            "y": 109.35938405105301,
+                            "width": 16,
+                            "height": 16
+                        },
+                        {
+                            "id": "branch-retry-001",
+                            "type": "source",
+                            "nodeId": "node-condition-001",
+                            "position": "right",
+                            "x": 300.00009063864127,
+                            "y": 231.07814152954163,
+                            "width": 16,
+                            "height": 16
+                        }
+                    ],
+                    "target": [
+                        {
+                            "id": "default",
+                            "type": "target",
+                            "nodeId": "node-condition-001",
+                            "position": "left",
+                            "x": -7.999941030435931,
+                            "y": 116.57814730415187,
+                            "width": 16,
+                            "height": 16
+                        }
+                    ]
+                },
+                "selected": false,
+                "dragging": false,
+                "resizing": false,
+                "initialized": false,
+                "isParent": false,
+                "position": {
+                    "x": 1241.9251041666666,
+                    "y": 28.07572916666664
+                },
+                "data": {
+                    "title": "Check Understanding",
+                    "config": {},
+                    "hasBlocks": true
+                },
+                "events": {}
+            },
+            "targetNode": {
+                "id": "node-end-retry",
+                "type": "custom-end",
+                "dimensions": {
+                    "width": 64,
+                    "height": 64
+                },
+                "computedPosition": {
+                    "x": 1845.38875,
+                    "y": 178.84531249999998,
+                    "z": 0
+                },
+                "handleBounds": {
+                    "source": null,
+                    "target": [
+                        {
+                            "id": null,
+                            "type": "target",
+                            "nodeId": "node-end-retry",
+                            "position": "left",
+                            "x": -8.00014120411366,
+                            "y": 24.000023264985522,
+                            "width": 16,
+                            "height": 16
+                        }
+                    ]
+                },
+                "selected": false,
+                "dragging": false,
+                "resizing": false,
+                "initialized": false,
+                "isParent": false,
+                "position": {
+                    "x": 1845.38875,
+                    "y": 178.84531249999998
+                },
+                "data": {
+                    "title": "Need Review",
+                    "config": {}
+                },
+                "events": {}
+            },
+            "sourceX": 1557.925194805308,
+            "sourceY": 267.1538706962083,
+            "targetX": 1837.3886087958865,
+            "targetY": 210.8453357649855
         }
-      },
-      {
-        "id": "lecture-block-002",
-        "type": "assets-applied",
-        "data": {
-          "setupNodeId": "node-setup-001",
-          "assetId": "welcome-banner",
-          "displayDuration": 5000,
-          "title": "Display Welcome Banner",
-          "selectedAssetKey": "node-setup-001-setup-block-001"
-        }
-      },
-      {
-        "id": "lecture-block-003",
-        "type": "question",
-        "data": {
-          "questionTitle": "Introduction Quiz",
-          "questionId": "intro_understanding",
-          "title": "Understanding Check"
-        }
-      },
-      {
-        "id": "lecture-block-004",
-        "type": "collect-user-data",
-        "data": {
-          "collectionMethod": "text",
-          "prompt": "Please share your learning goals for this course:",
-          "variableName": "learning_goals",
-          "title": "Collect Learning Goals",
-          "saveToField": "",
-          "method": [
-            "voice",
-            "choose-answer",
-            "text-input"
-          ]
-        }
-      },
-      {
-        "id": "lecture-block-005",
-        "type": "system-action",
-        "data": {
-          "actionMethod": "Show Asset",
-          "targetObject": "Course Progress Tracker",
-          "delay": 2000,
-          "title": "Show Progress Tracker",
-          "action": "asset-interaction",
-          "method": [
-            "circle",
-            "score"
-          ],
-          "object": ""
-        }
-      },
-      {
-        "id": "2d158d1e-3868-4b9d-b160-8bbda05b398a",
-        "type": "audio",
-        "data": {
-          "title": "Audio #1",
-          "description": "",
-          "voice": "female",
-          "text": ""
-        }
-      }
     ],
-    "node-condition-001": [
-      {
-        "id": "branch-success-001",
-        "type": "condition-branch",
-        "data": {
-          "label": "Quiz Passed",
-          "condition": "quiz_score >= 80",
-          "title": "Success Branch"
-        }
-      },
-      {
-        "id": "branch-retry-001",
-        "type": "condition-branch",
-        "data": {
-          "label": "Need Review",
-          "condition": "quiz_score < 80",
-          "title": "Retry Branch"
-        }
-      }
-    ]
-  },
-  "_meta": {
-    "documentSize": 15318,
-    "nodeCount": 6,
-    "totalBlocks": 13,
-    "lastModified": "2025-07-04T07:10:58.057Z",
-    "version": "2.1"
-  }
+    "nodeBlocks": {
+        "node-setup-001": [
+            {
+                "id": "setup-block-001",
+                "type": "asset-image",
+                "data": {
+                    "assetId": "welcome-banner",
+                    "imageUrl": "https://picsum.photos/800/400?random=1",
+                    "title": "Welcome Banner",
+                    "alt": "Course welcome banner showing learning objectives"
+                }
+            },
+            {
+                "id": "setup-block-002",
+                "type": "asset-video",
+                "data": {
+                    "assetId": "intro-video",
+                    "videoUrl": "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+                    "title": "Introduction Video",
+                    "duration": 60,
+                    "thumbnail": "https://picsum.photos/320/180?random=2"
+                }
+            },
+            {
+                "id": "setup-block-003",
+                "type": "variable",
+                "data": {
+                    "variableName": "student_name",
+                    "variableType": "text",
+                    "defaultValue": "",
+                    "title": "Student Name Variable"
+                }
+            },
+            {
+                "id": "setup-block-004",
+                "type": "variable",
+                "data": {
+                    "variableName": "quiz_score",
+                    "variableType": "number",
+                    "defaultValue": 0,
+                    "title": "Quiz Score Variable"
+                }
+            },
+            {
+                "id": "ce566d0a-a99e-4a38-87c8-3343d906bbb9",
+                "type": "lms",
+                "data": {
+                    "title": "Lms #1"
+                }
+            }
+        ],
+        "node-lecture-001": [
+            {
+                "id": "lecture-block-001",
+                "type": "teacher-video",
+                "data": {
+                    "videoSource": "url",
+                    "videoUrl": "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+                    "transcript": "Welcome to our learning journey! In this lesson, we'll explore the fundamentals of effective learning strategies...",
+                    "title": "Welcome Video"
+                }
+            },
+            {
+                "id": "lecture-block-002",
+                "type": "assets-applied",
+                "data": {
+                    "setupNodeId": "node-setup-001",
+                    "assetId": "welcome-banner",
+                    "displayDuration": 5000,
+                    "title": "Display Welcome Banner",
+                    "selectedAssetKey": "node-setup-001-setup-block-001"
+                }
+            },
+            {
+                "id": "lecture-block-003",
+                "type": "question",
+                "data": {
+                    "questionTitle": "Introduction Quiz",
+                    "questionId": "intro_understanding",
+                    "title": "Understanding Check"
+                }
+            },
+            {
+                "id": "lecture-block-004",
+                "type": "collect-user-data",
+                "data": {
+                    "collectionMethod": "text",
+                    "prompt": "Please share your learning goals for this course:",
+                    "variableName": "learning_goals",
+                    "title": "Collect Learning Goals",
+                    "saveToField": "",
+                    "method": ["voice", "choose-answer", "text-input"]
+                }
+            },
+            {
+                "id": "lecture-block-005",
+                "type": "system-action",
+                "data": {
+                    "actionMethod": "Show Asset",
+                    "targetObject": "Course Progress Tracker",
+                    "delay": 2000,
+                    "title": "Show Progress Tracker",
+                    "action": "asset-interaction",
+                    "method": ["circle", "score"],
+                    "object": ""
+                }
+            },
+            {
+                "id": "2d158d1e-3868-4b9d-b160-8bbda05b398a",
+                "type": "audio",
+                "data": {
+                    "title": "Audio #1",
+                    "description": "",
+                    "voice": "female",
+                    "text": ""
+                }
+            }
+        ],
+        "node-condition-001": [
+            {
+                "id": "branch-success-001",
+                "type": "condition-branch",
+                "data": {
+                    "label": "Quiz Passed",
+                    "condition": "quiz_score >= 80",
+                    "title": "Success Branch"
+                }
+            },
+            {
+                "id": "branch-retry-001",
+                "type": "condition-branch",
+                "data": {
+                    "label": "Need Review",
+                    "condition": "quiz_score < 80",
+                    "title": "Retry Branch"
+                }
+            }
+        ]
+    },
+    "_meta": {
+        "documentSize": 15318,
+        "nodeCount": 6,
+        "totalBlocks": 13,
+        "lastModified": "2025-07-04T07:10:58.057Z",
+        "version": "2.1"
+    }
 }
