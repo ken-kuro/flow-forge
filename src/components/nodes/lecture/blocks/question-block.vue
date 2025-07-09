@@ -3,6 +3,7 @@ import { ref, onUnmounted, computed } from 'vue'
 import { useFlowEditor } from '@/composables/use-flow-editor'
 import { HelpCircle } from 'lucide-vue-next'
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue'
+import StopPropagationTextArea from '@/components/shared/stop-propagation-textarea.vue'
 
 /**
  * QuestionBlock - A simplified block for questions in Lecture nodes.
@@ -61,16 +62,7 @@ const updateBlockData = (immediate = false) => {
             <label class="label">
                 <span class="label-text text-xs">Question</span>
             </label>
-            <textarea
-                v-model="question"
-                @blur="updateBlockData"
-                @wheel.stop
-                @mousedown.stop
-                @mouseup.stop
-                @click.stop
-                placeholder="Enter your question"
-                class="textarea textarea-bordered textarea-xs min-h-18"
-            ></textarea>
+            <StopPropagationTextArea v-model="question" @blur="updateBlockData" placeholder="Enter your question" />
         </div>
     </CardBlockWrapper>
 </template>

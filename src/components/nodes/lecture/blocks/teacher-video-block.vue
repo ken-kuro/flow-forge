@@ -3,6 +3,7 @@ import { ref, onUnmounted, computed } from 'vue'
 import { useFlowEditor } from '@/composables/use-flow-editor'
 import { Play, Upload, X } from 'lucide-vue-next'
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue'
+import StopPropagationTextArea from '@/components/shared/stop-propagation-textarea.vue'
 
 /**
  * TeacherVideoBlock - A block for displaying video content in Lecture nodes.
@@ -85,16 +86,11 @@ const removeVideo = () => {
             <label class="label">
                 <span class="label-text text-xs">Description</span>
             </label>
-            <textarea
+            <StopPropagationTextArea
                 v-model="description"
                 @blur="updateBlockData"
-                @wheel.stop
-                @mousedown.stop
-                @mouseup.stop
-                @click.stop
                 placeholder="Enter video description"
-                class="textarea textarea-bordered textarea-xs min-h-18"
-            ></textarea>
+            />
         </div>
 
         <!-- Source Type Selection -->
@@ -154,16 +150,11 @@ const removeVideo = () => {
             <label class="label">
                 <span class="label-text text-xs">Transcript</span>
             </label>
-            <textarea
+            <StopPropagationTextArea
                 v-model="transcript"
                 @blur="updateBlockData"
-                @wheel.stop
-                @mousedown.stop
-                @mouseup.stop
-                @click.stop
                 placeholder="Enter video transcript"
-                class="textarea textarea-bordered textarea-xs min-h-18"
-            ></textarea>
+            />
         </div>
     </CardBlockWrapper>
 </template>

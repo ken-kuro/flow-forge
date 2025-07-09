@@ -3,6 +3,7 @@ import { ref, computed, onUnmounted } from 'vue'
 import { useFlowEditor } from '@/composables/use-flow-editor'
 import { X, Video as VideoIcon, Upload } from 'lucide-vue-next'
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue'
+import StopPropagationTextArea from '@/components/shared/stop-propagation-textarea.vue'
 
 /**
  * VideoAssetBlock - A block for defining video assets in Setup nodes.
@@ -88,16 +89,11 @@ const showPreview = computed(() => videoUrl.value && videoUrl.value.trim() !== '
             <label class="label">
                 <span class="label-text text-xs">Description</span>
             </label>
-            <textarea
+            <StopPropagationTextArea
                 v-model="description"
                 @blur="updateBlockData"
-                @wheel.stop
-                @mousedown.stop
-                @mouseup.stop
-                @click.stop
                 placeholder="Enter video description"
-                class="textarea textarea-bordered textarea-xs min-h-18"
-            ></textarea>
+            />
         </div>
 
         <!-- Source Type Selection -->
