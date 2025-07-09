@@ -1,20 +1,19 @@
 <script setup>
-
-import { ConnectionMode,VueFlow } from "@vue-flow/core";
-import { Background } from "@vue-flow/background";
-import { Controls } from "@vue-flow/controls";
-import { MiniMap } from "@vue-flow/minimap";
-import { useFlowEditor } from "@/composables/use-flow-editor.js";
-import { onMounted, onUnmounted } from 'vue';
-import EditorToolbar from "@/components/editor/toolbar.vue";
+import { ConnectionMode, VueFlow } from '@vue-flow/core'
+import { Background } from '@vue-flow/background'
+import { Controls } from '@vue-flow/controls'
+import { MiniMap } from '@vue-flow/minimap'
+import { useFlowEditor } from '@/composables/use-flow-editor.js'
+import { onMounted, onUnmounted } from 'vue'
+import EditorToolbar from '@/components/editor/editor-toolbar.vue'
 
 // Import custom node registry
-import { nodeTypes } from "@/components/nodes";
+import { nodeTypes } from '@/components/nodes'
 
 // TODO: This is not really that important, but we need to revisit tablet mode in the future since it requires a lot of event handling.
 /**
  * FlowEditor - The core flow editor component
- * 
+ *
  * This component handles:
  * - Rendering the Vue Flow canvas with basic controls (zoom, fit, etc.)
  * - Custom application toolbar for save/load/import features
@@ -25,7 +24,7 @@ import { nodeTypes } from "@/components/nodes";
 
 // --- Flow Editor Logic ---
 // All Vue Flow interactions are handled by this composable
-const { nodes, edges, initFlowEvents, canUndo } = useFlowEditor();
+const { nodes, edges, initFlowEvents, canUndo } = useFlowEditor()
 
 /**
  * Warns the user about unsaved changes before they leave the page.
@@ -33,30 +32,30 @@ const { nodes, edges, initFlowEvents, canUndo } = useFlowEditor();
  * @param {BeforeUnloadEvent} event
  */
 const onBeforeUnload = (event) => {
-  if (canUndo.value) {
-    // Standard way to trigger the browser's confirmation dialog.
-    // The message is controlled by the browser and cannot be customized.
-    event.preventDefault();
-    // Legacy support for older browsers
-    event.returnValue = '';
-    return '';
-  }
-};
+    if (canUndo.value) {
+        // Standard way to trigger the browser's confirmation dialog.
+        // The message is controlled by the browser and cannot be customized.
+        event.preventDefault()
+        // Legacy support for older browsers
+        event.returnValue = ''
+        return ''
+    }
+}
 
 // Initialize the event handlers for the flow editor instance.
 onMounted(() => {
-  initFlowEvents();
-  window.addEventListener('beforeunload', onBeforeUnload);
-});
+    initFlowEvents()
+    window.addEventListener('beforeunload', onBeforeUnload)
+})
 
 onUnmounted(() => {
-  window.removeEventListener('beforeunload', onBeforeUnload);
-});
+    window.removeEventListener('beforeunload', onBeforeUnload)
+})
 
 /**
  * Connection validation function
  * This prevents Vue Flow's default behavior of replacing existing connections on a handle.
- * 
+ *
  * TODO: EDGE_VALIDATION - Implement proper edge validation and duplicate prevention
  * Current issues to address:
  * 1. Prevent duplicate edges between the same source/target nodes
@@ -64,13 +63,13 @@ onUnmounted(() => {
  * 3. Consider implementing custom edge routing or path offsetting
  * 4. Add user confirmation dialog for potential duplicate connections
  * 5. Implement edge labeling/numbering for better identification
- * 
+ *
  * Possible solutions:
  * - Custom edge component with bezier curve offsets
  * - Validation to prevent duplicates entirely
  * - Edge bundling/grouping UI for multiple connections
  * - Custom pathfinding algorithm for parallel edge routing
- * 
+ *
  * @param {Object} connection - The connection being validated
  * @returns {boolean} - Whether the connection is valid
  */
@@ -78,10 +77,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="flow-editor h-full w-full bg-base-300 relative overflow-hidden">
-    <!-- Vue Flow Canvas -->
-    <!-- TODO: Allow passing the config to the VueFlow component -->
-    <!--
+    <div class="flow-editor h-full w-full bg-base-300 relative overflow-hidden">
+        <!-- Vue Flow Canvas -->
+        <!-- TODO: Allow passing the config to the VueFlow component -->
+        <!--
       CONTROLLED FLOW CONFIGURATION
       -----------------------------------------
       We are using a "controlled flow" with:
@@ -103,7 +102,7 @@ onUnmounted(() => {
 
       Official Documentation: https://vueflow.dev/guide/controlled-flow.html
     -->
-    <!-- TODO: CUSTOM_MARKERS - Implement custom edge markers for better visual design
+        <!-- TODO: CUSTOM_MARKERS - Implement custom edge markers for better visual design
          Current requirements:
          1. Circle markers at start of edges, arrow markers at end
          2. Custom marker definitions with proper SVG paths
@@ -116,35 +115,34 @@ onUnmounted(() => {
          
          This is a UI polish feature for future phases, not Phase 3 priority.
     -->
-    <VueFlow
-      v-model:nodes="nodes"
-      v-model:edges="edges"
-      :node-types="nodeTypes"
-      :apply-default="false"
-      :nodes-draggable="true"
-      :pan-on-scroll="true"
-      :delete-key-code="['Backspace', 'Delete']"
-      :multi-selection-key-code="['Control']"
-      :connection-mode="ConnectionMode.Strict"
-      fit-view-on-init
-      class="vue-flow-instance w-full h-full"
-    >
-      <Background />
-      
-      <!-- Interactive minimap -->
-      <!-- TODO: Configure it with nodeColor and nodeStrokeColor -->
-      <MiniMap pannable zoomable />
+        <VueFlow
+            v-model:nodes="nodes"
+            v-model:edges="edges"
+            :node-types="nodeTypes"
+            :apply-default="false"
+            :nodes-draggable="true"
+            :pan-on-scroll="true"
+            :delete-key-code="['Backspace', 'Delete']"
+            :multi-selection-key-code="['Control']"
+            :connection-mode="ConnectionMode.Strict"
+            fit-view-on-init
+            class="vue-flow-instance w-full h-full"
+        >
+            <Background />
 
-      <!-- Vue Flow Basic Controls (zoom, fit, lock, etc.) -->
-      <Controls position="bottom-left" />
-    </VueFlow>
+            <!-- Interactive minimap -->
+            <!-- TODO: Configure it with nodeColor and nodeStrokeColor -->
+            <MiniMap pannable zoomable />
 
-    <!-- Custom Application Toolbar -->
-    <EditorToolbar />
-    
-  </div>
+            <!-- Vue Flow Basic Controls (zoom, fit, lock, etc.) -->
+            <Controls position="bottom-left" />
+        </VueFlow>
+
+        <!-- Custom Application Toolbar -->
+        <EditorToolbar />
+    </div>
 </template>
 
 <style scoped>
 /* All styles have been moved to Tailwind utility classes in the template. */
-</style> 
+</style>

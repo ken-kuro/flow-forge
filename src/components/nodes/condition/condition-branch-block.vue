@@ -1,9 +1,9 @@
 <script setup>
-import { ref, onUnmounted } from "vue";
-import { Handle, Position } from "@vue-flow/core";
-import { useFlowEditor } from "@/composables/use-flow-editor.js";
-import { GitBranch as BranchIcon } from "lucide-vue-next";
-import CardBlockWrapper from "@/components/nodes/base/card-block-wrapper.vue";
+import { ref, onUnmounted } from 'vue'
+import { Handle, Position } from '@vue-flow/core'
+import { useFlowEditor } from '@/composables/use-flow-editor.js'
+import { GitBranch as BranchIcon } from 'lucide-vue-next'
+import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue'
 
 /**
  * ConditionBranchBlock - A block for defining the condition branch in Condition nodes.
@@ -26,27 +26,27 @@ const props = defineProps({
         type: Object,
         required: true,
     },
-});
+})
 
-const { updateBlock, flushPendingSaves } = useFlowEditor();
+const { updateBlock, flushPendingSaves } = useFlowEditor()
 
 // Flush any pending saves when component is unmounted
 // TODO: MED_PRIORITY - Improve memory management by clearing timers more aggressively
 onUnmounted(() => {
-    flushPendingSaves();
-});
+    flushPendingSaves()
+})
 
 // Local reactive copies for editing
-const title = ref(props.block.data.title ?? "");
-const condition = ref(props.block.data.condition ?? "");
+const title = ref(props.block.data.title ?? '')
+const condition = ref(props.block.data.condition ?? '')
 
 const updateBlockData = (immediate = false) => {
     const newData = {
         title: title.value,
         condition: condition.value,
-    };
-    updateBlock(props.nodeId, props.block.id, newData, immediate);
-};
+    }
+    updateBlock(props.nodeId, props.block.id, newData, immediate)
+}
 </script>
 
 <template>
@@ -77,12 +77,7 @@ const updateBlockData = (immediate = false) => {
         </CardBlockWrapper>
 
         <!-- Source handle for connecting to next nodes -->
-        <Handle
-            type="source"
-            :position="Position.Right"
-            :id="block.id"
-            class="branch-handle"
-        />
+        <Handle type="source" :position="Position.Right" :id="block.id" class="branch-handle" />
     </div>
 </template>
 

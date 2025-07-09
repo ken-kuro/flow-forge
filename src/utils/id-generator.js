@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid'
  * @returns {string} A UUID v4 string
  */
 export function generateId() {
-  return uuidv4()
+    return uuidv4()
 }
 
 /**
@@ -18,7 +18,7 @@ export function generateId() {
  * @returns {string} A prefixed UUID string
  */
 export function generateIdWithPrefix(prefix) {
-  return `${prefix}_${uuidv4()}`
+    return `${prefix}_${uuidv4()}`
 }
 
 /**
@@ -27,6 +27,6 @@ export function generateIdWithPrefix(prefix) {
  * @returns {boolean} True if valid UUID v4
  */
 export function isValidId(id) {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-  return uuidRegex.test(id)
-} 
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+    return uuidRegex.test(id)
+}
