@@ -35,13 +35,13 @@ onUnmounted(() => {
 
 // Local reactive copies for editing
 const title = ref(props.block.data.title ?? 'Question')
-const questionId = ref(props.block.data.questionId ?? '')
+const question = ref(props.block.data.question ?? '')
 
 // Update the store when values change
 const updateBlockData = (immediate = false) => {
     const newData = {
         title: title.value,
-        questionId: questionId.value,
+        question: question.value,
     }
     updateBlock(props.nodeId, props.block.id, newData, immediate)
 }
@@ -56,18 +56,21 @@ const updateBlockData = (immediate = false) => {
         :block-id="block.id"
         placeholder="Enter question block name"
     >
-        <!-- Question ID -->
+        <!-- Question Field -->
         <div class="form-control">
             <label class="label">
-                <span class="label-text text-xs">Question ID</span>
+                <span class="label-text text-xs">Question</span>
             </label>
-            <input
-                v-model="questionId"
+            <textarea
+                v-model="question"
                 @blur="updateBlockData"
-                type="text"
-                placeholder="Enter question ID"
-                class="input input-bordered input-xs"
-            />
+                @wheel.stop
+                @mousedown.stop
+                @mouseup.stop
+                @click.stop
+                placeholder="Enter your question"
+                class="textarea textarea-bordered textarea-xs min-h-18"
+            ></textarea>
         </div>
     </CardBlockWrapper>
 </template>
