@@ -3,8 +3,8 @@
 
 /* DaisyUI configuration using new plugin syntax */
 @plugin "daisyui" {
-  themes: false;
-  exclude: rootscrollgutter;
+    themes: false;
+    exclude: rootscrollgutter;
 }
 
 /* Custom Catppuccin themes */
@@ -19,24 +19,24 @@
 
 /* Base handle styling - applies to ALL Vue Flow handles */
 .vue-flow__handle {
-  width: 16px !important;
-  height: 16px !important;
-  border: 2px solid transparent !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    width: 16px !important;
+    height: 16px !important;
+    border: 2px solid transparent !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 /* Target handles (inputs) - Using  primary color for inputs */
 .vue-flow__handle.target {
-  @apply bg-primary border-primary-content opacity-100;
+    @apply bg-primary border-primary-content opacity-100;
 }
 
 /* Source handles (outputs) - Using secondary color for outputs */
 .vue-flow__handle.source {
-  @apply bg-secondary border-secondary-content opacity-100;
+    @apply bg-secondary border-secondary-content opacity-100;
 }
 
 /* Hover effects - NO position changes, only visual feedback */
 .vue-flow__handle:hover {
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  transition: box-shadow 0.2s ease-in-out;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    transition: box-shadow 0.2s ease-in-out;
 }
