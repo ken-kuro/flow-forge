@@ -37,14 +37,7 @@ onUnmounted(() => {
 })
 
 // Local reactive copies for editing
-const title = computed({
-    get: () => props.block.data.title ?? '',
-    set: (val) => {
-        // eslint-disable-next-line vue/no-mutating-props
-        props.block.data.title = val
-        updateBlockData()
-    },
-})
+const title = ref(props.block.data.title ?? 'Image Asset')
 const sourceType = ref(props.block.data.sourceType || 'url')
 const imageUrl = ref(props.block.data.imageUrl ?? '')
 const applyToAll = ref(props.block.data.applyToAll ?? false)

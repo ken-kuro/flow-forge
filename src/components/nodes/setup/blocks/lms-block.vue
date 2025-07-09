@@ -27,14 +27,7 @@ onUnmounted(() => {
     flushPendingSaves()
 })
 
-const title = computed({
-    get: () => props.block.data.title ?? '',
-    set: (val) => {
-        // eslint-disable-next-line vue/no-mutating-props
-        props.block.data.title = val
-        updateBlockData()
-    },
-})
+const title = ref(props.block.data.title ?? 'Lms')
 
 // Local state
 const lmsType = ref(props.block.data.lmsType || 'Practice')

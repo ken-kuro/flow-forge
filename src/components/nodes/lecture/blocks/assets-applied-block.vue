@@ -34,14 +34,7 @@ onUnmounted(() => {
 })
 
 // Local reactive copies for editing
-const title = computed({
-    get: () => props.block.data.title || 'Assets Applied',
-    set: (val) => {
-        // eslint-disable-next-line vue/no-mutating-props
-        props.block.data.title = val
-        updateBlockData()
-    },
-})
+const title = ref(props.block.data.title ?? 'Assets Applied')
 const selectedAssetKey = ref(props.block.data.selectedAssetKey ?? '')
 
 // Get available assets from setup nodes

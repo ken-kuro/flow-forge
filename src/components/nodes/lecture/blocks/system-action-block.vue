@@ -34,14 +34,7 @@ onUnmounted(() => {
 })
 
 // Local reactive copies for editing
-const title = computed({
-    get: () => props.block.data.title || 'System Action',
-    set: (val) => {
-        // eslint-disable-next-line vue/no-mutating-props
-        props.block.data.title = val
-        updateBlockData()
-    },
-})
+const title = ref(props.block.data.title ?? 'System Action')
 const action = ref(props.block.data.action || 'show')
 const delay = ref(props.block.data.delay ?? 0)
 const methods = ref(props.block.data.method || [])

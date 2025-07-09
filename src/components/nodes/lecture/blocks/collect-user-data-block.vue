@@ -34,14 +34,7 @@ onUnmounted(() => {
 })
 
 // Local reactive copies for editing
-const title = computed({
-    get: () => props.block.data.title || 'Collect User Data',
-    set: (val) => {
-        // eslint-disable-next-line vue/no-mutating-props
-        props.block.data.title = val
-        updateBlockData()
-    },
-})
+const title = ref(props.block.data.title ?? 'Collect User Data')
 const methods = ref(props.block.data.method || [])
 const saveToField = ref(props.block.data.saveToField ?? '')
 

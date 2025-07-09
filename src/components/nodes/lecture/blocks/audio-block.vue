@@ -34,14 +34,7 @@ onUnmounted(() => {
 })
 
 // Local reactive copies for editing
-const title = computed({
-    get: () => props.block.data.title || 'Audio',
-    set: (val) => {
-        // eslint-disable-next-line vue/no-mutating-props
-        props.block.data.title = val
-        updateBlockData()
-    },
-})
+const title = ref(props.block.data.title ?? 'Audio')
 const description = ref(props.block.data.description ?? '')
 const voice = ref(props.block.data.voice ?? 'male')
 const text = ref(props.block.data.text ?? '')
