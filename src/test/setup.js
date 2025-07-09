@@ -29,7 +29,7 @@ vi.mock('@vue-flow/core', () => ({
 }))
 
 // Global test utilities
-global.ResizeObserver = vi.fn(() => ({
+globalThis.ResizeObserver = vi.fn(() => ({
     observe: vi.fn(),
     unobserve: vi.fn(),
     disconnect: vi.fn(),
