@@ -4,7 +4,11 @@ import { X, RectangleHorizontal, MessageSquare, ChevronDown } from 'lucide-vue-n
 import { useMagicKeys } from '@vueuse/core'
 import SetupImageToolbar from './setup-image-toolbar.vue'
 import SelectionHandles from './selection-handles.vue'
-import { DRAWING_TOOLS, TEXT_DISPLAY_TYPES, MIN_DRAWING_SIZE } from '@/utils/modal-constants'
+import {
+    DRAWING_TOOLS,
+    TEXT_DISPLAY_TYPES,
+    MIN_DRAWING_SIZE,
+} from '@/components/nodes/setup/setup-image-modal.constants'
 import { useModal } from '@/composables/use-modal'
 
 /**
@@ -577,7 +581,7 @@ const handleDragEnd = () => {
             </div>
             <div class="flex-1 bg-base-200 rounded-lg p-4 flex items-center justify-center min-h-0 overflow-hidden">
                 <div
-                    class="relative cursor-crosshair select-none max-w-full max-h-full"
+                    class="relative cursor-crosshair select-none w-full h-full max-w-full max-h-full flex items-center justify-center"
                     ref="imageContainer"
                     @mousedown="handleDrawStart"
                     @mousemove="
