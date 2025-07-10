@@ -27,16 +27,15 @@ export default {
 
         // subject rules
         'subject-empty': [2, 'never'],
-        'subject-case': [2, 'always', ['sentence-case', 'lower-case']],
-        'header-max-length': [2, 'always', 72],
+        'header-max-length': [2, 'always', 100],
 
         // body formatting
         'body-leading-blank': [1, 'always'],
-        'body-max-line-length': [2, 'always', 100],
+        'body-max-line-length': [2, 'always', 120],
 
         // footer rules
         'footer-leading-blank': [1, 'always'],
-        'footer-max-line-length': [2, 'always', 100],
+        'footer-max-line-length': [2, 'always', 120],
     },
 
     // skip linting for WIP commits
