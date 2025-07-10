@@ -49,7 +49,7 @@ const actionOptions = [
 // Available methods for asset interaction (multiple choice)
 const availableMethods = [
     { value: 'circle', label: 'Circle' },
-    { value: 'score', label: 'Score' },
+    { value: 'displayIPA', label: 'Display IPA' },
 ]
 
 // Update the store when values change
