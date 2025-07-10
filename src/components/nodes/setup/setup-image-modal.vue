@@ -1,6 +1,6 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
-import { X, RectangleHorizontal, MessageSquare, ChevronDown } from 'lucide-vue-next'
+import { X, RectangleHorizontal, MessageSquare } from 'lucide-vue-next'
 import { useMagicKeys } from '@vueuse/core'
 import SetupImageToolbar from './setup-image-toolbar.vue'
 import SelectionHandles from './selection-handles.vue'
@@ -79,23 +79,52 @@ const getIcon = (type) => {
     return displayTypeIcons[type] || RectangleHorizontal
 }
 
+// Computed style for the preview rectangle during drawing
 const previewRectStyle = computed(() => {
     if (!isDrawing.value || !newRect.value) return {}
 
     const { x, y, width, height } = newRect.value
+    const { offsetX, offsetY } = imageDisplayInfo.value
+
+    // Handle negative dimensions (drawing from bottom-right to top-left)
+    const finalLeft = width < 0 ? x + width : x
+    const finalTop = height < 0 ? y + height : y
+    const finalWidth = Math.abs(width)
+    const finalHeight = Math.abs(height)
 
     return {
-        left: (width < 0 ? x + width : x) + 'px',
-        top: (height < 0 ? y + height : y) + 'px',
-        width: Math.abs(width) + 'px',
-        height: Math.abs(height) + 'px',
+        left: `${finalLeft + offsetX}px`,
+        top: `${finalTop + offsetY}px`,
+        width: `${finalWidth}px`,
+        height: `${finalHeight}px`,
         borderRadius: activeTool.value === DRAWING_TOOLS.ELLIPSE ? '50%' : '0',
     }
 })
 
-const handleToolSelected = (tool) => {
-    activeTool.value = tool
+// Unified style helper for both objects and texts
+const getElementStyle = (element, type = 'object') => {
+    const { offsetX, offsetY } = imageDisplayInfo.value
+    const baseStyle = {
+        left: `${element.rect.x + offsetX}px`,
+        top: `${element.rect.y + offsetY}px`,
+        width: `${element.rect.width}px`,
+        height: `${element.rect.height}px`,
+    }
+
+    // Add type-specific styles
+    if (type === 'object') {
+        return {
+            ...baseStyle,
+            borderRadius: element.type === DRAWING_TOOLS.ELLIPSE ? '50%' : '0',
+        }
+    }
+
+    return baseStyle
 }
+
+// Legacy helpers for backward compatibility
+const getObjectStyle = (obj) => getElementStyle(obj, 'object')
+const getTextStyle = (txt) => getElementStyle(txt, 'text')
 
 // Create a deep copy of the initial state for change detection.
 const initialElementsSnapshot = ref(JSON.stringify(props.initialElements || []))
@@ -220,31 +249,99 @@ const removeText = (index) => {
 
 // Selection functions - minimal addition
 const selectObject = (index, type = 'object') => {
-    console.log('Selecting:', index, type) // Debug log
     selectedObjectIndex.value = type === 'object' ? index : -1
     selectedTextIndex.value = type === 'text' ? index : -1
-    console.log('Selected object index:', selectedObjectIndex.value) // Debug log
-    console.log('Selected text index:', selectedTextIndex.value) // Debug log
 }
 
 const clearSelection = () => {
-    console.log('Clearing selection') // Debug log
     selectedObjectIndex.value = -1
     selectedTextIndex.value = -1
 }
 
-// Mouse position helper - get position relative to the image
-const getMousePosition = (event) => {
-    if (!imageRef.value) return { x: 0, y: 0 }
-    const imageRect = imageRef.value.getBoundingClientRect()
+// Computed property for image display information - memoized for performance
+const imageDisplayInfo = computed(() => {
+    if (!imageRef.value) return { offsetX: 0, offsetY: 0, scale: 1, displayedWidth: 0, displayedHeight: 0 }
+
+    const imageElement = imageRef.value
+
+    // Get the natural dimensions of the image
+    const naturalWidth = imageElement.naturalWidth
+    const naturalHeight = imageElement.naturalHeight
+
+    // Get the container dimensions (the div that contains the image)
+    const containerElement = imageElement.parentElement // This is the imageContainer div
+    if (!containerElement) return { offsetX: 0, offsetY: 0, scale: 1, displayedWidth: 0, displayedHeight: 0 }
+
+    const containerRect = containerElement.getBoundingClientRect()
+    const containerWidth = containerRect.width
+    const containerHeight = containerRect.height
+
+    // Calculate the displayed image dimensions (after object-contain scaling)
+    const imageAspectRatio = naturalWidth / naturalHeight
+    const containerAspectRatio = containerWidth / containerHeight
+
+    let displayedWidth, displayedHeight, offsetX, offsetY
+
+    if (imageAspectRatio > containerAspectRatio) {
+        // Image is wider relative to container, so it's constrained by width
+        displayedWidth = containerWidth
+        displayedHeight = containerWidth / imageAspectRatio
+        offsetX = 0
+        offsetY = (containerHeight - displayedHeight) / 2
+    } else {
+        // Image is taller relative to container, so it's constrained by height
+        displayedWidth = containerHeight * imageAspectRatio
+        displayedHeight = containerHeight
+        offsetX = (containerWidth - displayedWidth) / 2
+        offsetY = 0
+    }
+
     return {
-        x: event.clientX - imageRect.left,
-        y: event.clientY - imageRect.top,
+        offsetX,
+        offsetY,
+        displayedWidth,
+        displayedHeight,
+        scale: displayedWidth / naturalWidth,
+    }
+})
+
+// Legacy helper function for backward compatibility - now uses computed property
+const getImageDisplayInfo = () => imageDisplayInfo.value
+
+// Mouse position helper - get position relative to the actual displayed image
+const getMousePosition = (event) => {
+    if (!imageRef.value) {
+        // eslint-disable-next-line no-console
+        console.warn('⚠️ getMousePosition called before image is ready')
+        return { x: 0, y: 0 }
+    }
+
+    // Handle both mouse and touch events
+    const clientX = event.touches ? event.touches[0].clientX : event.clientX
+    const clientY = event.touches ? event.touches[0].clientY : event.clientY
+
+    // Get the container element (the div with event handlers)
+    const containerElement = imageRef.value.parentElement
+    if (!containerElement) {
+        // eslint-disable-next-line no-console
+        console.warn('⚠️ Container element not found')
+        return { x: 0, y: 0 }
+    }
+
+    const containerRect = containerElement.getBoundingClientRect()
+    const { offsetX, offsetY } = imageDisplayInfo.value
+
+    // Calculate mouse position relative to the container, then subtract the image offset
+    const mouseX = clientX - containerRect.left - offsetX
+    const mouseY = clientY - containerRect.top - offsetY
+
+    return {
+        x: mouseX,
+        y: mouseY,
     }
 }
 
 const handleIdMouseDown = (event, index, type = 'object') => {
-    console.log('ID mousedown:', index, type) // Debug log
     event.stopPropagation()
     event.preventDefault()
 
@@ -259,7 +356,6 @@ const handleIdMouseDown = (event, index, type = 'object') => {
 }
 
 const handleResizeMouseDown = (event, index, type, handle) => {
-    console.log('Resize mousedown:', index, type, handle) // Debug log
     event.stopPropagation()
     event.preventDefault()
 
@@ -274,21 +370,12 @@ const handleResizeMouseDown = (event, index, type, handle) => {
     dragStart.value = getMousePosition(event)
 }
 
-const getEventPosition = (event) => {
-    if (event.touches) {
-        return { x: event.touches[0].clientX, y: event.touches[0].clientY }
-    }
-    return { x: event.clientX, y: event.clientY }
-}
-
 const handleDrawStart = (event) => {
-    console.log('Draw start triggered', event.target, event.target.tagName) // Debug log
     // Don't start drawing if we're dragging
     if (isDragging.value) return
 
     // Don't start drawing if clicking on interactive elements
     if (event.target.closest('span[data-id-tag]')) {
-        console.log('Clicked on ID tag, not starting draw')
         return
     }
 
@@ -299,20 +386,25 @@ const handleDrawStart = (event) => {
     clearSelection()
 
     isDrawing.value = true
-    const bounds = imageRef.value.getBoundingClientRect()
-    const { x, y } = getEventPosition(event)
-    const startX = x - bounds.left
-    const startY = y - bounds.top
-    newRect.value = { x: startX, y: startY, width: 0, height: 0 }
+    const mousePos = getMousePosition(event)
+    const displayInfo = getImageDisplayInfo()
+
+    // eslint-disable-next-line no-console
+    console.log('🎯 Draw Start:', {
+        mousePos,
+        displayInfo: { offsetX: displayInfo.offsetX, offsetY: displayInfo.offsetY },
+        naturalSize: { width: imageRef.value.naturalWidth, height: imageRef.value.naturalHeight },
+    })
+
+    newRect.value = { x: mousePos.x, y: mousePos.y, width: 0, height: 0 }
 }
 
 const handleDrawMove = (event) => {
     if (!isDrawing.value || !newRect.value || isDragging.value) return
     event.preventDefault()
-    const bounds = imageRef.value.getBoundingClientRect()
-    const { x, y } = getEventPosition(event)
-    newRect.value.width = x - bounds.left - newRect.value.x
-    newRect.value.height = y - bounds.top - newRect.value.y
+    const mousePos = getMousePosition(event)
+    newRect.value.width = mousePos.x - newRect.value.x
+    newRect.value.height = mousePos.y - newRect.value.y
 }
 
 // Handle drag movement
@@ -371,13 +463,11 @@ const handleDrawEnd = (event) => {
     if (!isDrawing.value) return
     event.preventDefault()
 
-    console.log('Draw end - newRect:', newRect.value) // Debug log
     if (
         newRect.value &&
         Math.abs(newRect.value.width) > MIN_DRAWING_SIZE &&
         Math.abs(newRect.value.height) > MIN_DRAWING_SIZE
     ) {
-        console.log('Creating object - size check passed') // Debug log
         const { x, y, width, height } = newRect.value
         const finalRect = {
             x: width < 0 ? x + width : x,
@@ -393,19 +483,27 @@ const handleDrawEnd = (event) => {
         }
 
         if (activeTool.value === DRAWING_TOOLS.RECTANGLE || activeTool.value === DRAWING_TOOLS.ELLIPSE) {
-            objects.value.push({
+            const newObject = {
                 ...commonProps,
                 name: `Object ${objects.value.length + 1}`,
                 isMain: false,
                 type: activeTool.value,
-            })
+            }
+            objects.value.push(newObject)
+
+            // eslint-disable-next-line no-console
+            console.log('📦 Object Created:', newObject)
         } else if (activeTool.value === 'text') {
-            texts.value.push({
+            const newText = {
                 ...commonProps,
                 text: 'New Text',
                 type: 'text',
                 displayType: TEXT_DISPLAY_TYPES.BUBBLE_LEFT, // Default display type
-            })
+            }
+            texts.value.push(newText)
+
+            // eslint-disable-next-line no-console
+            console.log('📝 Text Created:', newText)
         }
     }
     isDrawing.value = false
@@ -603,8 +701,18 @@ const handleDragEnd = () => {
                         }
                     "
                     @touchstart="handleDrawStart"
-                    @touchmove="handleDrawMove"
-                    @touchend="handleDrawEnd"
+                    @touchmove="
+                        (event) => {
+                            handleDrawMove(event)
+                            handleDragMove(event)
+                        }
+                    "
+                    @touchend="
+                        (event) => {
+                            handleDrawEnd(event)
+                            handleDragEnd()
+                        }
+                    "
                     @dragstart.prevent
                     style="
                         user-select: none;
@@ -636,13 +744,7 @@ const handleDragEnd = () => {
                             'border-error': selectedObjectIndex !== index,
                             'border-purple-500 border-4': selectedObjectIndex === index,
                         }"
-                        :style="{
-                            left: `${obj.rect.x}px`,
-                            top: `${obj.rect.y}px`,
-                            width: `${obj.rect.width}px`,
-                            height: `${obj.rect.height}px`,
-                            borderRadius: obj.type === DRAWING_TOOLS.ELLIPSE ? '50%' : '0',
-                        }"
+                        :style="getObjectStyle(obj)"
                     >
                         <SelectionHandles
                             :is-selected="selectedObjectIndex === index"
@@ -658,14 +760,9 @@ const handleDragEnd = () => {
                         :key="`txt-${index}`"
                         class="absolute box-border select-none pointer-events-none p-1 flex items-center justify-center"
                         :class="{
-                            'outline outline-4 outline-purple-500': selectedTextIndex === index,
+                            'outline-4 outline-purple-500': selectedTextIndex === index,
                         }"
-                        :style="{
-                            left: `${txt.rect.x}px`,
-                            top: `${txt.rect.y}px`,
-                            width: `${txt.rect.width}px`,
-                            height: `${txt.rect.height}px`,
-                        }"
+                        :style="getTextStyle(txt)"
                     >
                         <SelectionHandles
                             :is-selected="selectedTextIndex === index"
