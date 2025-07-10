@@ -25,6 +25,10 @@ import LMSAssetBlock from './blocks/lms-asset-block.vue'
  * - Add search/filter for block types when list grows
  */
 const props = defineProps({
+    /**
+     * The node ID.
+     * @type {string}
+     */
     id: {
         type: String,
         required: true,
@@ -38,6 +42,10 @@ const props = defineProps({
         required: true,
         default: () => ({ title: 'Setup', config: {} }),
     },
+    /**
+     * Whether the node is selected.
+     * @type {boolean}
+     */
     selected: Boolean,
 })
 
