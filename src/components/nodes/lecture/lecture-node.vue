@@ -9,7 +9,6 @@ import { useFlowEditor } from '@/composables/use-flow-editor.js'
 // Lecture-specific block imports
 import TeacherVideoBlock from './blocks/teacher-video-block.vue'
 import AssetsAppliedBlock from './blocks/assets-applied-block.vue'
-import QuestionBlock from './blocks/question-block.vue'
 import CollectUserDataBlock from '@/components/nodes/lecture/blocks/collect-user-data-block.vue'
 import SystemActionBlock from '@/components/nodes/lecture/blocks/system-action-block.vue'
 import AudioBlock from '@/components/nodes/lecture/blocks/audio-block.vue'
@@ -49,7 +48,6 @@ const blocks = computed(() => getNodeBlocks(props.id))
 const availableBlocks = [
     { type: 'teacher-video', label: 'Teacher Video', description: 'Video content with controls' },
     { type: 'assets-applied', label: 'Assets Applied', description: 'Reference setup node assets' },
-    { type: 'question', label: 'Question', description: 'Interactive question for users' },
     { type: 'collect-user-data', label: 'Collect User Data', description: 'Gather user responses' },
     { type: 'system-action', label: 'System Action', description: 'Execute system operations' },
     { type: 'audio', label: 'Audio', description: 'Audio content' },
@@ -82,9 +80,6 @@ function handleAddBlock(blockType) {
 
                     <!-- Assets Applied Block -->
                     <AssetsAppliedBlock v-else-if="block.type === 'assets-applied'" :node-id="id" :block="block" />
-
-                    <!-- Question Block -->
-                    <QuestionBlock v-else-if="block.type === 'question'" :node-id="id" :block="block" />
 
                     <!-- Collect User Data Block -->
                     <CollectUserDataBlock v-else-if="block.type === 'collect-user-data'" :node-id="id" :block="block" />
