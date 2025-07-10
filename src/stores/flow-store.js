@@ -266,6 +266,14 @@ export const useFlowStore = defineStore('flow', () => {
 
                 // Handle node removals
                 if (removeChanges.length > 0) {
+                    // Remove associated blocks for each removed node
+                    for (const change of removeChanges) {
+                        const nodeId = change.id
+                        if (nodeId && nodeBlocks.value[nodeId]) {
+                            console.log(`🗑️ Removing blocks for deleted node: ${nodeId}`)
+                            delete nodeBlocks.value[nodeId]
+                        }
+                    }
                     if (removeChanges.length === 1) {
                         const description = `Remove node`
                         console.log(`💾 Saving state for single node removal: ${description}`)
