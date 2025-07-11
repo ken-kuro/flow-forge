@@ -10,6 +10,7 @@ import {
     MIN_DRAWING_SIZE,
 } from '@/components/nodes/setup/setup-image-modal.constants'
 import { useModal } from '@/composables/use-modal'
+import { generateId } from '@/utils/id-generator'
 
 /**
  * TODO: MODAL-SPECIFIC HISTORY MANAGEMENT
@@ -43,7 +44,11 @@ import { useModal } from '@/composables/use-modal'
 
 const props = defineProps({
     imageUrl: String,
-    initialElements: {
+    initialObjects: {
+        type: Array,
+        default: () => [],
+    },
+    initialTexts: {
         type: Array,
         default: () => [],
     },
@@ -58,7 +63,7 @@ const isDrawing = ref(false)
 const newRect = ref(null)
 const activeTool = ref(DRAWING_TOOLS.RECTANGLE) // Default tool
 
-// Selection state - minimal addition
+// Selection state
 const selectedObjectIndex = ref(-1)
 const selectedTextIndex = ref(-1)
 
@@ -122,29 +127,31 @@ const getElementStyle = (element, type = 'object') => {
     return baseStyle
 }
 
-// Legacy helpers for backward compatibility
+// Style helpers
 const getObjectStyle = (obj) => getElementStyle(obj, 'object')
 const getTextStyle = (txt) => getElementStyle(txt, 'text')
 
 // Create a deep copy of the initial state for change detection.
-const initialElementsSnapshot = ref(JSON.stringify(props.initialElements || []))
+const initialDataSnapshot = ref(
+    JSON.stringify({
+        objects: props.initialObjects || [],
+        texts: props.initialTexts || [],
+    }),
+)
 
-// When the modal is shown, props will be passed. We watch `initialElements` to populate our local state.
+// When the modal is shown, props will be passed. We watch the separated arrays to populate our local state.
 watch(
-    () => props.initialElements,
-    (newVal) => {
-        const allItems = JSON.parse(JSON.stringify(newVal || []))
-
-        objects.value = allItems
-            .filter(
-                (item) => !item.type || item.type === DRAWING_TOOLS.RECTANGLE || item.type === DRAWING_TOOLS.ELLIPSE,
-            )
-            .map((item) => ({ ...item, type: item.type || DRAWING_TOOLS.RECTANGLE }))
-
-        texts.value = allItems.filter((item) => item.type === 'text')
+    [() => props.initialObjects, () => props.initialTexts],
+    ([newObjects, newTexts]) => {
+        // Deep clone to ensure reactivity independence
+        objects.value = JSON.parse(JSON.stringify(newObjects || []))
+        texts.value = JSON.parse(JSON.stringify(newTexts || []))
 
         // Update the snapshot whenever the initial data changes.
-        initialElementsSnapshot.value = JSON.stringify(newVal || [])
+        initialDataSnapshot.value = JSON.stringify({
+            objects: newObjects || [],
+            texts: newTexts || [],
+        })
     },
     { immediate: true, deep: true },
 )
@@ -154,9 +161,11 @@ watch(
  * This is our "dirty" check.
  */
 const isDirty = computed(() => {
-    const currentState = [...objects.value, ...texts.value]
-    // Simple comparison. For a more robust check, we could sort both arrays by ID.
-    return JSON.stringify(currentState) !== initialElementsSnapshot.value
+    const currentState = {
+        objects: objects.value,
+        texts: texts.value,
+    }
+    return JSON.stringify(currentState) !== initialDataSnapshot.value
 })
 
 const { hideModal } = useModal()
@@ -234,7 +243,11 @@ defineExpose({
 
 const saveElements = () => {
     if (props.onSave) {
-        props.onSave([...objects.value, ...texts.value])
+        // Send separated arrays
+        props.onSave({
+            objects: objects.value,
+            texts: texts.value,
+        })
     }
     closeModal()
 }
@@ -247,7 +260,7 @@ const removeText = (index) => {
     texts.value.splice(index, 1)
 }
 
-// Selection functions - minimal addition
+// Selection functions
 const selectObject = (index, type = 'object') => {
     selectedObjectIndex.value = type === 'object' ? index : -1
     selectedTextIndex.value = type === 'text' ? index : -1
@@ -305,13 +318,9 @@ const imageDisplayInfo = computed(() => {
     }
 })
 
-// Legacy helper function for backward compatibility - now uses computed property
-const getImageDisplayInfo = () => imageDisplayInfo.value
-
 // Mouse position helper - get position relative to the actual displayed image
 const getMousePosition = (event) => {
     if (!imageRef.value) {
-        // eslint-disable-next-line no-console
         console.warn('⚠️ getMousePosition called before image is ready')
         return { x: 0, y: 0 }
     }
@@ -323,7 +332,6 @@ const getMousePosition = (event) => {
     // Get the container element (the div with event handlers)
     const containerElement = imageRef.value.parentElement
     if (!containerElement) {
-        // eslint-disable-next-line no-console
         console.warn('⚠️ Container element not found')
         return { x: 0, y: 0 }
     }
@@ -387,9 +395,8 @@ const handleDrawStart = (event) => {
 
     isDrawing.value = true
     const mousePos = getMousePosition(event)
-    const displayInfo = getImageDisplayInfo()
+    const displayInfo = imageDisplayInfo.value
 
-    // eslint-disable-next-line no-console
     console.log('🎯 Draw Start:', {
         mousePos,
         displayInfo: { offsetX: displayInfo.offsetX, offsetY: displayInfo.offsetY },
@@ -478,7 +485,8 @@ const handleDrawEnd = (event) => {
 
         const totalItems = objects.value.length + texts.value.length
         const commonProps = {
-            id: totalItems + 1, // Note: This simple ID generation can have issues if items are deleted.
+            // id: totalItems + 1, // Note: This simple ID generation can have issues if items are deleted.
+            id: generateId(),
             rect: finalRect,
         }
 
@@ -491,18 +499,16 @@ const handleDrawEnd = (event) => {
             }
             objects.value.push(newObject)
 
-            // eslint-disable-next-line no-console
             console.log('📦 Object Created:', newObject)
-        } else if (activeTool.value === 'text') {
+        } else if (activeTool.value === DRAWING_TOOLS.TEXT) {
             const newText = {
                 ...commonProps,
                 text: 'New Text',
-                type: 'text',
+                type: DRAWING_TOOLS.TEXT,
                 displayType: TEXT_DISPLAY_TYPES.BUBBLE_LEFT, // Default display type
             }
             texts.value.push(newText)
 
-            // eslint-disable-next-line no-console
             console.log('📝 Text Created:', newText)
         }
     }
@@ -791,7 +797,7 @@ const handleDragEnd = () => {
                         :class="{
                             'border-error':
                                 activeTool === DRAWING_TOOLS.RECTANGLE || activeTool === DRAWING_TOOLS.ELLIPSE,
-                            'border-primary': activeTool === 'text',
+                            'border-primary': activeTool === DRAWING_TOOLS.TEXT,
                         }"
                         :style="previewRectStyle"
                     ></div>

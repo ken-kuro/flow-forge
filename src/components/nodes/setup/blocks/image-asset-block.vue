@@ -20,7 +20,7 @@ const props = defineProps({
     },
     /**
      * The block data object.
-     * @type {{id: string, type: string, data: {title: string, imageUrl: string, sourceType: 'url'|'upload', applyToAll: boolean, elements: Array<any>}}}
+     * @type {{id: string, type: string, data: {title: string, imageUrl: string, sourceType: 'url'|'upload', applyToAll: boolean, objects: Array<any>, texts: Array<any>}}}
      */
     block: {
         type: Object,
@@ -41,7 +41,11 @@ const title = ref(props.block.data.title ?? 'Image Asset')
 const sourceType = ref(props.block.data.sourceType || 'url')
 const imageUrl = ref(props.block.data.imageUrl ?? '')
 const applyToAll = ref(props.block.data.applyToAll ?? false)
-const elements = ref(props.block.data.elements || [])
+const objects = ref(props.block.data.objects || [])
+const texts = ref(props.block.data.texts || [])
+
+// Computed property for total element count
+const totalElementsCount = computed(() => objects.value.length + texts.value.length)
 
 // Update the store when values change
 const updateBlockData = (immediate = false) => {
@@ -50,7 +54,8 @@ const updateBlockData = (immediate = false) => {
         imageUrl: imageUrl.value,
         sourceType: sourceType.value,
         applyToAll: applyToAll.value,
-        elements: elements.value,
+        objects: objects.value,
+        texts: texts.value,
     }
     updateBlock(props.nodeId, props.block.id, newData, immediate)
 }
@@ -73,8 +78,9 @@ const removeImage = () => {
     updateBlockData(true)
 }
 
-const handleSaveElements = (newElements) => {
-    elements.value = newElements
+const handleSaveElements = (data) => {
+    objects.value = data.objects || []
+    texts.value = data.texts || []
     updateBlockData(true)
 }
 
@@ -83,7 +89,8 @@ const openSetupImageModal = () => {
         SetupImageModal,
         {
             imageUrl: imageUrl.value,
-            initialElements: elements.value,
+            initialObjects: objects.value,
+            initialTexts: texts.value,
             onSave: handleSaveElements,
         },
         {
@@ -154,7 +161,7 @@ const openSetupImageModal = () => {
                 <!-- Action buttons on preview -->
                 <div class="absolute top-1 right-1 flex flex-col gap-1">
                     <button @click="openSetupImageModal" class="btn btn-xs btn-primary btn-outline">
-                        Set image elements ({{ elements.length }})
+                        Set image elements ({{ totalElementsCount }})
                     </button>
                     <button @click="removeImage" class="btn btn-xs btn-circle btn-error self-end">
                         <X class="w-3 h-3" />
