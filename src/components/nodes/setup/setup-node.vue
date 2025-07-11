@@ -7,7 +7,6 @@ import BlockContainer from '@/components/nodes/base/block-container.vue'
 import { useFlowEditor } from '@/composables/use-flow-editor.js'
 
 // Setup-specific block imports
-import VariableBlock from './blocks/variable-block.vue'
 import ImageAssetBlock from './blocks/image-asset-block.vue'
 import VideoAssetBlock from './blocks/video-asset-block.vue'
 import LMSAssetBlock from './blocks/lms-asset-block.vue'
@@ -25,27 +24,14 @@ import LMSAssetBlock from './blocks/lms-asset-block.vue'
  * - Add search/filter for block types when list grows
  */
 const props = defineProps({
-    /**
-     * The node ID.
-     * @type {string}
-     */
     id: {
         type: String,
         required: true,
     },
-    /**
-     * The data object for the node.
-     * @type {{title: string, config: object}}
-     */
     data: {
         type: Object,
         required: true,
-        default: () => ({ title: 'Setup', config: {} }),
     },
-    /**
-     * Whether the node is selected.
-     * @type {boolean}
-     */
     selected: Boolean,
 })
 
@@ -61,7 +47,6 @@ const title = computed({
 const blocks = computed(() => getNodeBlocks(props.id))
 
 const availableBlocks = [
-    { type: 'variable', label: 'Variable', description: 'Define a typed variable' },
     { type: 'asset-image', label: 'Image Asset', description: 'Reference an image' },
     { type: 'asset-video', label: 'Video Asset', description: 'Reference a video' },
     { type: 'asset-lms', label: 'LMS Asset', description: 'Reference an LMS asset' },
@@ -89,11 +74,8 @@ function handleAddBlock(blockType) {
             <!-- Render blocks based on their type -->
             <template v-if="blocks.length > 0">
                 <template v-for="block in blocks" :key="block.id">
-                    <!-- Variable Block -->
-                    <VariableBlock v-if="block.type === 'variable'" :node-id="id" :block="block" />
-
                     <!-- Image Asset Block -->
-                    <ImageAssetBlock v-else-if="block.type === 'asset-image'" :node-id="id" :block="block" />
+                    <ImageAssetBlock v-if="block.type === 'asset-image'" :node-id="id" :block="block" />
 
                     <!-- Video Asset Block -->
                     <VideoAssetBlock v-else-if="block.type === 'asset-video'" :node-id="id" :block="block" />
