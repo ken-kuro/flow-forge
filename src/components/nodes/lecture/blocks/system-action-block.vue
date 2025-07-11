@@ -38,18 +38,21 @@ const title = ref(props.block.data.title ?? 'System Action')
 const action = ref(props.block.data.action || 'show')
 const delay = ref(props.block.data.delay ?? 0)
 const methods = ref(props.block.data.method || [])
+// TODO: Change this to plural and array type
 const object = ref(props.block.data.object ?? '')
 
+// TODO: Deal with these magic strings
 // Available actions (extensible for future API calls, jobs, etc.)
 const actionOptions = [
     { value: 'asset-interaction', label: 'Asset Interaction' },
     // Future: api-call, do-job, etc.
 ]
 
+// TODO: Deal with these magic strings
 // Available methods for asset interaction (multiple choice)
 const availableMethods = [
-    { value: 'circle', label: 'Circle' },
-    { value: 'displayIPA', label: 'Display IPA' },
+    { value: 'highlight-elements', label: 'Highlight Elements' },
+    { value: 'show-pronunciation-result', label: 'Show Pronunciation Result' },
 ]
 
 // Update the store when values change

@@ -38,6 +38,7 @@ const title = ref(props.block.data.title ?? 'Collect User Data')
 const methods = ref(props.block.data.method || [])
 const saveToField = ref(props.block.data.saveToField ?? '')
 
+// TODO: Deal with these magic strings
 // Available collection methods (multiple choice)
 const availableMethods = [
     { value: 'voice', label: 'Voice' },
