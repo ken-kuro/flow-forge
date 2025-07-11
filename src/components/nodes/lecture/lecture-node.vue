@@ -18,27 +18,14 @@ import AudioBlock from '@/components/nodes/lecture/blocks/audio-block.vue'
  * This node holds various content blocks like videos, questions, and system actions.
  */
 const props = defineProps({
-    /**
-     * The node ID.
-     * @type {string}
-     */
     id: {
         type: String,
         required: true,
     },
-    /**
-     * The data object for the node.
-     * @type {{title: string, config: object}}
-     */
     data: {
         type: Object,
         required: true,
-        default: () => ({ title: 'Lecture', config: {} }),
     },
-    /**
-     * Whether the node is selected.
-     * @type {boolean}
-     */
     selected: Boolean,
 })
 

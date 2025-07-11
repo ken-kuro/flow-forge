@@ -9,15 +9,8 @@ import { Play } from 'lucide-vue-next'
 
 // Props from Vue Flow with improved type definition for `data`
 const props = defineProps({
-    /**
-     * The data object for the node.
-     * @type {{title: string, config: object}}
-     */
     data: {
         type: Object,
-        required: true,
-        // Provide a default factory function for object props
-        default: () => ({ title: 'Start', config: {} }),
     },
     selected: Boolean,
 })

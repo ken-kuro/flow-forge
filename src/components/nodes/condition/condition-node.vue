@@ -8,27 +8,14 @@ import { useFlowEditor } from '@/composables/use-flow-editor.js'
 import ConditionBranchBlock from './condition-branch-block.vue'
 
 const props = defineProps({
-    /**
-     * The node ID.
-     * @type {string}
-     */
     id: {
         type: String,
         required: true,
     },
-    /**
-     * The data object for the node.
-     * @type {{title: string, config: object}}
-     */
     data: {
         type: Object,
         required: true,
-        default: () => ({ title: 'Condition' }),
     },
-    /**
-     * Whether the node is selected.
-     * @type {boolean}
-     */
     selected: Boolean,
 })
 
