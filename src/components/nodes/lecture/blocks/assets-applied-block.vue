@@ -26,7 +26,7 @@ const props = defineProps({
     },
 })
 
-const { updateBlock, flushPendingSaves, getAvailableAssets, getAssetFromSetup } = useFlowEditor()
+const { updateBlock, flushPendingSaves, getAvailableAssets, getAssetById } = useFlowEditor()
 
 // Flush any pending saves when component is unmounted
 onUnmounted(() => {
@@ -73,7 +73,8 @@ const getLmsAssetLabel = (assetData) => {
 const assetOptions = computed(() => {
     const options = []
     availableAssets.value.forEach((asset) => {
-        const key = `${asset.setupNodeId}::${asset.assetId}`
+        // Use just the asset ID as the key (simplified approach)
+        const key = asset.assetId
         let label = `${asset.setupNodeTitle} > ${asset.assetTitle || 'Untitled Asset'}`
 
         // Add specific labeling for LMS assets
@@ -95,8 +96,8 @@ const assetOptions = computed(() => {
 // Get the currently selected asset data
 const selectedAsset = computed(() => {
     if (!selectedAssetKey.value) return null
-    const [setupNodeId, assetId] = selectedAssetKey.value.split('::')
-    return getAssetFromSetup(setupNodeId, assetId)
+    // Use the new simplified lookup by asset ID only
+    return getAssetById(selectedAssetKey.value)
 })
 
 // Update the store when values change

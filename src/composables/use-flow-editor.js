@@ -94,7 +94,6 @@ export function useFlowEditor() {
             applyNodeChanges(validatedChanges)
 
             // No need for manual applyChanges() - v-model handles store synchronization
-            // This eliminates the double-application bug that caused position sync issues
 
             // FIX: v-model updates are not synchronous. We must wait for the next
             // DOM update cycle to ensure the store's `nodes` ref is updated
@@ -403,7 +402,7 @@ export function useFlowEditor() {
         removeBlock: flowStore.removeBlock,
         reorderBlocks: flowStore.reorderBlocks,
         getNodeBlocks: flowStore.getNodeBlocks,
-        getAssetFromSetup: flowStore.getAssetFromSetup,
+        getAssetById: flowStore.getAssetById,
         getAvailableAssets: flowStore.getAvailableAssets,
 
         // --- History Operations ---

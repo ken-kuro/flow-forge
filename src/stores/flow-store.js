@@ -576,21 +576,32 @@ export const useFlowStore = defineStore('flow', () => {
     }
 
     /**
-     * Resolves an asset reference from a setup node
-     * @param {string} setupNodeId - The ID of the setup node
+     * Gets an asset block by its ID from any setup node
      * @param {string} assetId - The ID of the asset (block ID)
      * @returns {Object|null} The asset block data or null if not found
      */
-    function getAssetFromSetup(setupNodeId, assetId) {
-        console.log('🔍 Getting asset from setup:', setupNodeId, assetId)
-        const setupBlocks = nodeBlocks.value[setupNodeId] || []
-        return (
-            setupBlocks.find(
+    function getAssetById(assetId) {
+        console.log('🔍 Getting asset by ID:', assetId)
+
+        // Find all setup nodes
+        const setupNodes = nodes.value.filter((n) => n.type === NODE_TYPES.SETUP)
+
+        // Search through all setup nodes for the asset
+        for (const setupNode of setupNodes) {
+            const setupBlocks = nodeBlocks.value[setupNode.id] || []
+            const asset = setupBlocks.find(
                 (block) =>
                     (block.type === 'asset-image' || block.type === 'asset-video' || block.type === 'asset-lms') &&
                     block.id === assetId,
-            ) || null
-        )
+            )
+            if (asset) {
+                console.log('✅ Found asset in setup node:', setupNode.id)
+                return asset
+            }
+        }
+
+        console.log('❌ Asset not found:', assetId)
+        return null
     }
 
     /**
@@ -897,7 +908,7 @@ export const useFlowStore = defineStore('flow', () => {
         updateNodeData,
 
         // --- Asset Management ---
-        getAssetFromSetup,
+        getAssetById,
         getAvailableAssets,
 
         // --- Condition Branch Edge Management ---
