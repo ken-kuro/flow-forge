@@ -37,7 +37,7 @@ onUnmounted(() => {
 const title = ref(props.block.data.title ?? 'System Action')
 const action = ref(props.block.data.action || 'show')
 const delay = ref(props.block.data.delay ?? 0)
-const methods = ref(props.block.data.method || [])
+const methods = ref(props.block.data.methods || [])
 // TODO: Change this to plural and array type
 const object = ref(props.block.data.object ?? '')
 
@@ -61,7 +61,7 @@ const updateBlockData = (immediate = false) => {
         title: title.value,
         action: action.value,
         delay: delay.value,
-        method: methods.value,
+        methods: methods.value,
         object: object.value,
     }
     updateBlock(props.nodeId, props.block.id, newData, immediate)

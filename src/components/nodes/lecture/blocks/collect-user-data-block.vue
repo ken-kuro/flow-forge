@@ -35,7 +35,7 @@ onUnmounted(() => {
 
 // Local reactive copies for editing
 const title = ref(props.block.data.title ?? 'Collect User Data')
-const methods = ref(props.block.data.method || [])
+const methods = ref(props.block.data.methods || [])
 const saveToField = ref(props.block.data.saveToField ?? '')
 
 // TODO: Deal with these magic strings
@@ -51,7 +51,7 @@ const updateBlockData = (immediate = false) => {
     const newData = {
         title: title.value,
         saveToField: saveToField.value,
-        method: methods.value,
+        methods: methods.value,
     }
     updateBlock(props.nodeId, props.block.id, newData, immediate)
 }
