@@ -39,7 +39,7 @@ const action = ref(props.block.data.action || 'asset-interaction')
 const delay = ref(props.block.data.delay ?? 0)
 const methods = ref(props.block.data.methods || [])
 // TODO: Change this to plural and array type
-const object = ref(props.block.data.object ?? '')
+const objects = ref(props.block.data.objects ?? '')
 
 // TODO: Deal with these magic strings
 // Available actions (extensible for future API calls, jobs, etc.)
@@ -62,7 +62,7 @@ const updateBlockData = (immediate = false) => {
         action: action.value,
         delay: delay.value,
         methods: methods.value,
-        object: object.value,
+        objects: objects.value,
     }
     updateBlock(props.nodeId, props.block.id, newData, immediate)
 }
@@ -163,7 +163,7 @@ const isMethodSelected = (method) => {
                     <span class="label-text text-xs">Object</span>
                 </label>
                 <input
-                    v-model="object"
+                    v-model="objects"
                     @blur="updateBlockData"
                     type="text"
                     placeholder="TODO: Object reference system"
