@@ -1,12 +1,12 @@
 <script setup>
 import { ref, computed, onUnmounted } from 'vue'
 import { useFlowEditor } from '@/composables/use-flow-editor'
-import { Link, Image as ImageIcon, Video as VideoIcon } from 'lucide-vue-next'
+import { Link, Image as ImageIcon, Video as VideoIcon, BookOpenText as LMSIcon } from 'lucide-vue-next'
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue'
 
 /**
  * AssetsAppliedBlock - A simplified block for referencing assets from Setup nodes.
- * Matches the design specifications.
+ * Supports image, video, and LMS assets.
  */
 const props = defineProps({
     /**
@@ -37,17 +37,56 @@ onUnmounted(() => {
 const title = ref(props.block.data.title ?? 'Assets Applied')
 const selectedAssetKey = ref(props.block.data.selectedAssetKey ?? '')
 
+// TODO: Revisit this in the future. I think we need to filter only the assets that are connected
 // Get available assets from setup nodes
 const availableAssets = computed(() => getAvailableAssets())
+
+// Helper function to get asset type label
+const getAssetTypeLabel = (assetType) => {
+    switch (assetType) {
+        case 'asset-image':
+            return 'Image'
+        case 'asset-video':
+            return 'Video'
+        case 'asset-lms':
+            return 'LMS'
+        default:
+            return assetType.replace('asset-', '')
+    }
+}
+
+// Helper function to get LMS asset subtype label
+const getLmsAssetLabel = (assetData) => {
+    if (!assetData || !assetData.lmsType) return 'LMS'
+
+    const typeLabel = assetData.lmsType.charAt(0).toUpperCase() + assetData.lmsType.slice(1)
+
+    // If it's a practice with a specific question, show more details
+    if (assetData.lmsType === 'practice' && assetData.questionData) {
+        return `${typeLabel} - Q${assetData.questionData.id}`
+    }
+
+    return typeLabel
+}
 
 // Create options for the select dropdown
 const assetOptions = computed(() => {
     const options = []
     availableAssets.value.forEach((asset) => {
-        const key = `${asset.setupNodeId}-${asset.assetId}`
+        const key = `${asset.setupNodeId}::${asset.assetId}`
+        let label = `${asset.setupNodeTitle} > ${asset.assetTitle || 'Untitled Asset'}`
+
+        // Add specific labeling for LMS assets
+        if (asset.assetType === 'asset-lms') {
+            const lmsLabel = getLmsAssetLabel(asset.assetData)
+            label += ` (${lmsLabel})`
+        } else {
+            label += ` (${getAssetTypeLabel(asset.assetType)})`
+        }
+
         options.push({
             value: key,
-            label: `${asset.setupNodeTitle} > ${asset.assetTitle || 'Untitled Asset'} (${asset.assetType.replace('asset-', '')})`,
+            label: label,
         })
     })
     return options
@@ -56,7 +95,7 @@ const assetOptions = computed(() => {
 // Get the currently selected asset data
 const selectedAsset = computed(() => {
     if (!selectedAssetKey.value) return null
-    const [setupNodeId, assetId] = selectedAssetKey.value.split('-')
+    const [setupNodeId, assetId] = selectedAssetKey.value.split('::')
     return getAssetFromSetup(setupNodeId, assetId)
 })
 
@@ -95,22 +134,37 @@ const updateBlockData = (immediate = false) => {
             </div>
         </div>
 
-        TODO: FIX THIS NEXT
         <!-- Asset Preview -->
         <div v-if="selectedAsset" class="preview-container">
             <label class="label">
                 <span class="label-text text-xs">Preview</span>
             </label>
 
-            <!-- Debug info (remove after testing) -->
-            <div class="text-xs text-base-content/50 p-2 bg-base-300 rounded">
-                <div>Type: {{ selectedAsset.type }}</div>
-                <div>imageUrl: {{ selectedAsset.data?.imageUrl || 'not set' }}</div>
-                <div>videoUrl: {{ selectedAsset.data?.videoUrl || 'not set' }}</div>
-                <div>Data keys: {{ Object.keys(selectedAsset.data || {}).join(', ') }}</div>
+            <!-- LMS Asset Preview -->
+            <div v-if="selectedAsset.type === 'asset-lms'" class="w-full p-3 bg-base-200 rounded">
+                <div class="flex items-center gap-2 mb-2">
+                    <LMSIcon class="w-4 h-4 text-accent" />
+                    <span class="text-sm font-medium">{{ getLmsAssetLabel(selectedAsset.data) }}</span>
+                </div>
+
+                <!-- LMS Data Summary -->
+                <div class="text-xs text-base-content/70 space-y-1">
+                    <div><strong>Type:</strong> {{ selectedAsset.data.lmsType }}</div>
+                    <div v-if="selectedAsset.data.lmsData">
+                        <strong>Content:</strong> {{ selectedAsset.data.lmsData.content || 'No content' }}
+                    </div>
+                    <div v-if="selectedAsset.data.questionData">
+                        <strong>Question:</strong>
+                        {{ selectedAsset.data.questionData.content || 'No question content' }}
+                    </div>
+                </div>
             </div>
 
-            <div class="w-full h-32 bg-base-200 rounded flex items-center justify-center overflow-hidden relative">
+            <!-- Image/Video Preview -->
+            <div
+                v-else
+                class="w-full h-32 bg-base-200 rounded flex items-center justify-center overflow-hidden relative"
+            >
                 <!-- Image Preview -->
                 <img
                     v-if="selectedAsset.type === 'asset-image' && selectedAsset.data.imageUrl"

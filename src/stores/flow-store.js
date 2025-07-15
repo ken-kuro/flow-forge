@@ -582,10 +582,13 @@ export const useFlowStore = defineStore('flow', () => {
      * @returns {Object|null} The asset block data or null if not found
      */
     function getAssetFromSetup(setupNodeId, assetId) {
+        console.log('🔍 Getting asset from setup:', setupNodeId, assetId)
         const setupBlocks = nodeBlocks.value[setupNodeId] || []
         return (
             setupBlocks.find(
-                (block) => (block.type === 'asset-image' || block.type === 'asset-video') && block.id === assetId,
+                (block) =>
+                    (block.type === 'asset-image' || block.type === 'asset-video' || block.type === 'asset-lms') &&
+                    block.id === assetId,
             ) || null
         )
     }
@@ -617,7 +620,7 @@ export const useFlowStore = defineStore('flow', () => {
         for (const setupNode of setupNodes) {
             const setupBlocks = nodeBlocks.value[setupNode.id] || []
             for (const block of setupBlocks) {
-                if (block.type === 'asset-image' || block.type === 'asset-video') {
+                if (block.type === 'asset-image' || block.type === 'asset-video' || block.type === 'asset-lms') {
                     assets.push({
                         setupNodeId: setupNode.id,
                         setupNodeTitle: setupNode.data.title,
