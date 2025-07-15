@@ -154,8 +154,14 @@ const updateBlockData = (immediate = false) => {
                         <strong>Content:</strong> {{ selectedAsset.data.lmsData.content || 'No content' }}
                     </div>
                     <div v-if="selectedAsset.data.questionData">
-                        <strong>Question:</strong>
-                        {{ selectedAsset.data.questionData.content || 'No question content' }}
+                        <div>
+                            <strong>Question:</strong>
+                            {{ selectedAsset.data.questionData.content || 'No question content' }}
+                        </div>
+                        <div>
+                            <strong>Question Type:</strong>
+                            {{ selectedAsset.data.questionData.type || 'No question type' }}
+                        </div>
                     </div>
                 </div>
             </div>
