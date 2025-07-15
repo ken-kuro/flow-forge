@@ -370,6 +370,8 @@ const getMousePosition = (event) => {
  * 3. Natural coordinates → Display coordinates (for rendering)
  */
 
+// TODO: Support viewport size changes as well
+
 // Coordinate conversion helpers
 const displayToNaturalCoords = (displayRect) => {
     const { scale } = imageDisplayInfo.value
