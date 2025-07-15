@@ -212,6 +212,7 @@ const handleQuestionChange = () => {
                 @change="handleQuestionChange"
                 :disabled="loadingQuestions"
             >
+                <!-- TODO: For practice type, questionData should be required, not optional. Remove this option when validation is implemented -->
                 <option :value="null">Select a question (optional)</option>
                 <option v-if="loadingQuestions" disabled>Loading questions...</option>
                 <option v-else-if="questionOptions.length === 0" disabled>No questions available</option>
