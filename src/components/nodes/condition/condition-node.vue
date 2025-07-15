@@ -7,12 +7,20 @@ import BlockContainer from '@/components/nodes/base/block-container.vue'
 import { useFlowEditor } from '@/composables/use-flow-editor.js'
 import ConditionBranchBlock from './condition-branch-block.vue'
 
+/**
+ * @typedef {import('@/schemas/node.js').NodeDataSchema} NodeDataSchema
+ */
+
 const props = defineProps({
     id: {
         type: String,
         required: true,
     },
     data: {
+        /**
+         * TODO: APPLY FOR ALL NODE TYPES, ADD THIS
+         * @type {import('vue').PropType<NodeDataSchema>}
+         */
         type: Object,
         required: true,
     },
