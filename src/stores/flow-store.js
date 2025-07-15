@@ -765,8 +765,11 @@ export const useFlowStore = defineStore('flow', () => {
 
             // Replace current state with imported data
             nodes.value = JSON.parse(JSON.stringify(flowData.nodes))
+            console.log('🔍 Nodes:', nodes.value)
             edges.value = JSON.parse(JSON.stringify(flowData.edges))
+            console.log('🔍 Edges:', edges.value)
             nodeBlocks.value = JSON.parse(JSON.stringify(flowData.nodeBlocks || {}))
+            console.log('🔍 Node Blocks:', nodeBlocks.value)
 
             // Update version
             if (typeof flowData._version === 'number') {

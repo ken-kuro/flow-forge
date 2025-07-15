@@ -109,11 +109,13 @@ const previewRectStyle = computed(() => {
 // Unified style helper for both objects and texts
 const getElementStyle = (element, type = 'object') => {
     const { offsetX, offsetY } = imageDisplayInfo.value
+    // Convert from natural coordinates to display coordinates
+    const displayRect = naturalToDisplayCoords(element.rect)
     const baseStyle = {
-        left: `${element.rect.x + offsetX}px`,
-        top: `${element.rect.y + offsetY}px`,
-        width: `${element.rect.width}px`,
-        height: `${element.rect.height}px`,
+        left: `${displayRect.x + offsetX}px`,
+        top: `${displayRect.y + offsetY}px`,
+        width: `${displayRect.width}px`,
+        height: `${displayRect.height}px`,
     }
 
     // Add type-specific styles
@@ -349,15 +351,55 @@ const getMousePosition = (event) => {
     }
 }
 
+/**
+ * Coordinate System Overview:
+ *
+ * NATURAL COORDINATES: Relative to the original image dimensions (stored in data)
+ * - Independent of display scale and screen size
+ * - Always consistent regardless of how the image is displayed
+ * - Used for storing object/text positions in the data model
+ *
+ * DISPLAY COORDINATES: Relative to the currently displayed image (used for UI interactions)
+ * - Scaled according to current image display size
+ * - Used for mouse interactions, drawing, and visual positioning
+ * - Converted from/to natural coordinates as needed
+ *
+ * Flow:
+ * 1. User interactions → Display coordinates
+ * 2. Display coordinates → Natural coordinates (for storage)
+ * 3. Natural coordinates → Display coordinates (for rendering)
+ */
+
+// Coordinate conversion helpers
+const displayToNaturalCoords = (displayRect) => {
+    const { scale } = imageDisplayInfo.value
+    return {
+        x: displayRect.x / scale,
+        y: displayRect.y / scale,
+        width: displayRect.width / scale,
+        height: displayRect.height / scale,
+    }
+}
+
+const naturalToDisplayCoords = (naturalRect) => {
+    const { scale } = imageDisplayInfo.value
+    return {
+        x: naturalRect.x * scale,
+        y: naturalRect.y * scale,
+        width: naturalRect.width * scale,
+        height: naturalRect.height * scale,
+    }
+}
+
 const handleIdMouseDown = (event, index, type = 'object') => {
     event.stopPropagation()
     event.preventDefault()
 
     selectObject(index, type)
 
-    // Start drag for moving
+    // Start drag for moving - convert to display coordinates for dragging calculations
     const targetArray = type === 'object' ? objects.value : texts.value
-    originalRect.value = { ...targetArray[index].rect }
+    originalRect.value = naturalToDisplayCoords(targetArray[index].rect)
     isDragging.value = true
     dragMode.value = 'move'
     dragStart.value = getMousePosition(event)
@@ -369,9 +411,9 @@ const handleResizeMouseDown = (event, index, type, handle) => {
 
     selectObject(index, type)
 
-    // Start drag for resizing
+    // Start drag for resizing - convert to display coordinates for dragging calculations
     const targetArray = type === 'object' ? objects.value : texts.value
-    originalRect.value = { ...targetArray[index].rect }
+    originalRect.value = naturalToDisplayCoords(targetArray[index].rect)
     isDragging.value = true
     dragMode.value = 'resize'
     resizeHandle.value = handle // Store which handle is being dragged
@@ -399,7 +441,12 @@ const handleDrawStart = (event) => {
 
     console.log('🎯 Draw Start:', {
         mousePos,
-        displayInfo: { offsetX: displayInfo.offsetX, offsetY: displayInfo.offsetY },
+        displayInfo: {
+            offsetX: displayInfo.offsetX,
+            offsetY: displayInfo.offsetY,
+            scale: displayInfo.scale,
+            displayedSize: { width: displayInfo.displayedWidth, height: displayInfo.displayedHeight },
+        },
         naturalSize: { width: imageRef.value.naturalWidth, height: imageRef.value.naturalHeight },
     })
 
@@ -428,12 +475,18 @@ const handleDragMove = (event) => {
 
     if (targetIndex < 0 || !originalRect.value) return
 
+    let newDisplayRect = null
+
     if (dragMode.value === 'move') {
-        // Move the object from original position
-        targetArray[targetIndex].rect.x = originalRect.value.x + deltaX
-        targetArray[targetIndex].rect.y = originalRect.value.y + deltaY
+        // Move the object from original position (in display coordinates)
+        newDisplayRect = {
+            x: originalRect.value.x + deltaX,
+            y: originalRect.value.y + deltaY,
+            width: originalRect.value.width,
+            height: originalRect.value.height,
+        }
     } else if (dragMode.value === 'resize') {
-        // Resize the object based on which handle is being dragged
+        // Resize the object based on which handle is being dragged (in display coordinates)
         const newRect = { ...originalRect.value }
 
         switch (resizeHandle.value) {
@@ -459,10 +512,16 @@ const handleDragMove = (event) => {
                 break
         }
 
-        // Ensure minimum size
+        // Ensure minimum size (in display coordinates)
         if (newRect.width >= MIN_DRAWING_SIZE && newRect.height >= MIN_DRAWING_SIZE) {
-            targetArray[targetIndex].rect = newRect
+            newDisplayRect = newRect
         }
+    }
+
+    // Convert display coordinates back to natural coordinates before storing
+    if (newDisplayRect) {
+        const naturalRect = displayToNaturalCoords(newDisplayRect)
+        targetArray[targetIndex].rect = naturalRect
     }
 }
 
@@ -470,24 +529,28 @@ const handleDrawEnd = (event) => {
     if (!isDrawing.value) return
     event.preventDefault()
 
+    // Check minimum size in display coordinates (MIN_DRAWING_SIZE is in display pixels)
     if (
         newRect.value &&
         Math.abs(newRect.value.width) > MIN_DRAWING_SIZE &&
         Math.abs(newRect.value.height) > MIN_DRAWING_SIZE
     ) {
         const { x, y, width, height } = newRect.value
-        const finalRect = {
+        const displayRect = {
             x: width < 0 ? x + width : x,
             y: height < 0 ? y + height : y,
             width: Math.abs(width),
             height: Math.abs(height),
         }
 
+        // Convert display coordinates to natural coordinates before storing
+        const naturalRect = displayToNaturalCoords(displayRect)
+
         const totalItems = objects.value.length + texts.value.length
         const commonProps = {
             // id: totalItems + 1, // Note: This simple ID generation can have issues if items are deleted.
             id: generateId(),
-            rect: finalRect,
+            rect: naturalRect,
         }
 
         if (activeTool.value === DRAWING_TOOLS.RECTANGLE || activeTool.value === DRAWING_TOOLS.ELLIPSE) {
@@ -499,7 +562,12 @@ const handleDrawEnd = (event) => {
             }
             objects.value.push(newObject)
 
-            console.log('📦 Object Created:', newObject)
+            console.log('📦 Object Created:', {
+                ...newObject,
+                displayRect,
+                naturalRect,
+                scale: imageDisplayInfo.value.scale,
+            })
         } else if (activeTool.value === DRAWING_TOOLS.TEXT) {
             const newText = {
                 ...commonProps,
@@ -509,7 +577,12 @@ const handleDrawEnd = (event) => {
             }
             texts.value.push(newText)
 
-            console.log('📝 Text Created:', newText)
+            console.log('📝 Text Created:', {
+                ...newText,
+                displayRect,
+                naturalRect,
+                scale: imageDisplayInfo.value.scale,
+            })
         }
     }
     isDrawing.value = false
