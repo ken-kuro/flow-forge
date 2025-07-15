@@ -35,7 +35,7 @@ onUnmounted(() => {
 
 // Local reactive copies for editing
 const title = ref(props.block.data.title ?? 'System Action')
-const action = ref(props.block.data.action || 'show')
+const action = ref(props.block.data.action || 'asset-interaction')
 const delay = ref(props.block.data.delay ?? 0)
 const methods = ref(props.block.data.methods || [])
 // TODO: Change this to plural and array type
