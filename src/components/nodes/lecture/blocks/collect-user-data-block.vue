@@ -36,7 +36,8 @@ onUnmounted(() => {
 // Local reactive copies for editing
 const title = ref(props.block.data.title ?? 'Collect User Data')
 const methods = ref(props.block.data.methods || [])
-const saveToField = ref(props.block.data.saveToField ?? '')
+// TODO: Deal with this magic string, and this is default value just for now
+const saveTo = ref(props.block.data.saveTo ?? 'user_answer')
 
 // TODO: Deal with these magic strings
 // Available collection methods (multiple choice)
@@ -50,7 +51,7 @@ const availableMethods = [
 const updateBlockData = (immediate = false) => {
     const newData = {
         title: title.value,
-        saveToField: saveToField.value,
+        saveTo: saveTo.value,
         methods: methods.value,
     }
     updateBlock(props.nodeId, props.block.id, newData, immediate)
@@ -122,7 +123,7 @@ const isMethodSelected = (method) => {
                 <span class="label-text text-xs">Save to</span>
             </label>
             <input
-                v-model="saveToField"
+                v-model="saveTo"
                 @blur="updateBlockData"
                 type="text"
                 placeholder="TODO: Variable reference system"
