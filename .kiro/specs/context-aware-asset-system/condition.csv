@@ -1,0 +1,204 @@
+Loại dữ liệu lms,Load dữ liệu lên màn hình,Collect user data,System action,Điều kiện chấm,Giá trị LMS + Question,
+"Câu hỏi dạng speaking - unscripted
+",Không,Voice,none,"AI xác định liên quan/không liên quan
+1. Trả lời liên quan","{
+  ""lms"": {
+    ""type"": ""practice""
+  },
+  ""question"": {
+    ""id"": 1,
+    ""content"": 'What is the weather today?',
+    ""type"": 'speaking_unscripted'
+  }
+}",user_answer.content_evaluation == accordant
+,,,,2. Trả lời không biết,,user_answer.content_evaluation == lack_of_knowledge 
+,,,,"3. Các trường hợp còn lại
+ - Nằm ngoài 2 trường hợp trên(trả lời không liên quan, tiêu cực, hỏi lại giáo viên)",,OTHER
+,,,,Im lặng,,NO_ANSWER
+Câu hỏi dạng speaking - unscripted + objects,Không,Voice,"highlight_elements ([""user_answer.ids""] hoặc object ids array)",1)Trả lời liên quan >= 50% object chính,"{
+  lms: {
+    type: practice
+  },
+  question: {
+    id: 1,
+    content: 'What can you see?',
+    type: 'speaking_unscripted'
+  }
+}",user_answer.main_length > 0 && objects.main_length > 0 && user_answer.main_length >= 0.5*objects.main_length
+,,,,"2)Trả lời liên quan < 50% (object chính + object liên quan)
+",,user_answer.length > 0 && objects.length > 0 && user_answer.length < 0.5*objects.length
+,,,,"3) Trả lời không chứa object chính, nhưng có object liên quan
+",,user_answer.main_length <= 0 && user_answer.relevant_length >= 1
+,,,,"4) Ngoài 3 trường hợp trên
+",,OTHER
+,,,,"Lượt 2( là lượt hỏi lại khi rơi vào 2,3,4)
+1)Trả lời liên quan đến object chính/ object liên quan",,user_answer.main_length > 0 ||  user_answer.relevant_length > 0
+,,,,"Lượt 2( là lượt hỏi lại khi rơi vào 2,3,4)
+2) Ngoài 1 trường hợp trên",,OTHER
+Câu hỏi dạng Speaking -Scripted,Không,Voice,show_pronunciation_result (text ids array),"Chấm phát âm trung bình
+1. Phát âm đúng (>60%)
+","{
+  lms: {
+    type: practice
+  },
+  question: {
+    id: 3,
+    content: 'Is it a butterfly?',
+    transcript: 'butterfly',
+    type: 'speaking_scripted'
+  }
+}",user_answer.pronunciation >= 60
+,,,,"Chấm phát âm trung bình
+2. Phát âm chưa đúng (< 60%)",,user_answer.pronunciation < 60
+Câu hỏi dạng Speaking -Scripted + Objects,Không,Voice,"highlight_elements (object ids array), show_pronunciation_result (text ids array)","Chấm phát âm trung bình
+1. Phát âm đúng (>60%)
+","{
+  lms: {
+    type: practice
+  },
+  question: {
+    id: 4,
+    content: 'Is it a butterfly?',
+    transcript: 'butterfly',
+    type: 'speaking_scripted',
+    
+  }
+}",user_answer.pronunciation >= 60
+,,,,"Chấm phát âm trung bình
+2. Phát âm chưa đúng (< 60%)",,user_answer.pronunciation < 60
+Câu dạng Đúng - Sai (true false),Có,Choose answer,none,"Chấm đúng/sai
+1. chọn đúng","{
+  lms: {
+    type: practice
+  },
+  question: {
+    id: 5,
+    content: 'Is it a butterfly?',
+    type: 'true_false',
+    image_url: 'https://scontent.rinoedu.ai/teacherroger/Ver2/3Vocab/intro_butterfly.png',
+    answers: [
+      'Yes, it is',
+      'No'
+    ],
+    correct_answer: [
+      'Yes, it is'
+    ],
+    
+  }
+}",user_answer == true
+,,,,"Chấm đúng/sai
+2. chọn sai",,user_answer == false
+,,,,"Chấm đúng/sai
+3. im lặng",,NO_ANSWER
+Trắc nghiệm chọn 1 (single choice),Có,Choose answer,none,"Chấm đúng/sai
+1. chọn đúng","{
+  lms: {
+    type: practice
+  },
+  question: {
+    id: 6,
+    content: 'Is it a butterfly?',
+    type: 'single_choice',
+    image_url: 'https://scontent.rinoedu.ai/teacherroger/Ver2/3Vocab/intro_butterfly.png',
+    answers: [
+      'Yes, it is',
+      'No'
+    ],
+    correct_answer: [
+      'Yes, it is'
+    ],
+    
+  }
+}",user_answer == true
+,,,,"Chấm đúng/sai
+2. chọn sai",,user_answer == false
+,,,,"Chấm đúng/sai
+3. im lặng",,NO_ANSWER
+"Matching
+(ĐK dừng đưa vào rule)",Có,Choose answer,none,"Chấm đúng/sai theo %
+1. Đúng hết (100%)","{
+  lms: {
+    type: practice
+  },
+  question: {
+    id: 7,
+    content: 'Matching',
+    type: 'matching',
+    list1: [
+      'https://scontent.rinoedu.ai/teacherroger/Ver2/3Vocab/intro_butterfly.png',
+      'https://scontent.rinoedu.ai/teacherroger/Ver2/3Vocab/intro_ant.png',
+      'https://scontent.rinoedu.ai/teacherroger/Ver2/3Vocab/intro_ladybug.png',
+      'https://scontent.rinoedu.ai/teacherroger/Ver2/3Vocab/intro_insects.png',
+      
+    ],
+    list2: [
+      'ant',
+      'butterfly',
+      'insects',
+      'ladybug'
+    ],
+    correct_answer: [
+      'butterfly',
+      'ant',
+      'ladybug',
+      'insects'
+    ],
+    
+  }
+}",user_answer >= 100
+,,,,"Chấm đúng/sai theo %
+2. Không đúng hết (các trường hợp còn lại)",,user_answer < 100
+Game đập chuột,Có,Choose answer,none,"Chấm % đúng
+1. Đúng bằng hoặc trên 70%",,user_answer >= 70
+,,,,"Chấm % đúng
+2. Đúng dưới 70%",,user_answer < 70
+Conversation,Có,Voice,none,"Chấm điểm trung bình ngữ pháp & từ vựng
+1. nói đúng (>=60%)","lms: {
+    ""content"": ""Animals"",
+    ""type"": ""conversation"",
+    ""vocabularies"": [
+        ""ant"",
+        ""butterfly"",
+        ""ladybug"",
+        ""spider""
+    ],
+    ""related_vocabularies"": [
+        ""ant"",
+        ""butterfly"",
+        ""ladybug"",
+        ""spider""
+    ],
+    ""grammars"": [
+        ""It is an ant"",
+        ""This is a butterfly""
+    ]
+},
+question: null",user_answer.avg_cumulative_score >= 60
+,,,,"Chấm điểm trung bình ngữ pháp & từ vựng
+2 nói đúng (< 60%) ",,user_answer.avg_cumulative_score < 60
+Dialogue,Có,Voice,none,"Chấm phát âm trung bình
+1. Nói đúng (>=60%)","{
+  lms: {
+    ""content"": ""Animals"",
+    ""type"": ""dialogue"",
+    ""questions"": [
+      {
+        ""question"": ""Do you like butterfly?"",
+        ""answer"": ""Yes, I do"",
+        
+      },
+      {
+        ""question"": ""What color is it?"",
+        ""answer"": ""It is red'"",
+        
+      }
+    ]
+  },
+  question: null
+}",user_answer.avg_cumulative_score >= 60
+,,,,"Chấm phát âm trung bình
+2 Nói chưa đúng (< 60%)",,user_answer.avg_cumulative_score < 60
+Game phát âm,Có,Voice,none,"Chấm phát âm trung bình
+1. Nói đúng (>=60%)",,user_answer.avg_cumulative_score >= 60
+,,,,"Chấm phát âm trung bình
+2 Nói chưa đúng (< 60%)",,user_answer.avg_cumulative_score < 60
