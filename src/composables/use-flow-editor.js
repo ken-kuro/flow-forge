@@ -8,12 +8,6 @@ import { NODE_TYPES } from '@/utils/constants'
 /**
  * Composable for Vue Flow Editor Logic
  *
- * TODO: REPO_QUALITY - Set up project-wide tooling for code quality and consistency.
- * - ESLint: For identifying and reporting on patterns in JavaScript.
- * - Prettier: For enforcing a consistent code style.
- * - Husky: For running scripts (like linting) on pre-commit hooks.
- * - Vitest: For setting up a unit and component testing framework.
- *
  * TODO: PRODUCTION - Configure build process to strip all console.log statements
  * for production builds to avoid leaking debug information.
  *
