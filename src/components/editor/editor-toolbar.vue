@@ -4,6 +4,12 @@ import { useModal } from '@/composables/use-modal'
 import { Plus, History, Undo, Redo, Download, Upload, Bug } from 'lucide-vue-next'
 import { useMagicKeys } from '@vueuse/core'
 import { ref, computed } from 'vue'
+import { useFlowContextStore } from '@/stores/flow-context-store.js'
+import {
+    getCollectUserDataMethods,
+    getSystemActionMethods,
+    getConditionBranch,
+} from '@/utils/flow-context-filtering.js'
 
 /**
  * EditorToolbar - Simplified application toolbar for the flow editor
@@ -39,6 +45,9 @@ const {
 // --- Modal State ---
 // This is crucial for disabling global shortcuts when a modal is active.
 const { isModalActive } = useModal()
+
+// --- Flow Context Store ---
+const flowContextStore = useFlowContextStore()
 
 // Ref for the create button to programmatically open the dropdown
 const createButtonRef = ref(null)
@@ -364,13 +373,54 @@ const handleExport = () => {
     }
 }
 
-const handleDebugDump = () => {
+/**
+ * Log current flow state to console for debugging
+ */
+function handleDebugDump() {
     console.group('🔬 Flow Forge Debug Dump')
     console.log('Nodes:', JSON.parse(JSON.stringify(nodes.value)))
     console.log('Edges:', JSON.parse(JSON.stringify(edges.value)))
     console.log('Node Blocks:', JSON.parse(JSON.stringify(nodeBlocks.value)))
     console.log('History Stack:', JSON.parse(JSON.stringify(history.value)))
     console.log('Current History Index:', historyIndex.value)
+
+    // TODO: Add more detailed flow context information
+    console.log(
+        'Flow Context:',
+        JSON.parse(
+            JSON.stringify({
+                current: {
+                    lmsType: flowContextStore.lmsType,
+                    questionType: flowContextStore.questionType,
+                    elements: {
+                        objects: flowContextStore.objects,
+                        texts: flowContextStore.texts,
+                    },
+                },
+                available: {
+                    collectUserDataMethods: flowContextStore.lmsType
+                        ? getCollectUserDataMethods(flowContextStore.lmsType, flowContextStore.questionType)
+                        : [],
+                    systemActionMethods: flowContextStore.lmsType
+                        ? getSystemActionMethods(
+                              flowContextStore.lmsType,
+                              flowContextStore.questionType,
+                              flowContextStore.objects,
+                              flowContextStore.texts,
+                          )
+                        : [],
+                    conditionBranches: flowContextStore.lmsType
+                        ? getConditionBranch(
+                              flowContextStore.lmsType,
+                              flowContextStore.questionType,
+                              flowContextStore.objects,
+                          )
+                        : [],
+                },
+            }),
+        ),
+    )
+
     console.groupEnd()
     alert('Current flow state has been logged to the console.')
 }
