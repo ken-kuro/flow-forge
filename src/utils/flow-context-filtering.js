@@ -62,10 +62,10 @@ const getCollectUserDataMethods = (lmsType, questionType) => {
 // #region: System Actions Block
 
 const SYSTEM_ACTION_METHODS = {
-    hightlightElements: {
-        value: 'hightlight-elements',
-        label: 'Hightlight Elements',
-        description: 'Hightlight elements in the scene',
+    highlightElements: {
+        value: 'highlight-elements',
+        label: 'Highlight Elements',
+        description: 'Highlight elements in the scene',
     },
     showPronunciationResult: {
         value: 'show-pronunciation-result',
@@ -76,10 +76,10 @@ const SYSTEM_ACTION_METHODS = {
 
 const SYSTEM_ACTION_GENERATORS = {
     [QUESTION_TYPES.SPEAKING_UNSCRIPTED]: ({ hasObject }) =>
-        hasObject ? [SYSTEM_ACTION_METHODS.hightlightElements] : [],
+        hasObject ? [SYSTEM_ACTION_METHODS.highlightElements] : [],
     [QUESTION_TYPES.SPEAKING_SCRIPTED]: ({ hasObject, hasText }) => [
         ...(hasText ? [SYSTEM_ACTION_METHODS.showPronunciationResult] : []),
-        ...(hasObject ? [SYSTEM_ACTION_METHODS.hightlightElements] : []),
+        ...(hasObject ? [SYSTEM_ACTION_METHODS.highlightElements] : []),
     ],
 }
 
@@ -116,13 +116,13 @@ const getSystemActionTargets = (actionType, objects) => {
     const targets = []
 
     switch (actionType) {
-        case SYSTEM_ACTION_METHODS.hightlightElements:
+        case SYSTEM_ACTION_METHODS.highlightElements.value:
             // Return object elements for highlighting
             // This user_answer.ids will be resolved by the client in runtime, based on the object name and user answer to resolve the real object id
             targets.push('user_answer.ids', ...objects.map((object) => object.id))
             break
 
-        case SYSTEM_ACTION_METHODS.showPronunciationResult:
+        case SYSTEM_ACTION_METHODS.showPronunciationResult.value:
             // For pronunciation result, return static "user_answer" target
             // This user_answer.ids will be resolved by the client in runtime, based on the text and user transcript to resolve the real text id
             targets.push('user_answer.ids')
