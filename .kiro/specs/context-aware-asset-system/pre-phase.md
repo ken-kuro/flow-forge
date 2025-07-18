@@ -368,13 +368,13 @@ const getConditionExpressions = (lmsType, questionType, elements) => {
                             id: 'ai_relevant',
                             label: 'Trả lời liên quan',
                             description: 'AI xác định học viên trả lời liên quan đến câu hỏi',
-                            expression: 'user_answer.content_evaluation == accordant',
+                            expression: 'user_answer.content_evaluation == "accordant"',
                         },
                         {
                             id: 'ai_lack_knowledge',
                             label: 'Trả lời không biết',
                             description: 'Học viên trả lời không biết',
-                            expression: 'user_answer.content_evaluation == lack_of_knowledge',
+                            expression: 'user_answer.content_evaluation == "lack_of_knowledge"',
                         },
                         {
                             id: 'ai_irrelevant',
