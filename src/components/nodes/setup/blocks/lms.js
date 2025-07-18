@@ -5,7 +5,9 @@ const LMS_TYPES = {
     PRACTICE: 'practice',
     CONVERSATION: 'conversation',
     DIALOGUE: 'dialogue',
-    GAME: 'game',
+    // TODO: Come up with a better name for these
+    GAME_WHACK_A_MOLE: 'game_whack_a_mole',
+    GAME_PRONUNCIATION: 'game_pronunciation',
 }
 
 const QUESTION_TYPES = {
