@@ -5,6 +5,7 @@ import { GraduationCap } from 'lucide-vue-next'
 import CardNodeWrapper from '@/components/nodes/base/card-node-wrapper.vue'
 import BlockContainer from '@/components/nodes/base/block-container.vue'
 import { useFlowEditor } from '@/composables/use-flow-editor.js'
+import { useFlowContextStore } from '@/stores/flow-context-store.js'
 
 // Lecture-specific block imports
 import TeacherVideoBlock from './blocks/teacher-video-block.vue'
@@ -15,7 +16,7 @@ import AudioBlock from '@/components/nodes/lecture/blocks/audio-block.vue'
 
 /**
  * LectureNode - A container node for content delivery and interaction.
- * This node holds various content blocks like videos, questions, and system actions.
+ * Enforces asset loading rules based on LMS type from the single setup node.
  */
 const props = defineProps({
     id: {
@@ -30,6 +31,7 @@ const props = defineProps({
 })
 
 const { addBlock, getNodeBlocks, updateNodeData } = useFlowEditor()
+const flowContextStore = useFlowContextStore()
 
 const title = computed({
     get: () => props.data.title,
@@ -40,6 +42,18 @@ const title = computed({
 
 const blocks = computed(() => getNodeBlocks(props.id))
 
+// Get asset constraints for this node type
+const assetConstraints = computed(() => {
+    const maxBlocks = flowContextStore.getMaxAssetBlocksForNode(props.id)
+    const existingAssetBlocks = blocks.value.filter((b) => b.type === 'assets-applied')
+
+    return {
+        maxBlocks,
+        currentCount: existingAssetBlocks.length,
+        canAddMore: existingAssetBlocks.length < maxBlocks,
+    }
+})
+
 const availableBlocks = [
     { type: 'teacher-video', label: 'Teacher Video', description: 'Video content with controls' },
     { type: 'assets-applied', label: 'Assets Applied', description: 'Reference setup node assets' },
@@ -49,6 +63,21 @@ const availableBlocks = [
 ]
 
 function handleAddBlock(blockType) {
+    // Check asset block constraints
+    if (blockType === 'assets-applied') {
+        const constraints = assetConstraints.value
+        if (!constraints.canAddMore) {
+            let message = `Cannot add more asset blocks. `
+            if (constraints.canHaveMultiple) {
+                message += `This node supports ${constraints.maxBlocks} asset blocks (1 image/video + 1 LMS).`
+            } else {
+                message += `This node supports only ${constraints.maxBlocks} asset block.`
+            }
+            alert(message)
+            return
+        }
+    }
+
     const blockData = {
         type: blockType,
         data: {},
@@ -65,6 +94,33 @@ function handleAddBlock(blockType) {
     <CardNodeWrapper v-model="title" :selected="selected" :icon="GraduationCap" icon-color="text-secondary">
         <!-- Input handle on the left -->
         <Handle type="target" :position="Position.Left" id="default" />
+
+        <!-- Asset Blocks Constraint Warning -->
+        <div
+            v-if="!assetConstraints.canAddMore && assetConstraints.currentCount > 0"
+            class="alert alert-warning text-xs mb-3"
+        >
+            <div class="flex items-center gap-2">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    class="stroke-current shrink-0 w-4 h-4"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+                    ></path>
+                </svg>
+                <span
+                    >Asset blocks limit reached ({{ assetConstraints.currentCount }}/{{
+                        assetConstraints.maxBlocks
+                    }})</span
+                >
+            </div>
+        </div>
 
         <BlockContainer empty-message="No lecture blocks yet. Add content below.">
             <!-- Render blocks based on their type -->
@@ -102,9 +158,23 @@ function handleAddBlock(blockType) {
                     </div>
                     <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-full">
                         <li v-for="blockDef in availableBlocks" :key="blockDef.type">
-                            <a @click="handleAddBlock(blockDef.type)">
+                            <a
+                                @click="handleAddBlock(blockDef.type)"
+                                :class="{
+                                    'opacity-50 cursor-not-allowed':
+                                        blockDef.type === 'assets-applied' && !assetConstraints.canAddMore,
+                                }"
+                            >
                                 <span class="font-bold">{{ blockDef.label }}</span>
-                                <span class="text-xs text-base-content/70">{{ blockDef.description }}</span>
+                                <span class="text-xs text-base-content/70">
+                                    {{ blockDef.description }}
+                                    <span
+                                        v-if="blockDef.type === 'assets-applied' && !assetConstraints.canAddMore"
+                                        class="text-warning"
+                                    >
+                                        (Limit reached)
+                                    </span>
+                                </span>
                             </a>
                         </li>
                     </ul>
