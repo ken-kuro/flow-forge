@@ -31,14 +31,85 @@ const getLmsIdOptions = (lmsType) => {
                 {
                     value: {
                         content: 'Animals',
-                        questions: [
+                        imageUrl: 'https://scontent.rinoedu.ai/teacherroger/Ver2/5Dialogue/img_dialogue.webp',
+                        backgroundImageUrl:
+                            'https://scontent.rinoedu.ai/teacherroger/Ver2/5Dialogue/img_bg_conversation.webp',
+                        messages: [
                             {
-                                question: 'Do you like butterfly?',
-                                answer: 'Yes, I do',
+                                name: 'Andrew',
+                                text: "Hello there! Let's talk about insects!",
+                                role: 'teacher',
+                                imageUrl: null,
                             },
                             {
-                                question: 'What color is it?',
-                                answer: 'It is red',
+                                name: 'You',
+                                text: 'Yes! I love insects!',
+                                role: 'student',
+                                imageUrl: null,
+                            },
+                            {
+                                name: 'Andrew',
+                                text: 'How many butterflies are there?',
+                                role: 'teacher',
+                                imageUrl:
+                                    'https://scontent.rinoedu.ai/teacherroger/Ver2/5Dialogue/img_dialogue_butterfly.webp',
+                            },
+                            {
+                                name: 'You',
+                                text: 'There are three butterflies',
+                                role: 'student',
+                                imageUrl: null,
+                            },
+                            {
+                                name: 'Andrew',
+                                text: 'Yes! What about ladybugs? How many ladybugs are there?',
+                                role: 'teacher',
+                                imageUrl:
+                                    'https://scontent.rinoedu.ai/teacherroger/Ver2/5Dialogue/img_dialogue_lady_bug.webp',
+                            },
+                            {
+                                name: 'You',
+                                text: 'There is one ladybug.',
+                                role: 'student',
+                                imageUrl: null,
+                            },
+                            {
+                                name: 'Andrew',
+                                text: 'What color is the ladybug?',
+                                role: 'teacher',
+                                imageUrl: null,
+                            },
+                            {
+                                name: 'You',
+                                text: "It's red and black.",
+                                role: 'student',
+                                imageUrl: null,
+                            },
+                            {
+                                name: 'Andrew',
+                                text: 'Look at the ants. How many ants are there?',
+                                role: 'teacher',
+                                imageUrl:
+                                    'https://scontent.rinoedu.ai/teacherroger/Ver2/5Dialogue/img_dialogue_ant.webp',
+                            },
+                            {
+                                name: 'You',
+                                text: 'There are six ants.',
+                                role: 'student',
+                                imageUrl: null,
+                            },
+                            {
+                                name: 'Andrew',
+                                text: 'Have you ever seen a spider?',
+                                role: 'teacher',
+                                imageUrl:
+                                    'https://scontent.rinoedu.ai/teacherroger/Ver2/5Dialogue/img_dialogue_spider.webp',
+                            },
+                            {
+                                name: 'You',
+                                text: "No, I don't. I don't really like spider.",
+                                role: 'student',
+                                imageUrl: null,
                             },
                         ],
                     },
