@@ -46,6 +46,7 @@ const title = computed({
 
 const blocks = computed(() => getNodeBlocks(props.id))
 
+// TODO: Deal with these magic strings
 const availableBlocks = [
     { type: 'asset-image', label: 'Image Asset', description: 'Reference an image' },
     { type: 'asset-video', label: 'Video Asset', description: 'Reference a video' },

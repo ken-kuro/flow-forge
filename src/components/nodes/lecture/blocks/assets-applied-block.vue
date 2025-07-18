@@ -3,6 +3,7 @@ import { ref, computed, onUnmounted } from 'vue'
 import { useFlowEditor } from '@/composables/use-flow-editor'
 import { Link, Image as ImageIcon, Video as VideoIcon, BookOpenText as LMSIcon } from 'lucide-vue-next'
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue'
+import { LMS_TYPES } from '../../setup/blocks/lms'
 
 /**
  * AssetsAppliedBlock - A simplified block for referencing assets from Setup nodes.
@@ -62,7 +63,7 @@ const getLmsAssetLabel = (assetData) => {
     const typeLabel = assetData.lmsType.charAt(0).toUpperCase() + assetData.lmsType.slice(1)
 
     // If it's a practice with a specific question, show more details
-    if (assetData.lmsType === 'practice' && assetData.questionData) {
+    if (assetData.lmsType === LMS_TYPES.PRACTICE && assetData.questionData) {
         return `${typeLabel} - Q${assetData.questionData.id}`
     }
 

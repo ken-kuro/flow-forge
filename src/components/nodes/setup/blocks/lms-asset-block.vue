@@ -3,7 +3,7 @@ import { ref, onUnmounted, computed, watch } from 'vue'
 import { useFlowEditor } from '@/composables/use-flow-editor'
 import { BookOpenText as LMSIcon, X } from 'lucide-vue-next'
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue'
-import { getLmsIdOptions, getLmsQuestionOptions } from './lms.js'
+import { getLmsIdOptions, getLmsQuestionOptions, LMS_TYPES } from './lms.js'
 
 /**
  * LmsAssetBlock - A block for defining LMS assets in Setup nodes.
@@ -36,7 +36,7 @@ onUnmounted(() => {
 
 // Local state
 const title = ref(props.block.data.title ?? 'LMS Asset')
-const lmsType = ref(props.block.data.lmsType || 'practice')
+const lmsType = ref(props.block.data.lmsType || LMS_TYPES.PRACTICE)
 const lmsData = ref(props.block.data.lmsData || null)
 const questionData = ref(props.block.data.questionData || null)
 
@@ -50,9 +50,9 @@ const questionOptions = ref([])
 
 // LMS type options - keeping as constant for easier maintenance and upgrades
 const lmsTypeOptions = [
-    { value: 'practice', label: 'Practice' },
-    { value: 'conversation', label: 'Conversation' },
-    { value: 'dialogue', label: 'Dialogue' },
+    { value: LMS_TYPES.PRACTICE, label: 'Practice' },
+    { value: LMS_TYPES.CONVERSATION, label: 'Conversation' },
+    { value: LMS_TYPES.DIALOGUE, label: 'Dialogue' },
 ]
 
 // Simulate API calls by wrapping existing functions
@@ -84,7 +84,7 @@ const fetchQuestionOptions = async (practiceData) => {
 
 // Computed property to check if questions should be shown
 const shouldShowQuestions = computed(() => {
-    return lmsType.value === 'practice' && lmsData.value
+    return lmsType.value === LMS_TYPES.PRACTICE && lmsData.value
 })
 
 // Initialize options when component loads
@@ -97,7 +97,7 @@ const initializeOptions = async () => {
     }
 
     // Load questions if practice type and lmsData is set
-    if (lmsType.value === 'practice' && lmsData.value) {
+    if (lmsType.value === LMS_TYPES.PRACTICE && lmsData.value) {
         questionOptions.value = await fetchQuestionOptions(lmsData.value)
     }
 }
@@ -112,7 +112,7 @@ watch(lmsType, async (newType) => {
     questionOptions.value = []
 
     // If switching to practice, load questions
-    if (newType === 'practice' && lmsData.value) {
+    if (newType === LMS_TYPES.PRACTICE && lmsData.value) {
         questionOptions.value = await fetchQuestionOptions(lmsData.value)
     }
 
@@ -121,7 +121,7 @@ watch(lmsType, async (newType) => {
 
 // Watch for lmsData changes (for practice type)
 watch(lmsData, async (newLmsData) => {
-    if (lmsType.value === 'practice' && newLmsData) {
+    if (lmsType.value === LMS_TYPES.PRACTICE && newLmsData) {
         questionOptions.value = await fetchQuestionOptions(newLmsData)
         questionData.value = null // Reset question selection
     } else {
