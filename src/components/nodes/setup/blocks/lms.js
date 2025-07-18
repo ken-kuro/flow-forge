@@ -1,9 +1,24 @@
 // THIS IS TEMPORARY FILE FOR LMS ASSET BLOCK
 // TODO: Remove this after we have a real backend for LMS related stuff
 
+const LMS_TYPES = {
+    PRACTICE: 'practice',
+    CONVERSATION: 'conversation',
+    DIALOGUE: 'dialogue',
+    GAME: 'game',
+}
+
+const QUESTION_TYPES = {
+    SPEAKING_UNSCRIPTED: 'speaking_unscripted',
+    SPEAKING_SCRIPTED: 'speaking_scripted',
+    TRUE_FALSE: 'true_false',
+    SINGLE_CHOICE: 'single_choice',
+    MATCHING: 'matching',
+}
+
 const getLmsIdOptions = (lmsType) => {
     switch (lmsType) {
-        case 'practice':
+        case LMS_TYPES.PRACTICE:
             return [
                 {
                     value: {
@@ -13,7 +28,7 @@ const getLmsIdOptions = (lmsType) => {
                     label: 'Practice mẫu',
                 },
             ]
-        case 'conversation':
+        case LMS_TYPES.CONVERSATION:
             return [
                 {
                     value: {
@@ -26,7 +41,7 @@ const getLmsIdOptions = (lmsType) => {
                     label: 'Conversation mẫu',
                 },
             ]
-        case 'dialogue':
+        case LMS_TYPES.DIALOGUE:
             return [
                 {
                     value: {
@@ -128,7 +143,7 @@ const getLmsQuestionOptions = (practiceId) => {
                 value: {
                     id: 1,
                     content: 'What is the weather today?',
-                    type: 'speaking_unscripted',
+                    type: QUESTION_TYPES.SPEAKING_UNSCRIPTED,
                 },
                 label: 'Câu hỏi Warmup',
             },
@@ -136,7 +151,7 @@ const getLmsQuestionOptions = (practiceId) => {
                 value: {
                     id: 2,
                     content: 'What can you see?',
-                    type: 'speaking_unscripted',
+                    type: QUESTION_TYPES.SPEAKING_UNSCRIPTED,
                 },
                 label: 'Câu hỏi Brainstorm',
             },
@@ -145,7 +160,7 @@ const getLmsQuestionOptions = (practiceId) => {
                     id: 3,
                     content: 'Is it a butterfly?',
                     transcript: 'butterfly',
-                    type: 'speaking_scripted',
+                    type: QUESTION_TYPES.SPEAKING_SCRIPTED,
                 },
                 label: 'Câu hỏi Vocab - Listen and repeat',
             },
@@ -154,7 +169,7 @@ const getLmsQuestionOptions = (practiceId) => {
                     id: 4,
                     content: 'Is it a butterfly?',
                     transcript: 'butterfly',
-                    type: 'speaking_scripted',
+                    type: QUESTION_TYPES.SPEAKING_SCRIPTED,
                 },
                 label: 'Câu hỏi Grammar - Listen and repeat',
             },
@@ -162,7 +177,7 @@ const getLmsQuestionOptions = (practiceId) => {
                 value: {
                     id: 5,
                     content: 'Is it a butterfly?',
-                    type: 'true_false',
+                    type: QUESTION_TYPES.TRUE_FALSE,
                     image_url: 'https://scontent.rinoedu.ai/teacherroger/Ver2/3Vocab/intro_butterfly.png',
                     answers: ['Yes, it is', 'No'],
                     correct_answer: ['Yes, it is'],
@@ -173,7 +188,7 @@ const getLmsQuestionOptions = (practiceId) => {
                 value: {
                     id: 6,
                     content: 'Is it a butterfly?',
-                    type: 'single_choice',
+                    type: QUESTION_TYPES.SINGLE_CHOICE,
                     image_url: 'https://scontent.rinoedu.ai/teacherroger/Ver2/3Vocab/intro_butterfly.png',
                     answers: ['Yes, it is', 'No'],
                     correct_answer: ['Yes, it is'],
@@ -184,7 +199,7 @@ const getLmsQuestionOptions = (practiceId) => {
                 value: {
                     id: 7,
                     content: 'Matching',
-                    type: 'matching',
+                    type: QUESTION_TYPES.MATCHING,
                     list1: [
                         'https://scontent.rinoedu.ai/teacherroger/Ver2/3Vocab/intro_butterfly.png',
                         'https://scontent.rinoedu.ai/teacherroger/Ver2/3Vocab/intro_ant.png',
@@ -201,4 +216,4 @@ const getLmsQuestionOptions = (practiceId) => {
     return []
 }
 
-export { getLmsIdOptions, getLmsQuestionOptions }
+export { LMS_TYPES, QUESTION_TYPES, getLmsIdOptions, getLmsQuestionOptions }
