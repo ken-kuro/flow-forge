@@ -38,10 +38,10 @@ onUnmounted(() => {
 
 // Local reactive copies for editing
 const title = ref(props.block.data.title ?? 'System Action')
-const action = ref(props.block.data.action || 'asset-interaction')
-const delay = ref(props.block.data.delay ?? 0)
-const methods = ref(props.block.data.methods || [])
-const targets = ref(props.block.data.targets || [])
+const action = ref(props.block.data.action ?? 'asset-interaction')
+const delay = ref(props.block.data.delay ?? 2.5)
+const method = ref(props.block.data.method ?? '') // Changed from methods array to single method
+const targets = ref(props.block.data.targets ?? [])
 
 // Available actions (extensible for future API calls, jobs, etc.)
 const actionOptions = [
@@ -64,19 +64,14 @@ const availableMethods = computed(() => {
     return getSystemActionMethods(lmsType, questionType, objects, texts)
 })
 
-// Get context-aware available targets for selected methods
+// Get context-aware available targets for selected method
 const availableTargets = computed(() => {
     const objects = flowContextStore.objects
-    const allTargets = []
 
-    // Get targets for each selected method
-    for (const methodValue of methods.value) {
-        const methodTargets = getSystemActionTargets(methodValue, objects)
-        allTargets.push(...methodTargets)
-    }
+    if (!method.value) return []
 
-    // Remove duplicates and return unique targets
-    return [...new Set(allTargets)]
+    // Get targets for the selected method
+    return getSystemActionTargets(method.value, objects)
 })
 
 // Check if we have valid context for showing methods
@@ -91,12 +86,12 @@ const conflictWarning = computed(() => {
     const warnings = []
 
     // Check method conflicts
-    if (methods.value.length > 0) {
+    if (method.value) {
         const validMethodValues = availableMethods.value.map((m) => m.value)
-        const invalidMethods = methods.value.filter((method) => !validMethodValues.includes(method))
+        const isInvalidMethod = !validMethodValues.includes(method.value)
 
-        if (invalidMethods.length > 0) {
-            warnings.push(`Methods not available: ${invalidMethods.join(', ')}`)
+        if (isInvalidMethod) {
+            warnings.push(`Method not available: ${method.value}`)
         }
     }
 
@@ -112,10 +107,11 @@ const conflictWarning = computed(() => {
     return warnings.length > 0 ? warnings.join('. ') : null
 })
 
-// Filter selected methods/targets to only include valid ones for display
-const validMethods = computed(() => {
+// Filter selected method/targets to only include valid ones for display
+const validMethod = computed(() => {
+    if (!method.value) return ''
     const validMethodValues = availableMethods.value.map((m) => m.value)
-    return methods.value.filter((method) => validMethodValues.includes(method))
+    return validMethodValues.includes(method.value) ? method.value : ''
 })
 
 const validTargets = computed(() => {
@@ -128,25 +124,22 @@ const updateBlockData = (immediate = false) => {
         title: title.value,
         action: action.value,
         delay: delay.value,
-        methods: methods.value, // Save all methods, let conflict detection handle validation
+        method: method.value, // Save single method, let conflict detection handle validation
         targets: targets.value, // Save all targets, let conflict detection handle validation
     }
     updateBlock(props.nodeId, props.block.id, newData, immediate)
 }
 
-// Handle method selection (multiple choice)
-const toggleMethod = (methodValue) => {
-    const index = methods.value.indexOf(methodValue)
-    if (index > -1) {
-        methods.value.splice(index, 1)
-    } else {
-        methods.value.push(methodValue)
-    }
+// Handle method selection (single choice)
+const setMethod = (methodValue) => {
+    method.value = methodValue
+    // Clear targets when method changes since they may not be valid for new method
+    targets.value = []
     updateBlockData(true)
 }
 
-const isMethodSelected = (method) => {
-    return methods.value.includes(method)
+const isMethodSelected = (methodValue) => {
+    return method.value === methodValue
 }
 
 // Handle target selection (multiple choice)
@@ -164,7 +157,7 @@ const isTargetSelected = (target) => {
     return targets.value.includes(target)
 }
 
-// Watch for context changes and clean up invalid methods/targets
+// Watch for context changes and clean up invalid method/targets
 watch(
     [
         () => flowContextStore.lmsType,
@@ -173,16 +166,16 @@ watch(
         () => flowContextStore.texts,
     ],
     () => {
-        // Filter out any methods that are no longer valid
+        // Check if current method is still valid
         const validMethodValues = availableMethods.value.map((m) => m.value)
-        const filteredMethods = methods.value.filter((method) => validMethodValues.includes(method))
+        const isMethodValid = method.value ? validMethodValues.includes(method.value) : true
 
         // Filter out any targets that are no longer valid
         const filteredTargets = targets.value.filter((target) => availableTargets.value.includes(target))
 
         let hasChanges = false
-        if (filteredMethods.length !== methods.value.length) {
-            methods.value = filteredMethods
+        if (!isMethodValid) {
+            method.value = ''
             hasChanges = true
         }
 
@@ -200,10 +193,12 @@ watch(
 
 // Watch for method changes and update targets accordingly
 watch(
-    methods,
+    method,
     () => {
-        // When methods change, filter targets to only include valid ones for the new method selection
-        const filteredTargets = targets.value.filter((target) => availableTargets.value.includes(target))
+        // When method changes, filter targets to only include valid ones for the new method selection
+        const currentTargets = availableTargets.value
+        const filteredTargets = targets.value.filter((target) => currentTargets.includes(target))
+
         if (filteredTargets.length !== targets.value.length) {
             targets.value = filteredTargets
             updateBlockData(true)
@@ -272,10 +267,10 @@ watch(
                 />
             </div>
 
-            <!-- Method Selection (Multiple Choice) -->
+            <!-- Method Selection (Single Choice) -->
             <div class="form-control">
                 <label class="label">
-                    <span class="label-text text-xs">Method view</span>
+                    <span class="label-text text-xs">Method</span>
                 </label>
 
                 <!-- Show methods dropdown when context is valid -->
@@ -285,31 +280,28 @@ watch(
                         role="button"
                         class="select select-bordered select-xs w-full flex items-center cursor-pointer"
                     >
-                        <span v-if="validMethods.length === 0" class="text-base-content/50"
-                            >Select view methods...</span
-                        >
+                        <span v-if="validMethod === ''" class="text-base-content/50">Select method...</span>
                         <span v-else class="text-left">{{
-                            validMethods
-                                .map((m) => availableMethods.find((am) => am.value === m)?.label || m)
-                                .join(', ')
+                            availableMethods.find((am) => am.value === validMethod)?.label || validMethod
                         }}</span>
                     </div>
                     <ul
                         tabindex="0"
                         class="dropdown-content menu bg-base-100 rounded-box z-[1] w-full p-2 shadow-lg border border-base-300"
                     >
-                        <li v-for="method in availableMethods" :key="method.value">
+                        <li v-for="methodItem in availableMethods" :key="methodItem.value">
                             <label class="label cursor-pointer justify-start gap-2 p-2 hover:bg-base-200 rounded">
                                 <input
-                                    type="checkbox"
-                                    :checked="isMethodSelected(method.value)"
-                                    @change="toggleMethod(method.value)"
-                                    class="checkbox checkbox-xs checkbox-success"
+                                    type="radio"
+                                    :name="`method-${nodeId}-${block.id}`"
+                                    :checked="isMethodSelected(methodItem.value)"
+                                    @change="setMethod(methodItem.value)"
+                                    class="radio radio-xs radio-success"
                                 />
                                 <div class="flex flex-col">
-                                    <span class="label-text text-xs font-medium">{{ method.label }}</span>
+                                    <span class="label-text text-xs font-medium">{{ methodItem.label }}</span>
                                     <span class="label-text text-xs text-base-content/70">{{
-                                        method.description
+                                        methodItem.description
                                     }}</span>
                                 </div>
                             </label>
@@ -325,7 +317,7 @@ watch(
             </div>
 
             <!-- Targets Selection (Multiple Choice) -->
-            <div v-if="validMethods.length > 0" class="form-control">
+            <div v-if="validMethod !== ''" class="form-control">
                 <label class="label">
                     <span class="label-text text-xs">Targets</span>
                 </label>
@@ -360,7 +352,7 @@ watch(
 
                 <!-- Show message when no targets available -->
                 <div v-else class="select select-bordered select-xs w-full flex items-center text-base-content/50">
-                    <span>No targets available for selected methods</span>
+                    <span>No targets available for selected method</span>
                 </div>
             </div>
         </div>
