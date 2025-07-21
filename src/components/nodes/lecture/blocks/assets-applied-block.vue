@@ -36,6 +36,20 @@ onUnmounted(() => {
     flushPendingSaves()
 })
 
+// Helper function to get LMS asset subtype label
+const getLmsAssetLabel = (assetData) => {
+    if (!assetData || !assetData.lmsType || assetData.lmsType === null) return 'LMS'
+
+    const typeLabel = assetData.lmsType.charAt(0).toUpperCase() + assetData.lmsType.slice(1)
+
+    // If it's a practice with a specific question, show more details
+    if (assetData.lmsType === LMS_TYPES.PRACTICE && assetData.questionData) {
+        return `${typeLabel} - Q${assetData.questionData.id}`
+    }
+
+    return typeLabel
+}
+
 // Local reactive copies for editing
 const title = ref(props.block.data.title ?? 'Assets Applied')
 const selectedAssetId = ref(props.block.data.selectedAssetId ?? '')
@@ -85,12 +99,16 @@ const filteredAssetOptions = computed(() => {
         })
     })
 
-    if (availableAssets.value.lms) {
-        options.push({
-            id: availableAssets.value.lms.id,
-            type: 'lms',
-            label: `${availableAssets.value.lms.data.title} (LMS)`,
-            data: availableAssets.value.lms.data,
+    // Add all LMS assets (check if it's an array)
+    if (Array.isArray(availableAssets.value.lms)) {
+        availableAssets.value.lms.forEach((asset, index) => {
+            const lmsLabel = getLmsAssetLabel(asset.data)
+            options.push({
+                id: asset.id,
+                type: 'lms',
+                label: `${asset.data.title} (${lmsLabel})`,
+                data: asset.data,
+            })
         })
     }
 
@@ -173,20 +191,6 @@ watch(
     },
     { immediate: true },
 )
-
-// Helper function to get LMS asset subtype label
-const getLmsAssetLabel = (assetData) => {
-    if (!assetData || !assetData.lmsType || assetData.lmsType === null) return 'LMS'
-
-    const typeLabel = assetData.lmsType.charAt(0).toUpperCase() + assetData.lmsType.slice(1)
-
-    // If it's a practice with a specific question, show more details
-    if (assetData.lmsType === LMS_TYPES.PRACTICE && assetData.questionData) {
-        return `${typeLabel} - Q${assetData.questionData.id}`
-    }
-
-    return typeLabel
-}
 </script>
 
 <template>
