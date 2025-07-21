@@ -84,16 +84,29 @@ export const useFlowContextStore = defineStore('flowContext', () => {
     })
 
     /**
-     * Get the single LMS asset configuration
-     * @returns {Object|null} LMS asset or null
+     * Get all LMS assets
+     * @returns {Array} Array of LMS assets
+     */
+    const lmsAssets = computed(() => {
+        return setupAssets.value.filter((asset) => asset.type === 'asset-lms')
+    })
+
+    /**
+     * Get the primary LMS asset configuration (first configured one)
+     * @returns {Object|null} Primary LMS asset or null
      */
     const lmsAsset = computed(() => {
-        const lmsAssets = setupAssets.value.filter((asset) => asset.type === 'asset-lms')
-        if (lmsAssets.length === 0) return null
-        if (lmsAssets.length > 1) {
-            console.warn('🚨 Multiple LMS assets found. Using the first one.')
+        if (lmsAssets.value.length === 0) return null
+
+        // Find the first LMS block that has a configuration
+        const configuredLms = lmsAssets.value.find((asset) => asset.data?.lmsType && asset.data.lmsType !== null)
+
+        if (configuredLms) {
+            return configuredLms
         }
-        return lmsAssets[0]
+
+        // If no configured LMS found, return the first one
+        return lmsAssets.value[0]
     })
 
     /**
@@ -170,27 +183,32 @@ export const useFlowContextStore = defineStore('flowContext', () => {
 
         // Check LMS constraint: All LMS blocks must have the same type and question type
         if (lmsBlocks.length > 1) {
-            const firstLms = lmsBlocks[0]
-            const firstLmsType = firstLms.data?.lmsType
-            const firstQuestionType = firstLms.data?.questionData?.type
+            // Find the first configured LMS block as the reference
+            const configuredLmsBlocks = lmsBlocks.filter((lms) => lms.data?.lmsType && lms.data.lmsType !== null)
 
-            for (let i = 1; i < lmsBlocks.length; i++) {
-                const currentLms = lmsBlocks[i]
-                const currentLmsType = currentLms.data?.lmsType
-                const currentQuestionType = currentLms.data?.questionData?.type
+            if (configuredLmsBlocks.length > 1) {
+                const referenceLms = configuredLmsBlocks[0]
+                const referenceLmsType = referenceLms.data.lmsType
+                const referenceQuestionType = referenceLms.data?.questionData?.type
 
-                if (currentLmsType !== firstLmsType) {
-                    result.isValid = false
-                    result.errors.push(
-                        `All LMS blocks must have the same type. Found: ${firstLmsType} and ${currentLmsType}`,
-                    )
-                }
+                for (let i = 1; i < configuredLmsBlocks.length; i++) {
+                    const currentLms = configuredLmsBlocks[i]
+                    const currentLmsType = currentLms.data.lmsType
+                    const currentQuestionType = currentLms.data?.questionData?.type
 
-                if (currentQuestionType !== firstQuestionType) {
-                    result.isValid = false
-                    result.errors.push(
-                        `All LMS blocks must have the same question type. Found: ${firstQuestionType} and ${currentQuestionType}`,
-                    )
+                    if (currentLmsType !== referenceLmsType) {
+                        result.isValid = false
+                        result.errors.push(
+                            `All LMS blocks must have the same type. Found: ${referenceLmsType} and ${currentLmsType}`,
+                        )
+                    }
+
+                    if (currentQuestionType !== referenceQuestionType) {
+                        result.isValid = false
+                        result.errors.push(
+                            `All LMS blocks must have the same question type. Found: ${referenceQuestionType} and ${currentQuestionType}`,
+                        )
+                    }
                 }
             }
         }
@@ -456,10 +474,8 @@ export const useFlowContextStore = defineStore('flowContext', () => {
         // Add video assets
         availableAssets.videos.push(...videoAssets.value)
 
-        // Add LMS asset
-        if (lmsAsset.value) {
-            availableAssets.lms = lmsAsset.value
-        }
+        // Add all LMS assets
+        availableAssets.lms = lmsAssets.value
 
         return availableAssets
     }
@@ -489,6 +505,7 @@ export const useFlowContextStore = defineStore('flowContext', () => {
         imageAssetWithElements,
         normalImageAssets,
         videoAssets,
+        lmsAssets,
         lmsAsset,
         objects,
         texts,
