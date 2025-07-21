@@ -174,7 +174,7 @@ const DEFAULT_OTHER_BRANCH = {
 
 const DEFAULT_NO_ANSWER_BRANCH = {
     value: 'NO_ANSWER',
-    label: 'Im lặng',
+    label: 'Không trả lời',
     description: 'Học sinh không trả lời',
     cup: 0,
 }
