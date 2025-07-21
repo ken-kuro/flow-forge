@@ -36,6 +36,7 @@ export default [
                     ignores: [],
                 },
             ],
+            'vue/no-unused-vars': 'warn',
         },
     },
 ]
