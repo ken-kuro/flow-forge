@@ -63,20 +63,23 @@ const questionOptions = ref([])
 // Check if another LMS configuration exists and has different type
 const conflictingLmsExists = computed(() => {
     const allLmsAssets = flowContextStore.setupAssets.filter((asset) => asset.type === 'asset-lms')
-    const otherLms = allLmsAssets.filter((asset) => asset.id !== props.block.id)
 
-    if (otherLms.length === 0) return false
+    if (allLmsAssets.length <= 1) return false // No conflicts with single or no LMS blocks
 
-    // Skip conflict checking if current block has no configuration (null values)
-    if (!lmsType.value) return false
+    // Find the first LMS block (by ID sort) that has a configuration
+    const sortedLms = allLmsAssets.sort((a, b) => a.id.localeCompare(b.id))
+    const primaryLms = sortedLms.find((asset) => asset.data?.lmsType && asset.data.lmsType !== null)
 
-    // Check if any other LMS has different type or question type
-    for (const other of otherLms) {
-        // Skip other blocks that have no configuration
-        if (!other.data?.lmsType) continue
+    // If no primary LMS exists yet, no conflicts
+    if (!primaryLms) return false
 
-        if (other.data.lmsType !== lmsType.value) return true
-        if (other.data?.questionData?.type !== questionData.value?.type) return true
+    // If this is the primary LMS, no conflicts
+    if (primaryLms.id === props.block.id) return false
+
+    // For secondary LMS blocks, check if they conflict with primary
+    if (lmsType.value && lmsType.value !== null) {
+        if (lmsType.value !== primaryLms.data.lmsType) return true
+        if (questionData.value?.type !== primaryLms.data?.questionData?.type) return true
     }
 
     return false
@@ -347,7 +350,7 @@ const clearLmsData = () => {
         <div class="form-control">
             <label class="label">
                 <span class="label-text text-xs"
-                    >{{ lmsType.charAt(0).toUpperCase() + lmsType.slice(1) }} Configuration</span
+                    >{{ lmsType ? lmsType.charAt(0).toUpperCase() + lmsType.slice(1) : 'LMS' }} Configuration</span
                 >
             </label>
             <select
