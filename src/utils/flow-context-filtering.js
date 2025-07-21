@@ -110,22 +110,43 @@ const getSystemActionMethods = (lmsType, questionType, objects, texts) => {
  * Get the targets for a given system action type
  * @param {string} actionType - The value of system action
  * @param {Array<Object>} objects - The objects in the scene
- * @returns {Array<Object>} - An array of target objects
+ * @returns {Array<Object>} - An array of target objects with display names and values
  */
 const getSystemActionTargets = (actionType, objects) => {
     const targets = []
 
     switch (actionType) {
         case SYSTEM_ACTION_METHODS.highlightElements.value:
-            // Return object elements for highlighting
+            // Add user answer target
             // This user_answer.ids will be resolved by the client in runtime, based on the object name and user answer to resolve the real object id
-            targets.push('user_answer.ids', ...objects.map((object) => object.id))
+            targets.push({
+                id: 'user_answer.ids',
+                name: 'User Answer Elements',
+                description: 'Elements mentioned in user answer',
+            })
+
+            // Add object targets with their names for on-demand highlighting
+            objects.forEach((object) => {
+                const isMain = object.isMain === true
+                const status = isMain ? 'Main' : 'Relevant'
+                targets.push({
+                    id: object.id,
+                    name: object.name || `Object ${object.id}`,
+                    description: `${status} Object: ${object.name || object.id}`,
+                    isMain: isMain,
+                    category: isMain ? 'main' : 'relevant',
+                })
+            })
             break
 
         case SYSTEM_ACTION_METHODS.showPronunciationResult.value:
-            // For pronunciation result, return static "user_answer" target
+            // For pronunciation result, return only "user_answer" target
             // This user_answer.ids will be resolved by the client in runtime, based on the text and user transcript to resolve the real text id
-            targets.push('user_answer.ids')
+            targets.push({
+                id: 'user_answer.ids',
+                name: 'User Pronunciation Result',
+                description: 'Text elements from pronunciation analysis',
+            })
             break
     }
 
