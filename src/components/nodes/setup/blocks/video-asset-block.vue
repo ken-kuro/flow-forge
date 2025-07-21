@@ -104,10 +104,12 @@ const showPreview = computed(() => videoUrl.value && videoUrl.value.trim() !== '
             <label class="label">
                 <span class="label-text text-xs">Source</span>
             </label>
-            <select v-model="sourceType" @change="handleSourceTypeChange" class="select select-bordered select-xs">
-                <option value="url">From URL</option>
-                <option value="upload">Upload Video</option>
-            </select>
+            <StopPropagationWrapper>
+                <select v-model="sourceType" @change="handleSourceTypeChange" class="select select-bordered select-xs">
+                    <option value="url">From URL</option>
+                    <option value="upload">Upload Video</option>
+                </select>
+            </StopPropagationWrapper>
         </div>
 
         <!-- URL Input or Upload Button -->
@@ -116,13 +118,15 @@ const showPreview = computed(() => videoUrl.value && videoUrl.value.trim() !== '
                 <label class="label">
                     <span class="label-text text-xs">Video URL</span>
                 </label>
-                <input
-                    v-model="videoUrl"
-                    @blur="updateBlockData"
-                    type="url"
-                    placeholder="https://example.com/video.mp4"
-                    class="input input-bordered input-xs"
-                />
+                <StopPropagationWrapper>
+                    <input
+                        v-model="videoUrl"
+                        @blur="updateBlockData"
+                        type="url"
+                        placeholder="https://example.com/video.mp4"
+                        class="input input-bordered input-xs"
+                    />
+                </StopPropagationWrapper>
             </div>
             <div v-if="sourceType === 'upload' && !videoUrl">
                 <label class="label">

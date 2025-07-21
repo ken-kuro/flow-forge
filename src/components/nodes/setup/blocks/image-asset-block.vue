@@ -6,6 +6,7 @@ import { useModal } from '@/composables/use-modal'
 import SetupImageModal from '../setup-image-modal.vue'
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue'
 import { useFlowContextStore } from '@/stores/flow-context-store.js'
+import StopPropagationWrapper from '@/components/shared/stop-propagation-wrapper.vue'
 
 /**
  * ImageAssetBlock - A block for defining image assets in Setup nodes.
@@ -224,10 +225,12 @@ const clearElements = () => {
             <label class="label">
                 <span class="label-text text-xs">Source</span>
             </label>
-            <select v-model="sourceType" @change="handleSourceTypeChange" class="select select-bordered select-xs">
-                <option value="url">From URL</option>
-                <option value="upload">Upload Image</option>
-            </select>
+            <StopPropagationWrapper>
+                <select v-model="sourceType" @change="handleSourceTypeChange" class="select select-bordered select-xs">
+                    <option value="url">From URL</option>
+                    <option value="upload">Upload Image</option>
+                </select>
+            </StopPropagationWrapper>
         </div>
 
         <!-- URL Input or Upload Button -->
@@ -236,13 +239,15 @@ const clearElements = () => {
                 <label class="label">
                     <span class="label-text text-xs">Image URL</span>
                 </label>
-                <input
-                    v-model="imageUrl"
-                    @blur="updateBlockData"
-                    type="url"
-                    placeholder="https://example.com/image.jpg"
-                    class="input input-bordered input-xs"
-                />
+                <StopPropagationWrapper>
+                    <input
+                        v-model="imageUrl"
+                        @blur="updateBlockData"
+                        type="url"
+                        placeholder="https://example.com/image.jpg"
+                        class="input input-bordered input-xs"
+                    />
+                </StopPropagationWrapper>
             </div>
             <div v-if="sourceType === 'upload' && !imageUrl">
                 <label class="label">

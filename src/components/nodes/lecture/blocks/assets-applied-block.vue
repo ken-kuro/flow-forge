@@ -5,6 +5,7 @@ import { Link, Image as ImageIcon, Video as VideoIcon, BookOpenText as LMSIcon }
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue'
 import { useFlowContextStore } from '@/stores/flow-context-store.js'
 import { LMS_TYPES } from '../../setup/blocks/lms'
+import StopPropagationWrapper from '@/components/shared/stop-propagation-wrapper.vue'
 
 /**
  * AssetsAppliedBlock - A simplified block for applying assets from the single Setup node.
@@ -232,16 +233,18 @@ watch(
 
             <!-- Show asset dropdown when options are available -->
             <div v-if="filteredAssetOptions.length > 0">
-                <select
-                    :value="selectedAssetId"
-                    @change="handleAssetSelect($event.target.value)"
-                    class="select select-bordered select-xs"
-                >
-                    <option value="">Choose an asset...</option>
-                    <option v-for="option in filteredAssetOptions" :key="option.id" :value="option.id">
-                        {{ option.label }}
-                    </option>
-                </select>
+                <StopPropagationWrapper>
+                    <select
+                        :value="selectedAssetId"
+                        @change="handleAssetSelect($event.target.value)"
+                        class="select select-bordered select-xs"
+                    >
+                        <option value="">Choose an asset...</option>
+                        <option v-for="option in filteredAssetOptions" :key="option.id" :value="option.id">
+                            {{ option.label }}
+                        </option>
+                    </select>
+                </StopPropagationWrapper>
             </div>
 
             <!-- Show message when no assets available -->
