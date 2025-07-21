@@ -8,6 +8,7 @@ import { useFlowContextStore } from '@/stores/flow-context-store.js'
 import {
     getCollectUserDataMethods,
     getSystemActionMethods,
+    getSystemActionTargets,
     getConditionBranch,
 } from '@/utils/flow-context-filtering.js'
 
@@ -409,6 +410,24 @@ function handleDebugDump() {
                               flowContextStore.texts,
                           )
                         : [],
+                    systemActionTargets: flowContextStore.lmsType
+                        ? (() => {
+                              const methods = getSystemActionMethods(
+                                  flowContextStore.lmsType,
+                                  flowContextStore.questionType,
+                                  flowContextStore.objects,
+                                  flowContextStore.texts,
+                              )
+                              const allTargets = {}
+                              methods.forEach((method) => {
+                                  allTargets[method.value] = getSystemActionTargets(
+                                      method.value,
+                                      flowContextStore.objects,
+                                  )
+                              })
+                              return allTargets
+                          })()
+                        : {},
                     conditionBranches: flowContextStore.lmsType
                         ? getConditionBranch(
                               flowContextStore.lmsType,
