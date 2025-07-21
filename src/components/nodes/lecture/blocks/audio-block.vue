@@ -3,7 +3,7 @@ import { ref, onUnmounted, computed } from 'vue'
 import { useFlowEditor } from '@/composables/use-flow-editor'
 import { Volume2 as AudioIcon } from 'lucide-vue-next'
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue'
-import StopPropagationTextArea from '@/components/shared/stop-propagation-textarea.vue'
+import StopPropagationWrapper from '@/components/shared/stop-propagation-wrapper.vue'
 
 /**
  * AudioBlock - A simplified block for creating audio blocks.
@@ -66,11 +66,14 @@ const updateBlockData = (immediate = false) => {
             <label class="label">
                 <span class="label-text text-xs">Description</span>
             </label>
-            <StopPropagationTextArea
-                v-model="description"
-                @blur="updateBlockData"
-                placeholder="Enter audio description"
-            />
+            <StopPropagationWrapper>
+                <textarea
+                    v-model="description"
+                    @blur="updateBlockData"
+                    placeholder="Enter audio description"
+                    class="textarea textarea-bordered textarea-xs min-h-18"
+                />
+            </StopPropagationWrapper>
         </div>
 
         <!-- Voice Selection -->
@@ -107,7 +110,14 @@ const updateBlockData = (immediate = false) => {
             <label class="label">
                 <span class="label-text text-xs">Audio text to speech</span>
             </label>
-            <StopPropagationTextArea v-model="text" @blur="updateBlockData" placeholder="Enter the text to be read" />
+            <StopPropagationWrapper>
+                <textarea
+                    v-model="text"
+                    @blur="updateBlockData"
+                    placeholder="Enter the text to be read"
+                    class="textarea textarea-bordered textarea-xs min-h-18"
+                />
+            </StopPropagationWrapper>
         </div>
     </CardBlockWrapper>
 </template>

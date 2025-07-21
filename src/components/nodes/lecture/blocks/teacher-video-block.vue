@@ -3,7 +3,7 @@ import { ref, onUnmounted, computed } from 'vue'
 import { useFlowEditor } from '@/composables/use-flow-editor'
 import { Play, Upload, X } from 'lucide-vue-next'
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue'
-import StopPropagationTextArea from '@/components/shared/stop-propagation-textarea.vue'
+import StopPropagationWrapper from '@/components/shared/stop-propagation-wrapper.vue'
 
 /**
  * TeacherVideoBlock - A block for displaying video content in Lecture nodes.
@@ -86,11 +86,14 @@ const removeVideo = () => {
             <label class="label">
                 <span class="label-text text-xs">Description</span>
             </label>
-            <StopPropagationTextArea
-                v-model="description"
-                @blur="updateBlockData"
-                placeholder="Enter video description"
-            />
+            <StopPropagationWrapper>
+                <textarea
+                    v-model="description"
+                    @blur="updateBlockData"
+                    placeholder="Enter video description"
+                    class="textarea textarea-bordered textarea-xs min-h-18"
+                />
+            </StopPropagationWrapper>
         </div>
 
         <!-- Source Type Selection -->
@@ -150,11 +153,14 @@ const removeVideo = () => {
             <label class="label">
                 <span class="label-text text-xs">Transcript</span>
             </label>
-            <StopPropagationTextArea
-                v-model="transcript"
-                @blur="updateBlockData"
-                placeholder="Enter video transcript"
-            />
+            <StopPropagationWrapper>
+                <textarea
+                    v-model="transcript"
+                    @blur="updateBlockData"
+                    placeholder="Enter video transcript"
+                    class="textarea textarea-bordered textarea-xs min-h-18"
+                />
+            </StopPropagationWrapper>
         </div>
     </CardBlockWrapper>
 </template>

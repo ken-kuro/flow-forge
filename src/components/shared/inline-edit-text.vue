@@ -12,7 +12,7 @@
 -->
 <script setup>
 import { ref, nextTick } from 'vue'
-import StopPropagationTextArea from './stop-propagation-textarea.vue'
+import StopPropagationWrapper from './stop-propagation-wrapper.vue'
 
 defineProps({
     placeholder: {
@@ -61,15 +61,15 @@ function finishEditing() {
             {{ localValue || placeholder }}
         </div>
         <!-- Edit Mode: Textarea with same dimensions, scrollable if content exceeds 2 lines -->
-        <StopPropagationTextArea
-            v-else
-            ref="inputRef"
-            v-model="localValue"
-            @blur="finishEditing"
-            :placeholder="placeholder"
-            :use-default-styles="false"
-            rows="2"
-            class="bg-transparent focus:bg-base-200 rounded px-1 -mx-1 outline-none w-full resize-none break-all leading-tight max-h-12 border border-base-content/20 overflow-y-auto"
-        />
+        <StopPropagationWrapper v-else>
+            <textarea
+                ref="inputRef"
+                v-model="localValue"
+                @blur="finishEditing"
+                :placeholder="placeholder"
+                rows="2"
+                class="bg-transparent focus:bg-base-200 rounded px-1 -mx-1 outline-none w-full resize-none break-all leading-tight max-h-12 border border-base-content/20 overflow-y-auto"
+            />
+        </StopPropagationWrapper>
     </div>
 </template>

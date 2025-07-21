@@ -5,6 +5,7 @@ import { Database } from 'lucide-vue-next'
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue'
 import { useFlowContextStore } from '@/stores/flow-context-store.js'
 import { getCollectUserDataMethods } from '@/utils/flow-context-filtering.js'
+import StopPropagationWrapper from '@/components/shared/stop-propagation-wrapper.vue'
 
 /**
  * CollectUserDataBlock - A context-aware block for collecting user data in Lecture nodes.
@@ -202,13 +203,15 @@ watch(
             <label class="label">
                 <span class="label-text text-xs">Save to</span>
             </label>
-            <input
-                v-model="saveTo"
-                @blur="updateBlockData"
-                type="text"
-                placeholder="user_answer"
-                class="input input-bordered input-xs"
-            />
+            <StopPropagationWrapper>
+                <input
+                    v-model="saveTo"
+                    @blur="updateBlockData"
+                    type="text"
+                    placeholder="user_answer"
+                    class="input input-bordered input-xs"
+                />
+            </StopPropagationWrapper>
             <div class="label">
                 <span class="label-text-alt text-xs text-base-content/50">
                     Variable where collected data will be stored

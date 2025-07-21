@@ -5,6 +5,7 @@ import { Settings } from 'lucide-vue-next'
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue'
 import { useFlowContextStore } from '@/stores/flow-context-store.js'
 import { getSystemActionMethods, getSystemActionTargets } from '@/utils/flow-context-filtering.js'
+import StopPropagationWrapper from '@/components/shared/stop-propagation-wrapper.vue'
 
 /**
  * SystemActionBlock - A context-aware block for system actions in Lecture nodes.
@@ -354,7 +355,8 @@ watch(
                             </span>
                         </div>
                     </div>
-                    <ul
+                    <StopPropagationWrapper
+                        tag="ul"
                         tabindex="0"
                         class="dropdown-content menu bg-base-100 rounded-box z-[1] w-full p-2 shadow-lg border border-base-300 max-h-48 overflow-y-auto"
                     >
@@ -385,7 +387,7 @@ watch(
                                 </div>
                             </label>
                         </li>
-                    </ul>
+                    </StopPropagationWrapper>
                 </div>
 
                 <!-- Show message when no targets available -->
