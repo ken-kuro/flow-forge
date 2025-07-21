@@ -39,7 +39,7 @@ onUnmounted(() => {
 // Local reactive copies for editing
 const title = ref(props.block.data.title ?? 'System Action')
 const action = ref(props.block.data.action ?? 'asset-interaction')
-const delay = ref(props.block.data.delay ?? 2.5)
+const delay = ref(props.block.data.delay ?? 0.0)
 const method = ref(props.block.data.method ?? '') // Changed from methods array to single method
 const targets = ref(props.block.data.targets ?? [])
 
@@ -97,7 +97,8 @@ const conflictWarning = computed(() => {
 
     // Check target conflicts
     if (targets.value.length > 0) {
-        const invalidTargets = targets.value.filter((target) => !availableTargets.value.includes(target))
+        const availableTargetIds = availableTargets.value.map((t) => t.id)
+        const invalidTargets = targets.value.filter((target) => !availableTargetIds.includes(target))
 
         if (invalidTargets.length > 0) {
             warnings.push(`Targets not available: ${invalidTargets.join(', ')}`)
@@ -115,7 +116,16 @@ const validMethod = computed(() => {
 })
 
 const validTargets = computed(() => {
-    return targets.value.filter((target) => availableTargets.value.includes(target))
+    const availableTargetIds = availableTargets.value.map((t) => t.id)
+    return targets.value.filter((target) => availableTargetIds.includes(target))
+})
+
+// Get display names for valid targets
+const validTargetsWithNames = computed(() => {
+    return validTargets.value.map((targetId) => {
+        const targetObj = availableTargets.value.find((t) => t.id === targetId)
+        return targetObj ? targetObj.name : targetId
+    })
 })
 
 // Update the store when values change
@@ -143,18 +153,18 @@ const isMethodSelected = (methodValue) => {
 }
 
 // Handle target selection (multiple choice)
-const toggleTarget = (targetValue) => {
-    const index = targets.value.indexOf(targetValue)
+const toggleTarget = (targetId) => {
+    const index = targets.value.indexOf(targetId)
     if (index > -1) {
         targets.value.splice(index, 1)
     } else {
-        targets.value.push(targetValue)
+        targets.value.push(targetId)
     }
     updateBlockData(true)
 }
 
-const isTargetSelected = (target) => {
-    return targets.value.includes(target)
+const isTargetSelected = (targetId) => {
+    return targets.value.includes(targetId)
 }
 
 // Watch for context changes and clean up invalid method/targets
@@ -196,8 +206,8 @@ watch(
     method,
     () => {
         // When method changes, filter targets to only include valid ones for the new method selection
-        const currentTargets = availableTargets.value
-        const filteredTargets = targets.value.filter((target) => currentTargets.includes(target))
+        const availableTargetIds = availableTargets.value.map((t) => t.id)
+        const filteredTargets = targets.value.filter((target) => availableTargetIds.includes(target))
 
         if (filteredTargets.length !== targets.value.length) {
             targets.value = filteredTargets
@@ -262,7 +272,7 @@ watch(
                     type="number"
                     step="0.1"
                     min="0"
-                    placeholder="2.5"
+                    placeholder="0.0"
                     class="input input-bordered input-xs"
                 />
             </div>
@@ -332,15 +342,15 @@ watch(
                         <span v-if="validTargets.length === 0" class="text-base-content/50">Select targets...</span>
                         <div v-else class="flex flex-wrap gap-1 w-full">
                             <span
-                                v-for="target in validTargets.slice(0, 3)"
-                                :key="target"
-                                class="badge badge-success badge-xs text-xs truncate max-w-[120px]"
-                                :title="target"
+                                v-for="targetName in validTargetsWithNames.slice(0, 5)"
+                                :key="targetName"
+                                class="badge badge-success badge-xs text-xs truncate max-w-[100px]"
+                                :title="targetName"
                             >
-                                {{ target }}
+                                {{ targetName }}
                             </span>
-                            <span v-if="validTargets.length > 3" class="text-xs text-base-content/70 self-center">
-                                +{{ validTargets.length - 3 }} more
+                            <span v-if="validTargets.length > 5" class="text-xs text-base-content/70 self-center">
+                                +{{ validTargets.length - 5 }} more
                             </span>
                         </div>
                     </div>
@@ -348,17 +358,31 @@ watch(
                         tabindex="0"
                         class="dropdown-content menu bg-base-100 rounded-box z-[1] w-full p-2 shadow-lg border border-base-300 max-h-48 overflow-y-auto"
                     >
-                        <li v-for="target in availableTargets" :key="target">
+                        <li v-for="target in availableTargets" :key="target.id">
                             <label class="label cursor-pointer justify-start gap-2 p-2 hover:bg-base-200 rounded">
                                 <input
                                     type="checkbox"
-                                    :checked="isTargetSelected(target)"
-                                    @change="toggleTarget(target)"
+                                    :checked="isTargetSelected(target.id)"
+                                    @change="toggleTarget(target.id)"
                                     class="checkbox checkbox-xs checkbox-success"
                                 />
-                                <span class="label-text text-xs break-all" :title="target">
-                                    {{ target }}
-                                </span>
+                                <div class="flex flex-col flex-1 min-w-0">
+                                    <div class="flex items-center gap-2">
+                                        <span class="label-text text-xs font-medium truncate">{{ target.name }}</span>
+                                        <span v-if="target.isMain === true" class="badge badge-primary badge-xs">
+                                            Main
+                                        </span>
+                                        <span
+                                            v-else-if="target.isMain === false"
+                                            class="badge badge-secondary badge-xs"
+                                        >
+                                            Relevant
+                                        </span>
+                                    </div>
+                                    <span class="label-text text-xs text-base-content/70 truncate">{{
+                                        target.description
+                                    }}</span>
+                                </div>
                             </label>
                         </li>
                     </ul>
