@@ -327,14 +327,26 @@ watch(
                     <div
                         tabindex="0"
                         role="button"
-                        class="select select-bordered select-xs w-full flex items-center cursor-pointer"
+                        class="select select-bordered select-xs w-full flex items-center cursor-pointer min-h-[2rem]"
                     >
                         <span v-if="validTargets.length === 0" class="text-base-content/50">Select targets...</span>
-                        <span v-else class="text-left">{{ validTargets.join(', ') }}</span>
+                        <div v-else class="flex flex-wrap gap-1 w-full">
+                            <span
+                                v-for="target in validTargets.slice(0, 3)"
+                                :key="target"
+                                class="badge badge-success badge-xs text-xs truncate max-w-[120px]"
+                                :title="target"
+                            >
+                                {{ target }}
+                            </span>
+                            <span v-if="validTargets.length > 3" class="text-xs text-base-content/70 self-center">
+                                +{{ validTargets.length - 3 }} more
+                            </span>
+                        </div>
                     </div>
                     <ul
                         tabindex="0"
-                        class="dropdown-content menu bg-base-100 rounded-box z-[1] w-full p-2 shadow-lg border border-base-300"
+                        class="dropdown-content menu bg-base-100 rounded-box z-[1] w-full p-2 shadow-lg border border-base-300 max-h-48 overflow-y-auto"
                     >
                         <li v-for="target in availableTargets" :key="target">
                             <label class="label cursor-pointer justify-start gap-2 p-2 hover:bg-base-200 rounded">
@@ -344,7 +356,9 @@ watch(
                                     @change="toggleTarget(target)"
                                     class="checkbox checkbox-xs checkbox-success"
                                 />
-                                <span class="label-text text-xs">{{ target }}</span>
+                                <span class="label-text text-xs break-all" :title="target">
+                                    {{ target }}
+                                </span>
                             </label>
                         </li>
                     </ul>
