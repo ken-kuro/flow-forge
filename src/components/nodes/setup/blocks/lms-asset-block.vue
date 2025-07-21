@@ -62,34 +62,43 @@ const questionOptions = ref([])
 
 // Check if another LMS configuration exists and has different type
 const conflictingLmsExists = computed(() => {
-    const allLmsAssets = flowContextStore.setupAssets.filter((asset) => asset.type === 'asset-lms')
+    const allLmsAssets = flowContextStore.lmsAssets
 
     if (allLmsAssets.length <= 1) return false // No conflicts with single or no LMS blocks
 
-    // Find the first LMS block (by ID sort) that has a configuration
-    const sortedLms = allLmsAssets.sort((a, b) => a.id.localeCompare(b.id))
-    const primaryLms = sortedLms.find((asset) => asset.data?.lmsType && asset.data.lmsType !== null)
+    // Find the first configured LMS block as the reference
+    const configuredLmsBlocks = allLmsAssets.filter((asset) => asset.data?.lmsType && asset.data.lmsType !== null)
 
-    // If no primary LMS exists yet, no conflicts
-    if (!primaryLms) return false
+    if (configuredLmsBlocks.length <= 1) return false // No conflicts if only one or no configured blocks
 
-    // If this is the primary LMS, no conflicts
-    if (primaryLms.id === props.block.id) return false
+    // Find the reference LMS (first configured one that's not this block)
+    const referenceLms = configuredLmsBlocks.find((asset) => asset.id !== props.block.id)
 
-    // For secondary LMS blocks, check if they conflict with primary
+    // If no reference LMS exists, no conflicts
+    if (!referenceLms) return false
+
+    // For this LMS block, check if it conflicts with the reference
     if (lmsType.value && lmsType.value !== null) {
-        if (lmsType.value !== primaryLms.data.lmsType) return true
-        if (questionData.value?.type !== primaryLms.data?.questionData?.type) return true
+        if (lmsType.value !== referenceLms.data.lmsType) return true
+        if (questionData.value?.type !== referenceLms.data?.questionData?.type) return true
     }
 
     return false
 })
 
-// Check if this is the first LMS configuration
-const isFirstLms = computed(() => {
-    const allLmsAssets = flowContextStore.setupAssets.filter((asset) => asset.type === 'asset-lms')
-    const sortedLms = allLmsAssets.sort((a, b) => a.id.localeCompare(b.id))
-    return sortedLms[0]?.id === props.block.id
+// Check if this is the primary LMS configuration (first configured one)
+const isPrimaryLms = computed(() => {
+    const allLmsAssets = flowContextStore.lmsAssets
+    const configuredLmsBlocks = allLmsAssets.filter((asset) => asset.data?.lmsType && asset.data.lmsType !== null)
+
+    if (configuredLmsBlocks.length === 0) {
+        // No configured blocks yet, this could be the first
+        return true
+    }
+
+    // Sort by ID to get consistent ordering
+    const sortedConfigured = configuredLmsBlocks.sort((a, b) => a.id.localeCompare(b.id))
+    return sortedConfigured[0]?.id === props.block.id
 })
 
 // Validation status
@@ -287,7 +296,7 @@ const clearLmsData = () => {
         </div>
 
         <!-- Primary LMS Configuration Info -->
-        <div v-if="isFirstLms" class="alert alert-success text-xs mb-2">
+        <div v-if="isPrimaryLms && lmsType && lmsType !== null" class="alert alert-success text-xs mb-2">
             <div class="flex items-center gap-2">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -335,14 +344,16 @@ const clearLmsData = () => {
                 v-model="lmsType"
                 class="select select-bordered select-xs"
                 @change="handleTypeChange"
-                :disabled="conflictingLmsExists"
+                :disabled="false"
             >
                 <option v-for="option in lmsTypeOptions" :key="option.value" :value="option.value">
                     {{ option.label }}
                 </option>
             </select>
             <div v-if="conflictingLmsExists" class="label">
-                <span class="label-text-alt text-xs text-warning"> Disabled: Another LMS configuration exists </span>
+                <span class="label-text-alt text-xs text-warning">
+                    Warning: This conflicts with another LMS configuration
+                </span>
             </div>
         </div>
 
@@ -357,7 +368,7 @@ const clearLmsData = () => {
                 v-model="lmsData"
                 class="select select-bordered select-xs"
                 @change="updateBlockData(true)"
-                :disabled="loadingLmsOptions || conflictingLmsExists"
+                :disabled="loadingLmsOptions"
             >
                 <option v-if="loadingLmsOptions" disabled>Loading...</option>
                 <option v-else-if="lmsOptions.length === 0" disabled>No options available</option>
@@ -381,7 +392,7 @@ const clearLmsData = () => {
                 v-model="questionData"
                 class="select select-bordered select-xs"
                 @change="handleQuestionChange"
-                :disabled="loadingQuestions || conflictingLmsExists"
+                :disabled="loadingQuestions"
             >
                 <option value="null">Select a question...</option>
                 <option v-if="loadingQuestions" disabled>Loading questions...</option>
