@@ -53,7 +53,6 @@ const getLmsAssetLabel = (assetData) => {
 // Local reactive copies for editing
 const title = ref(props.block.data.title ?? 'Assets Applied')
 const selectedAssetId = ref(props.block.data.selectedAssetId ?? '')
-const assetType = ref(props.block.data.assetType ?? 'any') // 'image', 'video', 'lms', 'any'
 
 // Get available assets from the single setup node
 const availableAssets = computed(() => {
@@ -70,7 +69,10 @@ const assetTypeConstraints = computed(() => {
     const constraints = {
         maxBlocks: flowContextStore.getMaxAssetBlocksForNode(props.nodeId),
         allowsDual: flowContextStore.allowsDualAssetBlocks,
-        usedAssetTypes: existingAssetBlocks.value.map((block) => block.data.assetType || 'any'),
+        usedAssetTypes: existingAssetBlocks.value.map((block) => {
+            const option = filteredAssetOptions.value.find((opt) => opt.id === block.data.selectedAssetId)
+            return option?.type || 'unknown'
+        }),
     }
 
     return constraints
@@ -84,7 +86,7 @@ const filteredAssetOptions = computed(() => {
     availableAssets.value.images.forEach((asset) => {
         options.push({
             id: asset.id,
-            type: 'image',
+            type: asset.type, // Use actual asset type: 'asset-image'
             label: `${asset.data.title} (Image)`,
             data: asset.data,
         })
@@ -93,7 +95,7 @@ const filteredAssetOptions = computed(() => {
     availableAssets.value.videos.forEach((asset) => {
         options.push({
             id: asset.id,
-            type: 'video',
+            type: asset.type, // Use actual asset type: 'asset-video'
             label: `${asset.data.title} (Video)`,
             data: asset.data,
         })
@@ -105,7 +107,7 @@ const filteredAssetOptions = computed(() => {
             const lmsLabel = getLmsAssetLabel(asset.data)
             options.push({
                 id: asset.id,
-                type: 'lms',
+                type: asset.type, // Use actual asset type: 'asset-lms'
                 label: `${asset.data.title} (${lmsLabel})`,
                 data: asset.data,
             })
@@ -137,11 +139,14 @@ const conflictWarning = computed(() => {
     if (allowsDual) {
         const selectedType = selectedOption.type
 
-        if (['image', 'video'].includes(selectedType) && existingTypes.some((t) => ['image', 'video'].includes(t))) {
+        if (
+            ['asset-image', 'asset-video'].includes(selectedType) &&
+            existingTypes.some((t) => ['asset-image', 'asset-video'].includes(t))
+        ) {
             return 'Only one image or video asset allowed per node'
         }
 
-        if (selectedType === 'lms' && existingTypes.includes('lms')) {
+        if (selectedType === 'asset-lms' && existingTypes.includes('asset-lms')) {
             return 'Only one LMS asset allowed per node'
         }
     }
@@ -160,7 +165,6 @@ const updateBlockData = (immediate = false) => {
     const newData = {
         title: title.value,
         selectedAssetId: selectedAssetId.value,
-        assetType: assetType.value,
     }
     updateBlock(props.nodeId, props.block.id, newData, immediate)
 }
@@ -170,7 +174,6 @@ const handleAssetSelect = (assetKey) => {
     const option = filteredAssetOptions.value.find((opt) => opt.id === assetKey)
     if (option) {
         selectedAssetId.value = option.id
-        assetType.value = option.type
         updateBlockData(true)
     }
 }
@@ -184,7 +187,6 @@ watch(
             const isValid = filteredAssetOptions.value.some((opt) => opt.id === selectedAssetId.value)
             if (!isValid) {
                 selectedAssetId.value = ''
-                assetType.value = 'any'
                 updateBlockData(true)
             }
         }
@@ -256,7 +258,7 @@ watch(
             </label>
 
             <!-- LMS Asset Preview -->
-            <div v-if="selectedAsset.type === 'lms'" class="w-full p-3 bg-base-200 rounded">
+            <div v-if="selectedAsset.type === 'asset-lms'" class="w-full p-3 bg-base-200 rounded">
                 <div class="flex items-center gap-2 mb-2">
                     <LMSIcon class="w-4 h-4 text-accent" />
                     <span class="text-sm font-medium">{{ getLmsAssetLabel(selectedAsset.data) }}</span>
@@ -288,14 +290,14 @@ watch(
             >
                 <!-- Image Preview -->
                 <img
-                    v-if="selectedAsset.type === 'image' && selectedAsset.data.imageUrl"
+                    v-if="selectedAsset.type === 'asset-image' && selectedAsset.data.imageUrl"
                     :src="selectedAsset.data.imageUrl"
                     :alt="selectedAsset.data.title"
                     class="max-w-full max-h-full object-contain"
                 />
                 <!-- Video Preview -->
                 <video
-                    v-else-if="selectedAsset.type === 'video' && selectedAsset.data.videoUrl"
+                    v-else-if="selectedAsset.type === 'asset-video' && selectedAsset.data.videoUrl"
                     :src="selectedAsset.data.videoUrl"
                     controls
                     class="max-w-full max-h-full"
@@ -303,11 +305,11 @@ watch(
                 ></video>
                 <!-- Fallback for missing or invalid assets -->
                 <div v-else class="flex flex-col items-center gap-2 text-base-content/50 text-xs text-center">
-                    <component :is="selectedAsset.type === 'image' ? ImageIcon : VideoIcon" class="w-8 h-8" />
-                    <span v-if="selectedAsset.type === 'image'">
+                    <component :is="selectedAsset.type === 'asset-image' ? ImageIcon : VideoIcon" class="w-8 h-8" />
+                    <span v-if="selectedAsset.type === 'asset-image'">
                         {{ selectedAsset.data.imageUrl ? 'Image failed to load' : 'No image URL set' }}
                     </span>
-                    <span v-else-if="selectedAsset.type === 'video'">
+                    <span v-else-if="selectedAsset.type === 'asset-video'">
                         {{ selectedAsset.data.videoUrl ? 'Video failed to load' : 'No video URL set' }}
                     </span>
                     <span v-else>No preview available</span>
@@ -319,7 +321,7 @@ watch(
                 <div><strong>Type:</strong> {{ selectedAsset.type }}</div>
                 <div
                     v-if="
-                        selectedAsset.type === 'image' &&
+                        selectedAsset.type === 'asset-image' &&
                         selectedAsset.data.objects &&
                         selectedAsset.data.objects.length > 0
                     "
@@ -328,7 +330,7 @@ watch(
                 </div>
                 <div
                     v-if="
-                        selectedAsset.type === 'image' &&
+                        selectedAsset.type === 'asset-image' &&
                         selectedAsset.data.texts &&
                         selectedAsset.data.texts.length > 0
                     "
