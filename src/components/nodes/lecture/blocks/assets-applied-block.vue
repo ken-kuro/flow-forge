@@ -176,7 +176,7 @@ watch(
 
 // Helper function to get LMS asset subtype label
 const getLmsAssetLabel = (assetData) => {
-    if (!assetData || !assetData.lmsType) return 'LMS'
+    if (!assetData || !assetData.lmsType || assetData.lmsType === null) return 'LMS'
 
     const typeLabel = assetData.lmsType.charAt(0).toUpperCase() + assetData.lmsType.slice(1)
 
