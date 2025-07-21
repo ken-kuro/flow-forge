@@ -342,15 +342,15 @@ watch(
                         <span v-if="validTargets.length === 0" class="text-base-content/50">Select targets...</span>
                         <div v-else class="flex flex-wrap gap-1 w-full">
                             <span
-                                v-for="targetName in validTargetsWithNames.slice(0, 5)"
+                                v-for="targetName in validTargetsWithNames.slice(0, 3)"
                                 :key="targetName"
-                                class="badge badge-success badge-xs text-xs truncate max-w-[100px]"
+                                class="badge badge-success badge-xs text-xs truncate max-w-[120px]"
                                 :title="targetName"
                             >
                                 {{ targetName }}
                             </span>
-                            <span v-if="validTargets.length > 5" class="text-xs text-base-content/70 self-center">
-                                +{{ validTargets.length - 5 }} more
+                            <span v-if="validTargets.length > 3" class="text-xs text-base-content/70 self-center">
+                                +{{ validTargets.length - 3 }} more
                             </span>
                         </div>
                     </div>
