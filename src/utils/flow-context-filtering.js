@@ -85,47 +85,55 @@ const SYSTEM_ACTION_GENERATORS = {
 
 /**
  * Get the system action methods for a given LMS type and question type and elements in the scene
- * @param {LMS_TYPES} lmsType - The type of LMS
- * @param {QUESTION_TYPES} questionType - The type of question
+ * @param {LMS_TYPES} lmsType - The type of LMS (can be null for manual highlighting)
+ * @param {QUESTION_TYPES} questionType - The type of question (can be null for manual highlighting)
  * @param {Array<Object>} objects - The objects in the scene
  * @param {Array<Object>} texts - The texts in the scene
  * @returns {Array<SystemActionMethod>} - An array of method objects
  */
 const getSystemActionMethods = (lmsType, questionType, objects, texts) => {
-    // Only PRACTICE questions have system actions
-    if (lmsType !== LMS_TYPES.PRACTICE) {
-        return []
-    }
-
     const context = {
         hasObject: objects.length > 0,
         hasText: texts.length > 0,
     }
 
-    const generator = SYSTEM_ACTION_GENERATORS[questionType]
-    return generator ? generator(context) : []
+    // Case 1: Manual highlighting - when there are objects but no LMS configuration
+    if (!lmsType && context.hasObject) {
+        return [SYSTEM_ACTION_METHODS.highlightElements]
+    }
+
+    // Case 2: LMS-based system actions (original logic)
+    if (lmsType === LMS_TYPES.PRACTICE) {
+        const generator = SYSTEM_ACTION_GENERATORS[questionType]
+        return generator ? generator(context) : []
+    }
+
+    // Case 3: No LMS and no objects, or other LMS types
+    return []
 }
 
 /**
  * Get the targets for a given system action type
  * @param {string} actionType - The value of system action
  * @param {Array<Object>} objects - The objects in the scene
+ * @param {boolean} hasLmsContext - Whether there's an LMS context (affects user_answer availability)
  * @returns {Array<Object>} - An array of target objects with display names and values
  */
-const getSystemActionTargets = (actionType, objects) => {
+const getSystemActionTargets = (actionType, objects, hasLmsContext = true) => {
     const targets = []
 
     switch (actionType) {
         case SYSTEM_ACTION_METHODS.highlightElements.value:
-            // Add user answer target
-            // This user_answer.ids will be resolved by the client in runtime, based on the object name and user answer to resolve the real object id
-            targets.push({
-                id: 'user_answer.ids',
-                name: 'User Answer Elements',
-                description: 'Elements mentioned in user answer',
-            })
+            // Only add user answer target if there's LMS context
+            if (hasLmsContext) {
+                targets.push({
+                    id: 'user_answer.ids',
+                    name: 'User Answer Elements',
+                    description: 'Elements mentioned in user answer',
+                })
+            }
 
-            // Add object targets with their names for on-demand highlighting
+            // Always add object targets for on-demand highlighting
             objects.forEach((object) => {
                 const isMain = object.isMain === true
                 const status = isMain ? 'Main' : 'Relevant'
@@ -345,6 +353,8 @@ const getConditionBranch = (lmsType, questionType, objects) => {
             const gen = PRACTICE_BRANCH_GENERATORS[questionType]
             return gen ? gen(objects).slice() : []
         }
+        case LMS_TYPES.CONVERSATION:
+            return CONVERSATION_BRANCHES.slice()
         case LMS_TYPES.DIALOGUE:
             return DIALOGUE_BRANCHES.slice()
         case LMS_TYPES.GAME_WHACK_A_MOLE:

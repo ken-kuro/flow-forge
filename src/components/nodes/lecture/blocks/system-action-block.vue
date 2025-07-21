@@ -68,16 +68,18 @@ const availableMethods = computed(() => {
 // Get context-aware available targets for selected method
 const availableTargets = computed(() => {
     const objects = flowContextStore.objects
+    const hasLmsContext = flowContextStore.lmsType !== null
 
     if (!method.value) return []
 
     // Get targets for the selected method
-    return getSystemActionTargets(method.value, objects)
+    return getSystemActionTargets(method.value, objects, hasLmsContext)
 })
 
 // Check if we have valid context for showing methods
 const hasValidContext = computed(() => {
-    return flowContextStore.lmsType !== null
+    // Valid context if we have LMS configuration OR objects for manual highlighting
+    return flowContextStore.lmsType !== null || flowContextStore.objects.length > 0
 })
 
 // Detect conflicts in current selection
@@ -322,7 +324,7 @@ watch(
 
                 <!-- Show message when no context or methods available -->
                 <div v-else class="select select-bordered select-xs w-full flex items-center text-base-content/50">
-                    <span v-if="!hasValidContext"> Configure LMS asset in setup node first </span>
+                    <span v-if="!hasValidContext"> Configure LMS asset or add objects in setup node first </span>
                     <span v-else> No action methods available for this configuration </span>
                 </div>
             </div>
