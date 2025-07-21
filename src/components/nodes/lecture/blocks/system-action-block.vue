@@ -177,47 +177,34 @@ watch(
         () => flowContextStore.questionType,
         () => flowContextStore.objects,
         () => flowContextStore.texts,
+        () => method.value, // Also watch method changes
     ],
     () => {
+        let hasChanges = false
+
         // Check if current method is still valid
         const validMethodValues = availableMethods.value.map((m) => m.value)
-        const isMethodValid = method.value ? validMethodValues.includes(method.value) : true
-
-        // Filter out any targets that are no longer valid
-        const filteredTargets = targets.value.filter((target) => availableTargets.value.includes(target))
-
-        let hasChanges = false
-        if (!isMethodValid) {
+        if (method.value && !validMethodValues.includes(method.value)) {
             method.value = ''
             hasChanges = true
         }
 
-        if (filteredTargets.length !== targets.value.length) {
+        // When method changes, or context changes, filter targets to only include valid ones
+        const availableTargetIds = availableTargets.value.map((t) => t.id)
+        const originalTargets = [...targets.value]
+        const filteredTargets = originalTargets.filter((targetId) => availableTargetIds.includes(targetId))
+
+        if (filteredTargets.length !== originalTargets.length) {
             targets.value = filteredTargets
             hasChanges = true
         }
 
+        // If there were any changes, trigger a single update
         if (hasChanges) {
             updateBlockData(true)
         }
     },
-    { immediate: true },
-)
-
-// Watch for method changes and update targets accordingly
-watch(
-    method,
-    () => {
-        // When method changes, filter targets to only include valid ones for the new method selection
-        const availableTargetIds = availableTargets.value.map((t) => t.id)
-        const filteredTargets = targets.value.filter((target) => availableTargetIds.includes(target))
-
-        if (filteredTargets.length !== targets.value.length) {
-            targets.value = filteredTargets
-            updateBlockData(true)
-        }
-    },
-    { immediate: true },
+    { immediate: true, deep: true },
 )
 </script>
 
