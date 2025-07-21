@@ -170,6 +170,10 @@ const isTargetSelected = (targetId) => {
     return targets.value.includes(targetId)
 }
 
+// TODO: PERFORMANCE - The `deep: true` watcher on context objects is convenient but could be a performance bottleneck on very complex flows.
+// Future optimizations could involve:
+// 1. Watching a computed hash of the objects instead of the objects themselves.
+// 2. Creating a more specific event bus for context changes.
 // Watch for context changes and clean up invalid method/targets
 watch(
     [
@@ -242,11 +246,13 @@ watch(
             <label class="label">
                 <span class="label-text text-xs">Action Type</span>
             </label>
-            <select v-model="action" @blur="updateBlockData" class="select select-bordered select-xs">
-                <option v-for="option in actionOptions" :key="option.value" :value="option.value">
-                    {{ option.label }}
-                </option>
-            </select>
+            <StopPropagationWrapper>
+                <select v-model="action" @blur="updateBlockData" class="select select-bordered select-xs">
+                    <option v-for="option in actionOptions" :key="option.value" :value="option.value">
+                        {{ option.label }}
+                    </option>
+                </select>
+            </StopPropagationWrapper>
         </div>
 
         <!-- Asset Interaction Fields (show only when action is asset-interaction) -->
@@ -256,15 +262,17 @@ watch(
                 <label class="label">
                     <span class="label-text text-xs">Delay (in seconds)</span>
                 </label>
-                <input
-                    v-model="delay"
-                    @blur="updateBlockData"
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    placeholder="0.0"
-                    class="input input-bordered input-xs"
-                />
+                <StopPropagationWrapper>
+                    <input
+                        v-model="delay"
+                        @blur="updateBlockData"
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        placeholder="0.0"
+                        class="input input-bordered input-xs"
+                    />
+                </StopPropagationWrapper>
             </div>
 
             <!-- Method Selection (Single Choice) -->
