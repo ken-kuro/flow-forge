@@ -3,7 +3,7 @@ import { ref, onUnmounted, computed, watch, nextTick } from 'vue'
 import { useFlowEditor } from '@/composables/use-flow-editor'
 import { BookOpenText as LMSIcon, X } from 'lucide-vue-next'
 import CardBlockWrapper from '@/components/nodes/base/card-block-wrapper.vue'
-import { getLmsIdOptions, getLmsQuestionOptions, LMS_TYPES } from './lms.js'
+import { getLmsIdOptions, getLmsQuestionOptions, LMS_TYPES, QUESTION_TYPES } from './lms.js'
 import { useFlowContextStore } from '@/stores/flow-context-store.js'
 
 /**
@@ -48,7 +48,12 @@ onUnmounted(() => {
 
 // Local state
 const title = ref(props.block.data.title ?? 'LMS Asset')
-const lmsType = ref(props.block.data.lmsType || LMS_TYPES.PRACTICE)
+
+// CONFIG FIELDS - Define the LMS context (editable in admin mode, read-only in collaborator mode)
+const lmsTypeConfig = ref(props.block.data.lmsTypeConfig || props.block.data.lmsType || null)
+const questionTypeConfig = ref(props.block.data.questionTypeConfig || props.block.data.questionData?.type || null)
+
+// DATA FIELDS - Actual content data (always editable)
 const lmsData = ref(props.block.data.lmsData || null)
 const questionData = ref(props.block.data.questionData || null)
 
@@ -66,8 +71,10 @@ const conflictingLmsExists = computed(() => {
 
     if (allLmsAssets.length <= 1) return false // No conflicts with single or no LMS blocks
 
-    // Find the first configured LMS block as the reference
-    const configuredLmsBlocks = allLmsAssets.filter((asset) => asset.data?.lmsType && asset.data.lmsType !== null)
+    // Find the first configured LMS block as the reference (using CONFIG fields)
+    const configuredLmsBlocks = allLmsAssets.filter(
+        (asset) => asset.data?.lmsTypeConfig && asset.data.lmsTypeConfig !== null,
+    )
 
     if (configuredLmsBlocks.length <= 1) return false // No conflicts if only one or no configured blocks
 
@@ -77,10 +84,10 @@ const conflictingLmsExists = computed(() => {
     // If no reference LMS exists, no conflicts
     if (!referenceLms) return false
 
-    // For this LMS block, check if it conflicts with the reference
-    if (lmsType.value && lmsType.value !== null) {
-        if (lmsType.value !== referenceLms.data.lmsType) return true
-        if (questionData.value?.type !== referenceLms.data?.questionData?.type) return true
+    // For this LMS block, check if it conflicts with the reference (using CONFIG fields)
+    if (lmsTypeConfig.value && lmsTypeConfig.value !== null) {
+        if (lmsTypeConfig.value !== referenceLms.data.lmsTypeConfig) return true
+        if (questionTypeConfig.value !== referenceLms.data?.questionTypeConfig) return true
     }
 
     return false
@@ -89,7 +96,9 @@ const conflictingLmsExists = computed(() => {
 // Check if this is the primary LMS configuration (first configured one)
 const isPrimaryLms = computed(() => {
     const allLmsAssets = flowContextStore.lmsAssets
-    const configuredLmsBlocks = allLmsAssets.filter((asset) => asset.data?.lmsType && asset.data.lmsType !== null)
+    const configuredLmsBlocks = allLmsAssets.filter(
+        (asset) => asset.data?.lmsTypeConfig && asset.data.lmsTypeConfig !== null,
+    )
 
     if (configuredLmsBlocks.length === 0) {
         // No configured blocks yet, this could be the first
@@ -121,6 +130,15 @@ const lmsTypeOptions = [
     { value: LMS_TYPES.GAME_PRONUNCIATION, label: 'Game: Pronunciation' },
 ]
 
+// Question type options for practice LMS
+const questionTypeOptions = [
+    { value: QUESTION_TYPES.SPEAKING_UNSCRIPTED, label: 'Speaking Unscripted' },
+    { value: QUESTION_TYPES.SPEAKING_SCRIPTED, label: 'Speaking Scripted' },
+    { value: QUESTION_TYPES.TRUE_FALSE, label: 'True/False' },
+    { value: QUESTION_TYPES.SINGLE_CHOICE, label: 'Single Choice' },
+    { value: QUESTION_TYPES.MATCHING, label: 'Matching' },
+]
+
 // Simulate API calls by wrapping existing functions
 const fetchLmsOptions = async (type) => {
     loadingLmsOptions.value = true
@@ -141,7 +159,13 @@ const fetchQuestionOptions = async (practiceData) => {
     try {
         // Simulate API delay
         await new Promise((resolve) => setTimeout(resolve, 200))
-        const options = getLmsQuestionOptions(practiceData.id)
+        let options = getLmsQuestionOptions(practiceData.id)
+
+        // Filter questions by questionTypeConfig if it's set
+        if (questionTypeConfig.value) {
+            options = options.filter((option) => option.value.type === questionTypeConfig.value)
+        }
+
         return options
     } finally {
         loadingQuestions.value = false
@@ -150,20 +174,25 @@ const fetchQuestionOptions = async (practiceData) => {
 
 // Computed property to check if questions should be shown
 const shouldShowQuestions = computed(() => {
-    return lmsType.value === LMS_TYPES.PRACTICE && lmsData.value
+    return lmsTypeConfig.value === LMS_TYPES.PRACTICE && lmsData.value
 })
 
 // Initialize options when component loads
 const initializeOptions = async () => {
-    lmsOptions.value = await fetchLmsOptions(lmsType.value)
-
-    // Set default lmsData if not set
-    if (!lmsData.value && lmsOptions.value.length > 0) {
-        lmsData.value = lmsOptions.value[0].value
+    // Only initialize if we have a configured LMS type
+    if (!lmsTypeConfig.value) {
+        return
     }
 
+    lmsOptions.value = await fetchLmsOptions(lmsTypeConfig.value)
+
+    // Don't auto-set lmsData - let user choose explicitly
+    // if (!lmsData.value && lmsOptions.value.length > 0) {
+    //     lmsData.value = lmsOptions.value[0].value
+    // }
+
     // Load questions if practice type and lmsData is set
-    if (lmsType.value === LMS_TYPES.PRACTICE && lmsData.value) {
+    if (lmsTypeConfig.value === LMS_TYPES.PRACTICE && lmsData.value) {
         questionOptions.value = await fetchQuestionOptions(lmsData.value)
     }
 }
@@ -174,7 +203,7 @@ async function handleLmsTypeChange() {
 
     if (!flowContextStore.confirmAssetChange(impact, 'change LMS type')) {
         // User cancelled, revert the change
-        lmsType.value = previousLmsType || ''
+        lmsTypeConfig.value = previousLmsTypeConfig || ''
         return
     }
 
@@ -184,43 +213,55 @@ async function handleLmsTypeChange() {
     }
 
     // Load new LMS options for the selected type
-    lmsOptions.value = await fetchLmsOptions(lmsType.value)
+    lmsOptions.value = await fetchLmsOptions(lmsTypeConfig.value)
 
+    // Don't auto-set lmsData - let user choose explicitly
     // Reset selections when type changes
-    lmsData.value = lmsOptions.value.length > 0 ? lmsOptions.value[0].value : null
-    questionData.value = {
-        type: '',
-        content: '',
-    }
+    lmsData.value = null
+    questionData.value = null
     questionOptions.value = []
-
-    // If switching to practice, load questions
-    if (lmsType.value === LMS_TYPES.PRACTICE && lmsData.value) {
-        questionOptions.value = await fetchQuestionOptions(lmsData.value)
-    }
 
     updateBlockData(true)
 }
 
 // Store previous LMS type to allow reverting
-let previousLmsType = lmsType.value
+let previousLmsTypeConfig = lmsTypeConfig.value
 
 // Watch for LMS type changes
-watch(lmsType, (newType, oldType) => {
+watch(lmsTypeConfig, async (newType, oldType) => {
     if (oldType !== undefined && newType !== oldType) {
-        previousLmsType = oldType
-        // Use nextTick to allow the select to update first
-        nextTick(() => {
-            handleLmsTypeChange()
-        })
+        previousLmsTypeConfig = oldType
+
+        if (newType === null) {
+            // Type was cleared, clear options too
+            lmsOptions.value = []
+            questionOptions.value = []
+        } else if (oldType === null) {
+            // Type was set from null, load options without impact analysis
+            lmsOptions.value = await fetchLmsOptions(newType)
+            updateBlockData(true)
+        } else {
+            // Type was changed from one value to another, use impact analysis
+            nextTick(() => {
+                handleLmsTypeChange()
+            })
+        }
     }
 })
 
 // Watch for lmsData changes (for practice type)
 watch(lmsData, async (newLmsData) => {
-    if (lmsType.value === LMS_TYPES.PRACTICE && newLmsData) {
+    if (lmsTypeConfig.value === LMS_TYPES.PRACTICE && newLmsData) {
         questionOptions.value = await fetchQuestionOptions(newLmsData)
-        questionData.value = null // Reset question selection
+        // Clear questionData if it doesn't match current config
+        if (
+            questionData.value &&
+            questionData.value.type &&
+            questionTypeConfig.value &&
+            questionData.value.type !== questionTypeConfig.value
+        ) {
+            questionData.value = null
+        }
     } else {
         questionOptions.value = []
         questionData.value = null
@@ -234,7 +275,8 @@ initializeOptions()
 const updateBlockData = (immediate = false) => {
     const newData = {
         title: title.value,
-        lmsType: lmsType.value,
+        lmsTypeConfig: lmsTypeConfig.value,
+        questionTypeConfig: questionTypeConfig.value,
         lmsData: lmsData.value,
         questionData: questionData.value,
     }
@@ -249,12 +291,43 @@ const handleTypeChange = async () => {
 
 // Handle question selection
 const handleQuestionChange = () => {
+    // Validate that selected question matches questionTypeConfig
+    if (questionData.value && questionData.value.type && questionTypeConfig.value) {
+        if (questionData.value.type !== questionTypeConfig.value) {
+            alert(
+                `Selected question type (${questionData.value.type}) doesn't match configuration (${questionTypeConfig.value}). Please select a question that matches the configured type.`,
+            )
+            questionData.value = null
+            updateBlockData(true)
+            return
+        }
+    }
+
     updateBlockData(true)
 }
 
+// When questionTypeConfig changes, clear questionData if it doesn't match
+watch(
+    questionTypeConfig,
+    async (newQuestionType) => {
+        if (questionData.value && questionData.value.type && questionData.value.type !== newQuestionType) {
+            questionData.value = null
+            updateBlockData(true)
+        }
+
+        // Reload question options based on new config
+        if (lmsTypeConfig.value === LMS_TYPES.PRACTICE && lmsData.value) {
+            questionOptions.value = await fetchQuestionOptions(lmsData.value)
+        }
+    },
+    { immediate: true },
+)
+
 // Clear LMS data to resolve conflicts
 const clearLmsData = () => {
-    lmsType.value = null // Set to null instead of default
+    // Only clear config when explicitly resolving conflicts
+    lmsTypeConfig.value = null
+    questionTypeConfig.value = null
     lmsData.value = null
     questionData.value = null
     updateBlockData(true)
@@ -296,7 +369,7 @@ const clearLmsData = () => {
         </div>
 
         <!-- Primary LMS Configuration Info -->
-        <div v-if="isPrimaryLms && lmsType && lmsType !== null" class="alert alert-success text-xs mb-2">
+        <div v-if="isPrimaryLms && lmsTypeConfig && lmsTypeConfig !== null" class="alert alert-success text-xs mb-2">
             <div class="flex items-center gap-2">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -341,11 +414,12 @@ const clearLmsData = () => {
                 <span class="label-text text-xs">LMS Type</span>
             </label>
             <select
-                v-model="lmsType"
+                v-model="lmsTypeConfig"
                 class="select select-bordered select-xs"
                 @change="handleTypeChange"
                 :disabled="false"
             >
+                <option :value="null">Select LMS Type...</option>
                 <option v-for="option in lmsTypeOptions" :key="option.value" :value="option.value">
                     {{ option.label }}
                 </option>
@@ -357,11 +431,36 @@ const clearLmsData = () => {
             </div>
         </div>
 
+        <!-- Question Type Configuration (for practice LMS) -->
+        <div v-if="lmsTypeConfig === 'practice'" class="form-control">
+            <label class="label">
+                <span class="label-text text-xs">Question Type Configuration</span>
+            </label>
+            <select
+                v-model="questionTypeConfig"
+                class="select select-bordered select-xs"
+                @change="updateBlockData(true)"
+            >
+                <option :value="null">Select Question Type...</option>
+                <option v-for="option in questionTypeOptions" :key="option.value" :value="option.value">
+                    {{ option.label }}
+                </option>
+            </select>
+            <div class="label">
+                <span class="label-text-alt text-xs text-base-content/50">
+                    Configure what question type this practice will use
+                </span>
+            </div>
+        </div>
+
         <!-- LMS Data Selection -->
         <div class="form-control">
             <label class="label">
                 <span class="label-text text-xs"
-                    >{{ lmsType ? lmsType.charAt(0).toUpperCase() + lmsType.slice(1) : 'LMS' }} Configuration</span
+                    >{{
+                        lmsTypeConfig ? lmsTypeConfig.charAt(0).toUpperCase() + lmsTypeConfig.slice(1) : 'LMS'
+                    }}
+                    Configuration</span
                 >
             </label>
             <select
@@ -370,6 +469,7 @@ const clearLmsData = () => {
                 @change="updateBlockData(true)"
                 :disabled="loadingLmsOptions"
             >
+                <option :value="null">Select Configuration...</option>
                 <option v-if="loadingLmsOptions" disabled>Loading...</option>
                 <option v-else-if="lmsOptions.length === 0" disabled>No options available</option>
                 <option
@@ -394,7 +494,7 @@ const clearLmsData = () => {
                 @change="handleQuestionChange"
                 :disabled="loadingQuestions"
             >
-                <option value="null">Select a question...</option>
+                <option :value="null">Select Question...</option>
                 <option v-if="loadingQuestions" disabled>Loading questions...</option>
                 <option v-else-if="questionOptions.length === 0" disabled>No questions available</option>
                 <option
@@ -416,7 +516,7 @@ const clearLmsData = () => {
         <!-- Configuration Summary -->
         <div v-if="lmsData && !conflictingLmsExists" class="mt-3 p-2 bg-base-200 rounded text-xs">
             <div class="font-medium mb-1">Configuration Summary:</div>
-            <div><strong>Type:</strong> {{ lmsType }}</div>
+            <div><strong>Type:</strong> {{ lmsTypeConfig }}</div>
             <div v-if="lmsData.content"><strong>Content:</strong> {{ lmsData.content }}</div>
             <div v-if="questionData">
                 <div><strong>Question:</strong> {{ questionData.content || 'No content' }}</div>
