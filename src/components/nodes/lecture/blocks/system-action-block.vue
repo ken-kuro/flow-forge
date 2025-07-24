@@ -57,11 +57,7 @@ const availableMethods = computed(() => {
     const objects = flowContextStore.objects
     const texts = flowContextStore.texts
 
-    if (!lmsType || !questionType) {
-        // No LMS configuration available, return empty array
-        return []
-    }
-
+    // Always call getSystemActionMethods, let it decide what to return
     return getSystemActionMethods(lmsType, questionType, objects, texts)
 })
 

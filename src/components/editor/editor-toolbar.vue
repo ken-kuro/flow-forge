@@ -402,32 +402,25 @@ function handleDebugDump() {
                     collectUserDataMethods: flowContextStore.lmsType
                         ? getCollectUserDataMethods(flowContextStore.lmsType, flowContextStore.questionType)
                         : [],
-                    systemActionMethods: flowContextStore.lmsType
-                        ? getSystemActionMethods(
-                              flowContextStore.lmsType,
-                              flowContextStore.questionType,
-                              flowContextStore.objects,
-                              flowContextStore.texts,
-                          )
-                        : [],
-                    systemActionTargets: flowContextStore.lmsType
-                        ? (() => {
-                              const methods = getSystemActionMethods(
-                                  flowContextStore.lmsType,
-                                  flowContextStore.questionType,
-                                  flowContextStore.objects,
-                                  flowContextStore.texts,
-                              )
-                              const allTargets = {}
-                              methods.forEach((method) => {
-                                  allTargets[method.value] = getSystemActionTargets(
-                                      method.value,
-                                      flowContextStore.objects,
-                                  )
-                              })
-                              return allTargets
-                          })()
-                        : {},
+                    systemActionMethods: getSystemActionMethods(
+                        flowContextStore.lmsType,
+                        flowContextStore.questionType,
+                        flowContextStore.objects,
+                        flowContextStore.texts,
+                    ),
+                    systemActionTargets: (() => {
+                        const methods = getSystemActionMethods(
+                            flowContextStore.lmsType,
+                            flowContextStore.questionType,
+                            flowContextStore.objects,
+                            flowContextStore.texts,
+                        )
+                        const allTargets = {}
+                        methods.forEach((method) => {
+                            allTargets[method.value] = getSystemActionTargets(method.value, flowContextStore.objects)
+                        })
+                        return allTargets
+                    })(),
                     conditionBranches: flowContextStore.lmsType
                         ? getConditionBranch(
                               flowContextStore.lmsType,
