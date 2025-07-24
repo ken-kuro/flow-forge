@@ -270,6 +270,7 @@ const MATCHING_BRANCHES = [
         description: 'Học sinh trả lời không đúng tất cả các câu hỏi',
         cup: 0,
     },
+    DEFAULT_NO_ANSWER_BRANCH,
 ]
 
 const CONVERSATION_BRANCHES = [
