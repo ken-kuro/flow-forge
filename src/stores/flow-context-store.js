@@ -56,8 +56,8 @@ export const useFlowContextStore = defineStore('flowContext', () => {
         return (
             imageAssets.find(
                 (asset) =>
-                    (asset.data.objects && asset.data.objects.length > 0) ||
-                    (asset.data.texts && asset.data.texts.length > 0),
+                    // Use config fields instead of actual data for context building
+                    asset.data.hasObjectsConfig === true || asset.data.hasTextsConfig === true,
             ) || null
         )
     })
@@ -70,8 +70,8 @@ export const useFlowContextStore = defineStore('flowContext', () => {
         const imageAssets = setupAssets.value.filter((asset) => asset.type === 'asset-image')
         return imageAssets.filter(
             (asset) =>
-                (!asset.data.objects || asset.data.objects.length === 0) &&
-                (!asset.data.texts || asset.data.texts.length === 0),
+                // Use config fields instead of actual data for context building
+                asset.data.hasObjectsConfig !== true && asset.data.hasTextsConfig !== true,
         )
     })
 
@@ -98,8 +98,10 @@ export const useFlowContextStore = defineStore('flowContext', () => {
     const lmsAsset = computed(() => {
         if (lmsAssets.value.length === 0) return null
 
-        // Find the first LMS block that has a configuration
-        const configuredLms = lmsAssets.value.find((asset) => asset.data?.lmsType && asset.data.lmsType !== null)
+        // Find the first LMS block that has a configuration (using config fields)
+        const configuredLms = lmsAssets.value.find(
+            (asset) => asset.data?.lmsTypeConfig && asset.data.lmsTypeConfig !== null,
+        )
 
         if (configuredLms) {
             return configuredLms
@@ -111,36 +113,73 @@ export const useFlowContextStore = defineStore('flowContext', () => {
 
     /**
      * Get objects from the image asset with elements
-     * @returns {Array} Array of objects
+     * @returns {Array} Array of objects (includes virtual objects in template mode)
      */
     const objects = computed(() => {
-        return imageAssetWithElements.value?.data.objects || []
+        const imageAsset = imageAssetWithElements.value
+        if (!imageAsset) return []
+
+        const actualObjects = imageAsset.data.objects || []
+
+        // If config indicates objects should exist but actual data is empty (template mode),
+        // provide a placeholder object for context filtering to work
+        if (actualObjects.length === 0 && imageAsset.data.hasObjectsConfig === true) {
+            return [
+                {
+                    id: 'template-object-1',
+                    name: 'Template Object',
+                    isMain: true,
+                    // Placeholder object for template mode context building
+                    _isTemplate: true,
+                },
+            ]
+        }
+
+        return actualObjects
     })
 
     /**
      * Get texts from the image asset with elements
-     * @returns {Array} Array of texts
+     * @returns {Array} Array of texts (includes virtual texts in template mode)
      */
     const texts = computed(() => {
-        return imageAssetWithElements.value?.data.texts || []
+        const imageAsset = imageAssetWithElements.value
+        if (!imageAsset) return []
+
+        const actualTexts = imageAsset.data.texts || []
+
+        // If config indicates texts should exist but actual data is empty (template mode),
+        // provide a placeholder text for context filtering to work
+        if (actualTexts.length === 0 && imageAsset.data.hasTextsConfig === true) {
+            return [
+                {
+                    id: 'template-text-1',
+                    name: 'Template Text',
+                    // Placeholder text for template mode context building
+                    _isTemplate: true,
+                },
+            ]
+        }
+
+        return actualTexts
     })
 
     /**
-     * Get the LMS type from the LMS asset
+     * Get the LMS type from the LMS asset configuration
      * @returns {string|null} LMS type or null
      */
     const lmsType = computed(() => {
-        return lmsAsset.value?.data.lmsType || null
+        return lmsAsset.value?.data.lmsTypeConfig || null
     })
 
     /**
-     * Get the question type from the LMS asset (only for practice)
+     * Get the question type from the LMS asset configuration
      * @returns {string|null} Question type or null
      */
     const questionType = computed(() => {
         const lms = lmsAsset.value
-        if (!lms || lms.data.lmsType !== 'practice') return null
-        return lms.data.questionData?.type || null
+        if (!lms || lms.data.lmsTypeConfig !== 'practice') return null
+        return lms.data.questionTypeConfig || null
     })
 
     /**
@@ -184,17 +223,19 @@ export const useFlowContextStore = defineStore('flowContext', () => {
         // Check LMS constraint: All LMS blocks must have the same type and question type
         if (lmsBlocks.length > 1) {
             // Find the first configured LMS block as the reference
-            const configuredLmsBlocks = lmsBlocks.filter((lms) => lms.data?.lmsType && lms.data.lmsType !== null)
+            const configuredLmsBlocks = lmsBlocks.filter(
+                (lms) => lms.data?.lmsTypeConfig && lms.data.lmsTypeConfig !== null,
+            )
 
             if (configuredLmsBlocks.length > 1) {
                 const referenceLms = configuredLmsBlocks[0]
-                const referenceLmsType = referenceLms.data.lmsType
-                const referenceQuestionType = referenceLms.data?.questionData?.type
+                const referenceLmsType = referenceLms.data.lmsTypeConfig
+                const referenceQuestionType = referenceLms.data?.questionTypeConfig
 
                 for (let i = 1; i < configuredLmsBlocks.length; i++) {
                     const currentLms = configuredLmsBlocks[i]
-                    const currentLmsType = currentLms.data.lmsType
-                    const currentQuestionType = currentLms.data?.questionData?.type
+                    const currentLmsType = currentLms.data.lmsTypeConfig
+                    const currentQuestionType = currentLms.data?.questionTypeConfig
 
                     if (currentLmsType !== referenceLmsType) {
                         result.isValid = false
@@ -215,7 +256,7 @@ export const useFlowContextStore = defineStore('flowContext', () => {
 
         // Check elements constraint: Only one image can have elements configuration
         const imagesWithElements = imageBlocks.filter(
-            (block) => block.data.objects?.length > 0 || block.data.texts?.length > 0,
+            (block) => block.data.hasObjectsConfig === true || block.data.hasTextsConfig === true,
         )
 
         if (imagesWithElements.length > 1) {
@@ -292,6 +333,7 @@ export const useFlowContextStore = defineStore('flowContext', () => {
 
         // For image elements changes
         if (assetBlock.type === 'asset-image' && ['remove', 'elements-change'].includes(changeType)) {
+            // Check actual data to see if there are elements being removed
             const currentElements = (assetBlock.data.objects?.length || 0) + (assetBlock.data.texts?.length || 0)
 
             if (currentElements > 0) {
@@ -421,7 +463,7 @@ export const useFlowContextStore = defineStore('flowContext', () => {
     const validateAssetAddition = (assetType, assetData) => {
         const errors = []
 
-        if (assetType === 'asset-image' && assetData.objects && assetData.objects.length > 0) {
+        if (assetType === 'asset-image' && (assetData.hasObjectsConfig === true || assetData.hasTextsConfig === true)) {
             if (hasElementsConfig.value) {
                 errors.push('Flow can have only one image asset with elements configuration')
             }
@@ -433,15 +475,15 @@ export const useFlowContextStore = defineStore('flowContext', () => {
 
             if (existingLmsBlocks.length > 0) {
                 const firstLms = existingLmsBlocks[0]
-                const existingLmsType = firstLms.data?.lmsType
-                const existingQuestionType = firstLms.data?.questionData?.type
+                const existingLmsType = firstLms.data?.lmsTypeConfig
+                const existingQuestionType = firstLms.data?.questionTypeConfig
 
                 // Only reject if types don't match
-                if (assetData.lmsType && assetData.lmsType !== existingLmsType) {
+                if (assetData.lmsTypeConfig && assetData.lmsTypeConfig !== existingLmsType) {
                     errors.push(`LMS type must match existing: ${existingLmsType}`)
                 }
 
-                if (assetData.questionData?.type && assetData.questionData.type !== existingQuestionType) {
+                if (assetData.questionTypeConfig && assetData.questionTypeConfig !== existingQuestionType) {
                     errors.push(`Question type must match existing: ${existingQuestionType}`)
                 }
             }
