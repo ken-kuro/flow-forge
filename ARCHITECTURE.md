@@ -754,4 +754,52 @@ All nodes, regardless of type, will follow this basic structure, compatible with
 }
 ```
 
-}
+## Config-Based Context System (NEW)
+
+### Problem
+
+The original context system relied on actual data being present in setup nodes (LMS data, image elements) to determine available options in downstream blocks. This worked in "data mode" but would fail in "template mode" where admins create structural workflows without real data.
+
+### Solution
+
+We've implemented a **config-based context system** that separates configuration fields from actual data:
+
+#### LMS Asset Block
+
+- **Config Fields** (define context): `lmsTypeConfig`, `questionTypeConfig`
+- **Data Fields** (actual content): `lmsData`, `questionData`
+- Context filtering uses config fields, not data presence
+
+#### Image Asset Block
+
+- **Config Fields** (define context): `hasObjectsConfig`, `hasTextsConfig`
+- **Data Fields** (actual content): `objects[]`, `texts[]`
+- Context filtering uses config fields, not array length
+
+#### Flow Context Store
+
+- Updated to read from config fields (`lmsTypeConfig`, `questionTypeConfig`, `hasObjectsConfig`, `hasTextsConfig`)
+- Provides virtual placeholder data when config indicates elements should exist but actual data is empty
+- Enables context filtering to work in both template and data modes
+
+#### Benefits
+
+1. **Template Mode Ready**: Admins can define LMS type and elements configuration without actual data
+2. **Predictable Context**: Context is determined by explicit config, not data presence
+3. **Simpler Validation**: Conflicts are checked against config fields, not complex data analysis
+4. **Future-Proof**: Ready for admin/collaborator mode implementation
+
+#### Usage
+
+- **Current (Admin Mode)**: All fields are editable
+- **Future (Collaborator Mode)**: Config fields will be read-only, only data fields editable
+
+### Implementation Status
+
+✅ LMS Asset Block config fields  
+✅ Image Asset Block config fields  
+✅ Flow Context Store updates  
+✅ Context filtering compatibility  
+✅ Virtual data for template mode
+
+---
