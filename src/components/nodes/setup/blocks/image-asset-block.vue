@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUnmounted, computed } from 'vue'
+import { ref, onUnmounted, computed, watch } from 'vue'
 import { useFlowEditor } from '@/composables/use-flow-editor'
 import { X, Image as ImageIcon, Upload } from 'lucide-vue-next'
 import { useModal } from '@/composables/use-modal'
@@ -44,6 +44,12 @@ const title = ref(props.block.data.title ?? 'Image Asset')
 const sourceType = ref(props.block.data.sourceType || 'url')
 const imageUrl = ref(props.block.data.imageUrl ?? '')
 const applyToAll = ref(props.block.data.applyToAll ?? false)
+
+// CONFIG FIELDS - Define the elements context (editable in admin mode, read-only in collaborator mode)
+const hasObjectsConfig = ref(props.block.data.hasObjectsConfig ?? false)
+const hasTextsConfig = ref(props.block.data.hasTextsConfig ?? false)
+
+// DATA FIELDS - Actual elements data (always editable)
 const objects = ref(props.block.data.objects || [])
 const texts = ref(props.block.data.texts || [])
 
@@ -82,6 +88,10 @@ const updateBlockData = (immediate = false) => {
         imageUrl: imageUrl.value,
         sourceType: sourceType.value,
         applyToAll: applyToAll.value,
+        // CONFIG FIELDS
+        hasObjectsConfig: hasObjectsConfig.value,
+        hasTextsConfig: hasTextsConfig.value,
+        // DATA FIELDS
         objects: objects.value,
         texts: texts.value,
     }
@@ -107,8 +117,24 @@ const removeImage = () => {
 }
 
 const handleSaveElements = (data) => {
-    // Check if we can add elements before saving
-    if (!canHaveElements.value && (data.objects?.length > 0 || data.texts?.length > 0)) {
+    // Validate that elements conform to config constraints
+    const hasObjects = data.objects && data.objects.length > 0
+    const hasTexts = data.texts && data.texts.length > 0
+
+    // Check if user is trying to add objects when config doesn't allow it
+    if (hasObjects && !hasObjectsConfig.value) {
+        alert('Cannot add objects: Image is configured to not have objects. Update the configuration first.')
+        return
+    }
+
+    // Check if user is trying to add texts when config doesn't allow it
+    if (hasTexts && !hasTextsConfig.value) {
+        alert('Cannot add texts: Image is configured to not have texts. Update the configuration first.')
+        return
+    }
+
+    // Check if we can add elements before saving (existing constraint)
+    if (!canHaveElements.value && (hasObjects || hasTexts)) {
         alert(
             `Cannot add elements: Another image "${flowContextStore.imageAssetWithElements.data.title}" already has elements configuration. Only one image per flow can have elements.`,
         )
@@ -117,6 +143,8 @@ const handleSaveElements = (data) => {
 
     objects.value = data.objects || []
     texts.value = data.texts || []
+
+    // Config fields remain unchanged - they control what's allowed
     updateBlockData(true)
 }
 
@@ -162,10 +190,44 @@ const clearElements = () => {
         flowContextStore.resetAffectedBlocks(impact.affectedBlocks)
     }
 
+    // Clear only the actual elements data, not the config
     objects.value = []
     texts.value = []
+
     updateBlockData()
 }
+
+// Watch for config changes and clear conflicting data
+watch(hasObjectsConfig, (newValue) => {
+    if (!newValue && objects.value.length > 0) {
+        const shouldClear = confirm('Disabling objects configuration will remove all existing objects. Continue?')
+        if (shouldClear) {
+            objects.value = []
+            updateBlockData(true)
+        } else {
+            // Revert the config change
+            hasObjectsConfig.value = true
+        }
+    }
+})
+
+watch(hasTextsConfig, (newValue) => {
+    if (!newValue && texts.value.length > 0) {
+        const shouldClear = confirm('Disabling texts configuration will remove all existing texts. Continue?')
+        if (shouldClear) {
+            texts.value = []
+            updateBlockData(true)
+        } else {
+            // Revert the config change
+            hasTextsConfig.value = true
+        }
+    }
+})
+
+// Show elements configuration UI only when at least one config is enabled
+const showElementsConfig = computed(() => {
+    return hasObjectsConfig.value || hasTextsConfig.value
+})
 </script>
 
 <template>
@@ -217,6 +279,38 @@ const clearElements = () => {
                     ></path>
                 </svg>
                 <span>This image has elements configuration for the flow</span>
+            </div>
+        </div>
+
+        <!-- Elements Configuration -->
+        <div class="form-control mb-2">
+            <label class="label">
+                <span class="label-text text-xs font-medium">Elements Configuration</span>
+            </label>
+            <div class="flex gap-4">
+                <label class="label cursor-pointer justify-start gap-2">
+                    <input
+                        type="checkbox"
+                        v-model="hasObjectsConfig"
+                        @change="updateBlockData(true)"
+                        class="checkbox checkbox-xs checkbox-primary"
+                    />
+                    <span class="label-text text-xs">Has Objects</span>
+                </label>
+                <label class="label cursor-pointer justify-start gap-2">
+                    <input
+                        type="checkbox"
+                        v-model="hasTextsConfig"
+                        @change="updateBlockData(true)"
+                        class="checkbox checkbox-xs checkbox-primary"
+                    />
+                    <span class="label-text text-xs">Has Texts</span>
+                </label>
+            </div>
+            <div class="label">
+                <span class="label-text-alt text-xs text-base-content/50">
+                    Configure what types of elements this image supports
+                </span>
             </div>
         </div>
 
@@ -277,7 +371,7 @@ const clearElements = () => {
         </div>
 
         <!-- Elements Configuration -->
-        <div v-if="imageUrl" class="form-control">
+        <div v-if="imageUrl && showElementsConfig" class="form-control">
             <label class="label">
                 <span class="label-text text-xs">Elements Configuration</span>
             </label>
