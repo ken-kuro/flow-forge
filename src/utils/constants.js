@@ -27,3 +27,70 @@ export const CONFIG = {
      */
     MAX_HISTORY_ENTRIES: 20,
 }
+
+/**
+ * Block Types for different nodes
+ */
+export const BLOCK_TYPES = {
+    // Lecture blocks
+    TEACHER_VIDEO: 'teacher-video',
+    AUDIO: 'audio',
+    ASSETS_APPLIED: 'assets-applied',
+    COLLECT_USER_DATA: 'collect-user-data',
+    SYSTEM_ACTION: 'system-action',
+
+    // Setup blocks
+    IMAGE_ASSET: 'image-asset',
+    VIDEO_ASSET: 'video-asset',
+    LMS_ASSET: 'lms-asset',
+}
+
+/**
+ * Edge Types
+ */
+export const EDGE_TYPES = {
+    DEFAULT: 'default',
+    CONDITION: 'condition',
+}
+
+/**
+ * Enhanced Flow Management System Constants
+ */
+export const ENTITY_TYPES = {
+    TEMPLATE: 'template',
+    GROUP: 'group',
+    SECTION: 'section',
+    BLUEPRINT: 'blueprint',
+    SCRIPT: 'script',
+    SETUP: 'setup',
+    FLOW: 'flow',
+}
+
+/**
+ * User Roles
+ */
+export const USER_ROLES = {
+    ADMIN: 'admin',
+    COLLABORATOR: 'collaborator',
+}
+
+/**
+ * Access Keys
+ */
+export const ACCESS_KEYS = {
+    ADMIN: 'admin123',
+    COLLABORATOR: 'collab456',
+}
+
+/**
+ * Default Values
+ */
+export const DEFAULTS = {
+    TEMPLATE_NAME: 'New Template',
+    GROUP_NAME: 'New Group',
+    SECTION_NAME: 'New Section',
+    BLUEPRINT_NAME: 'New Blueprint',
+    SCRIPT_NAME: 'New Script',
+    SETUP_NAME: 'New Setup',
+    FLOW_NAME: 'New Flow',
+}
